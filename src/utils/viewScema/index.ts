@@ -1,0 +1,1 @@
+export { viewSchema } from './viewSchema';
