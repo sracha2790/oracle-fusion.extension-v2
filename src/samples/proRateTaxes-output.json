@@ -1,0 +1,34 @@
+[{
+    "lineNum": 1,
+    "TaxRate": 1,
+    "TaxAmt": 9.25,
+    "TaxAmtTaxCurr": 9.25,
+    "UnroundedTaxAmt": 9.25,
+    "ReturnVbtLineOnly": true,
+    "totalVbt": 6,
+    "lineTax": 2,
+    "lineTaxCalculated": 9.25,
+    "proratedVbt": 2
+}, {
+    "lineNum": 2,
+    "TaxRate": 1,
+    "TaxAmt": 9.25,
+    "TaxAmtTaxCurr": 9.25,
+    "UnroundedTaxAmt": 9.25,
+    "ReturnVbtLineOnly": true,
+    "totalVbt": 6,
+    "lineTax": 2,
+    "lineTaxCalculated": 9.25,
+    "proratedVbt": 2
+}, {
+    "lineNum": 3,
+    "TaxRate": 1,
+    "TaxAmt": 9.25,
+    "TaxAmtTaxCurr": 9.25,
+    "UnroundedTaxAmt": 9.25,
+    "ReturnVbtLineOnly": true,
+    "totalVbt": 6,
+    "lineTax": 2,
+    "lineTaxCalculated": 9.25,
+    "proratedVbt": 2
+}]
