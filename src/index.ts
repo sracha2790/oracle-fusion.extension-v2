@@ -65,7 +65,7 @@ function addAuthenticationHeaders(
   return;
 }
 
-const integration: SdkIntegration = {
+const extension: SdkIntegration = {
   name: 'oracle-fusion-tax-integration-v2',
   websiteUrl: '',
   documentationUrl: '',
@@ -5085,4 +5085,4 @@ const wsdl =
   '</wsdl:service>' +
   '</wsdl:definitions>';
 
-export default integration;
+export default extension;
