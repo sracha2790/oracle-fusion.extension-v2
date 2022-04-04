@@ -1,5 +1,5 @@
 {
-  "name": "fusion-taxpartner-api-extension-v2",
+  "name": "oracle-fusion-extension-v2",
   "version": "2.0.0",
   "description": "Oracle Fusion Tax Partner API connector",
   "main": "dist/index.js",

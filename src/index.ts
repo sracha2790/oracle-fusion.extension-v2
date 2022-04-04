@@ -24,7 +24,6 @@ import {
 } from 'appknit-platform-sdk-v2';
 import { stringify } from 'csv/lib/sync';
 import { nodeSettingsForObject, SdkExtension } from '@appknit-io/common-frameworks';
-import { viewSchema } from './utils';
 
 const httpMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'TRACE', 'OPTIONS', 'CONNECT'];
 enum CollectOperation {
@@ -68,7 +67,7 @@ function addAuthenticationHeaders(
 }
 
 const extension: SdkExtension = {
-  name: 'oracle-fusion-tax-extension-v2',
+  name: 'oracle-fusion-extension-v2',
   websiteUrl: '',
   documentationUrl: '',
   iconUrl: '',
@@ -84,33 +83,24 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              values: {
-                title: 'Values to join',
-                type: 'array',
-              },
-              joiner: {
-                title: 'Joiner',
-                type: 'string',
-              },
-            },
+          values: {
+            title: 'Values to join',
+            type: 'array',
           },
-          nodeSettings:nodeSettingsForObject,
+          joiner: {
+            title: 'Joiner',
+            type: 'string',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          values: Array<string>,
-          joiner: string,
-        },
+          values: Array<string>;
+          joiner: string;
+        };
       }): Promise<any> => {
-        const {
-          values, joiner
-        } = input.configuration;
+        const { values, joiner } = input.configuration;
         let result = '';
         if (values && values.length > 0) {
           for (let idx = 0; idx < values.length; idx++) {
@@ -123,11 +113,11 @@ const extension: SdkExtension = {
         }
         return Promise.resolve(result);
       },
-      viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
-        outputSchema: {
-          title: 'Result of joining all strings together',
-        },
+      viewSchema: {},
+      svgSymbolMarkup: {},
+      outputSchema: {
+        title: 'Result of joining all strings together',
+      },
     },
     toURL: {
       description: 'Convert string to URL object',
@@ -135,36 +125,55 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              urlString: {
-                type: 'string',
-                title: 'String representation of the URL',
-              },
-            },
+          urlString: {
+            type: 'string',
+            title: 'String representation of the URL',
           },
-          nodeSettings:nodeSettingsForObject,
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          urlString: string,
-        },
+          urlString: string;
+        };
       }): Promise<any> => {
         const { urlString } = input.configuration;
 
-        const { href, origin, protocol, username, password, host, hostname, port, pathname, search, searchParams, hash }: URL = new URL(urlString);
+        const {
+          href,
+          origin,
+          protocol,
+          username,
+          password,
+          host,
+          hostname,
+          port,
+          pathname,
+          search,
+          searchParams,
+          hash,
+        }: URL = new URL(urlString);
         // console.log('URL : ' + { hostname, protocol, host, username, password, pathname, searchParams, href, port, search });
-        return Promise.resolve({ href, origin, protocol, username, password, host, hostname, port, pathname, search, searchParams, hash });
+        return Promise.resolve({
+          href,
+          origin,
+          protocol,
+          username,
+          password,
+          host,
+          hostname,
+          port,
+          pathname,
+          search,
+          searchParams,
+          hash,
+        });
       },
       outputSchema: {
-          type: 'string',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'string',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     mapFusionSoapRequest: {
       description: 'Map Fusion Soap Request values',
@@ -172,23 +181,16 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
+          body: {
             type: 'object',
-            properties: {
-              body: {
-                type: 'object',
-              },
-            },
           },
-          nodeSettings: nodeSettingsForObject,
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          body: string
-        },
+          body: string;
+        };
       }): Promise<any> => {
         const { body } = input.configuration;
         let mappedData;
@@ -196,15 +198,13 @@ const extension: SdkExtension = {
           const mapper = new DataMapper();
           mappedData = mapper.processIncomingSoapRequest(body);
         }
-        return Promise.resolve(
-          mappedData,
-        );
+        return Promise.resolve(mappedData);
       },
       outputSchema: {
-          type: 'object',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'object',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     filterByUniqueValues: {
       description: 'Filter items by unique field values',
@@ -212,35 +212,28 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              items: {
-                type: 'string',
-              },
-              uniqueFields: {
-                type: 'array',
-              },
-              selectBy: {
-                type: 'array'
-              },
-            },
+          items: {
+            type: 'string',
           },
-          nodeSettings: nodeSettingsForObject,
+          uniqueFields: {
+            type: 'array',
+          },
+          selectBy: {
+            type: 'array',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          items: any,
-          uniqueFields: Array<string>,
+          items: any;
+          uniqueFields: Array<string>;
           selectBy: Array<{
-            criteria: string,
-            field: string,
-            valueType: string,
-          }>,
-        },
+            criteria: string;
+            field: string;
+            valueType: string;
+          }>;
+        };
       }): Promise<any> => {
         const { items, uniqueFields, selectBy } = input.configuration;
         const registry: { [k: string]: any } = {};
@@ -274,7 +267,7 @@ const extension: SdkExtension = {
                     }
                   }
                 }
-                registry[key] = selItem
+                registry[key] = selItem;
               }
             }
           }
@@ -286,10 +279,10 @@ const extension: SdkExtension = {
         return Promise.resolve(results);
       },
       outputSchema: {
-          type: 'string',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'string',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     split: {
       description: 'Split a text to a text array',
@@ -297,37 +290,30 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              payload: {
-                type: 'string',
-              },
-              separator: {
-                type: 'string',
-                default: ',',
-              },
-            },
+          payload: {
+            type: 'string',
           },
-          nodeSettings: nodeSettingsForObject,
+          separator: {
+            type: 'string',
+            default: ',',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          payload: string,
-          separator: string
-        },
+          payload: string;
+          separator: string;
+        };
       }): Promise<any> => {
         const { payload, separator } = input.configuration;
         return Promise.resolve(payload.split(separator));
       },
       outputSchema: {
-          type: 'string',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'string',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     splitAll: {
       description: 'Split all texts to array of text array',
@@ -335,31 +321,24 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              payload: {
-                type: 'array',
-                items: {
-                  type: 'string'
-                }
-              },
-              separator: {
-                type: 'string',
-                default: ',',
-              },
+          payload: {
+            type: 'array',
+            items: {
+              type: 'string',
             },
           },
-          nodeSettings: nodeSettingsForObject,
+          separator: {
+            type: 'string',
+            default: ',',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          payload: Array<string>,
-          separator: string
-        },
+          payload: Array<string>;
+          separator: string;
+        };
       }): Promise<any> => {
         const { payload, separator } = input.configuration;
         let results = [];
@@ -369,10 +348,10 @@ const extension: SdkExtension = {
         return Promise.resolve(results);
       },
       outputSchema: {
-          type: 'string',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'string',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     toSeparateCsvsByField: {
       description: 'Serialize payload to separate CSV, grouped by field',
@@ -380,44 +359,37 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              payload: {
-                type: 'array',
-              },
-              groupByField: {
-                type: 'string'
-              },
-              header: {
-                type: 'boolean',
-                default: true,
-              },
-              columns: {
-                type: 'array',
-                items: {
-                  type: 'object',
-                },
-              },
-              columnDelimiter: {
-                type: 'string',
-                default: ',',
-              },
+          payload: {
+            type: 'array',
+          },
+          groupByField: {
+            type: 'string',
+          },
+          header: {
+            type: 'boolean',
+            default: true,
+          },
+          columns: {
+            type: 'array',
+            items: {
+              type: 'object',
             },
           },
-          nodeSettings: nodeSettingsForObject,
+          columnDelimiter: {
+            type: 'string',
+            default: ',',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          payload: any,
-          groupByField: string,
-          header: boolean,
-          columns: Array<string>,
-          columnDelimiter: string
-        },
+          payload: any;
+          groupByField: string;
+          header: boolean;
+          columns: Array<string>;
+          columnDelimiter: string;
+        };
       }): Promise<any> => {
         const { payload, groupByField, header, columns, columnDelimiter } = input.configuration;
         let options = {};
@@ -454,10 +426,10 @@ const extension: SdkExtension = {
         return Promise.resolve(resultObjects);
       },
       outputSchema: {
-          type: 'string',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'string',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     toCsv: {
       description: 'Serialize payload to CSV',
@@ -465,40 +437,33 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              payload: {
-                type: 'array',
-              },
-              header: {
-                type: 'boolean',
-                default: true,
-              },
-              columns: {
-                type: 'array',
-                items: {
-                  type: 'object',
-                },
-              },
-              columnDelimiter: {
-                type: 'string',
-                default: ',',
-              },
+          payload: {
+            type: 'array',
+          },
+          header: {
+            type: 'boolean',
+            default: true,
+          },
+          columns: {
+            type: 'array',
+            items: {
+              type: 'object',
             },
           },
-          nodeSettings: nodeSettingsForObject,
+          columnDelimiter: {
+            type: 'string',
+            default: ',',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          payload: any,
-          header: boolean,
-          columns: Array<string>,
-          columnDelimiter: string
-        },
+          payload: any;
+          header: boolean;
+          columns: Array<string>;
+          columnDelimiter: string;
+        };
       }): Promise<any> => {
         const { payload, header, columns, columnDelimiter } = input.configuration;
         let options = {};
@@ -515,10 +480,10 @@ const extension: SdkExtension = {
         return Promise.resolve(result);
       },
       outputSchema: {
-          type: 'string',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'string',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     joinMap: {
       description: 'Map items with an existing array of mapped objects',
@@ -526,45 +491,38 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              items: {
-                title: 'Objects to add to the existing mapping objects',
-                type: 'array',
-              },
-              join: {
-                title: 'Join details',
-                type: 'object',
-              },
-              mapWith: {
-                title: 'Join details',
-                type: 'object',
-              },
-            },
+          items: {
+            title: 'Objects to add to the existing mapping objects',
+            type: 'array',
           },
-          nodeSettings: nodeSettingsForObject,
-        },
-      },
-      js:  (input:{
-        sdk: AppknitSDK,
-        configuration: {
-          items: any,
           join: {
-            itemsPath: string,
-            nestedPath: string,
-            mapByField: string,
-            setToField: string,
+            title: 'Join details',
+            type: 'object',
           },
           mapWith: {
-            itemsPath: string,
-            nestedPath: string,
-            mapByField: string,
-            setToField: string,
+            title: 'Join details',
+            type: 'object',
           },
-          mapEmptyJoin: boolean,
         },
+      },
+      js: (input: {
+        sdk: AppknitSDK;
+        configuration: {
+          items: any;
+          join: {
+            itemsPath: string;
+            nestedPath: string;
+            mapByField: string;
+            setToField: string;
+          };
+          mapWith: {
+            itemsPath: string;
+            nestedPath: string;
+            mapByField: string;
+            setToField: string;
+          };
+          mapEmptyJoin: boolean;
+        };
       }): Promise<any> => {
         const { items, join, mapWith, mapEmptyJoin } = input.configuration;
         let combinedResults = [];
@@ -590,7 +548,6 @@ const extension: SdkExtension = {
           }
           let result = [];
           if (!joinNestedItems && !mapWithNestedItems) {
-
           } else if (!joinNestedItems) {
             if (mapEmptyJoin) {
               for (let mni of mapWithNestedItems) {
@@ -631,11 +588,11 @@ const extension: SdkExtension = {
         return Promise.resolve(results);
       },
       outputSchema: {
-          type: 'object',
-          description: 'An array of the input map with the input objects mapped for each item',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'object',
+        description: 'An array of the input map with the input objects mapped for each item',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     replaceByLookup: {
       description: 'Replace field value by lookup value',
@@ -643,42 +600,33 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              items: {
-                type: 'array',
-              },
-              lookups: {
-                type: 'object'
-              },
-              replace: {
-                type: 'object'
-              },
-            },
+          items: {
+            type: 'array',
           },
-          nodeSettings: nodeSettingsForObject,
+          lookups: {
+            type: 'object',
+          },
+          replace: {
+            type: 'object',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          items: Array<any>,
+          items: Array<any>;
           lookups: {
-            values: Array<any>,
-            key: string,
-            value: string
-          },
+            values: Array<any>;
+            key: string;
+            value: string;
+          };
           replace: Array<{
-            itemPath: string,
-            fields: Array<string>
-          }>
-        },
+            itemPath: string;
+            fields: Array<string>;
+          }>;
+        };
       }): Promise<any> => {
-        const {
-          items, lookups, replace
-        } = input.configuration;
+        const { items, lookups, replace } = input.configuration;
         let result = items;
         if (items && lookups && replace) {
           for (let item of items) {
@@ -717,7 +665,6 @@ const extension: SdkExtension = {
                     }
                   }
                 }
-
               }
             }
           }
@@ -725,12 +672,12 @@ const extension: SdkExtension = {
         return Promise.resolve(result);
       },
       outputSchema: {
-          title: 'New object',
-          description: 'New object to use for later',
-          type: 'object'
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        title: 'New object',
+        description: 'New object to use for later',
+        type: 'object',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     uniqueValuesFromFields: {
       description: 'Extract unique values from specified fields',
@@ -738,32 +685,23 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
+          data: {
             type: 'object',
-            properties: {
-              data: {
-                type: 'object',
-              },
-            },
           },
-          nodeSettings: nodeSettingsForObject,
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          items: any,
-          fields: Array<string>,
+          items: any;
+          fields: Array<string>;
           childItems: Array<{
-            name: string,
-            fields: Array<string>,
-          }>
-        },
+            name: string;
+            fields: Array<string>;
+          }>;
+        };
       }): Promise<any> => {
-        const {
-          items, fields, childItems
-        } = input.configuration;
+        const { items, fields, childItems } = input.configuration;
         const result = [];
         for (let item of items) {
           if (fields) {
@@ -809,12 +747,12 @@ const extension: SdkExtension = {
         return Promise.resolve(result);
       },
       outputSchema: {
-          title: 'New object',
-          description: 'New object to use for later',
-          type: 'object'
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        title: 'New object',
+        description: 'New object to use for later',
+        type: 'object',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     setCombinedFieldValues: {
       description: 'Set the value of a field as the concatenation of given field values',
@@ -822,58 +760,44 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              items: {
-                title: 'Host',
-                type: 'string',
-              },
-              path: {
-                title: 'path of items',
-                type: 'string'
-              },
-              setToField: {
-                title: 'setToField',
-                type: 'string',
-              },
-              defaultVal: {
-                title: 'defaultVal',
-                type: 'string',
-              },
-              joiner: {
-                title: 'joiner',
-                type: 'string',
-              },
-              fields: {
-                title: 'fields',
-                type: 'array',
-              },
-            },
+          items: {
+            title: 'Host',
+            type: 'string',
           },
-          nodeSettings: nodeSettingsForObject,
+          path: {
+            title: 'path of items',
+            type: 'string',
+          },
+          setToField: {
+            title: 'setToField',
+            type: 'string',
+          },
+          defaultVal: {
+            title: 'defaultVal',
+            type: 'string',
+          },
+          joiner: {
+            title: 'joiner',
+            type: 'string',
+          },
+          fields: {
+            title: 'fields',
+            type: 'array',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          items: Array<any>,
-          subPath: string,
-          setToField: string,
-          defaultVal: string,
-          joiner: string,
-          fields: Array<string>
-        },
+          items: Array<any>;
+          subPath: string;
+          setToField: string;
+          defaultVal: string;
+          joiner: string;
+          fields: Array<string>;
+        };
       }): Promise<any> => {
-        const {
-          items,
-          subPath,
-          setToField,
-          defaultVal,
-          joiner,
-          fields,
-        } = input.configuration;
+        const { items, subPath, setToField, defaultVal, joiner, fields } = input.configuration;
         if (items) {
           let path;
           if (subPath && subPath.trim() != '.') {
@@ -924,12 +848,12 @@ const extension: SdkExtension = {
         return Promise.resolve(items);
       },
       outputSchema: {
-          title: 'Data',
-          type: 'object',
-          description: 'The passed object',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        title: 'Data',
+        type: 'object',
+        description: 'The passed object',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     getIntervalTimes: {
       description: 'Download files from Oracle UCM',
@@ -937,61 +861,65 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              last: {
-                title: 'Last',
-                type: 'string',
-              },
-              dtPattern: {
-                title: 'Date Pattern',
-                type: 'string',
-              },
-              interval: {
-                title: 'Interval',
-                type: 'string',
-              },
-              period: {
-                title: 'Period',
-                type: 'string',
-              },
-              prior: {
-                title: 'Prior',
-                type: 'string',
-              },
-              future: {
-                title: 'Future',
-                type: 'string',
-              },
-              combinedTenth: {
-                title: 'Combine tenths (XYZ10 to XYZ19 will be trimmed to XYZ1 and so on)',
-                type: 'string',
-              },
-            },
+          last: {
+            title: 'Last',
+            type: 'string',
           },
-          nodeSettings: nodeSettingsForObject,
+          dtPattern: {
+            title: 'Date Pattern',
+            type: 'string',
+          },
+          interval: {
+            title: 'Interval',
+            type: 'string',
+          },
+          period: {
+            title: 'Period',
+            type: 'string',
+          },
+          prior: {
+            title: 'Prior',
+            type: 'string',
+          },
+          future: {
+            title: 'Future',
+            type: 'string',
+          },
+          combinedTenth: {
+            title: 'Combine tenths (XYZ10 to XYZ19 will be trimmed to XYZ1 and so on)',
+            type: 'string',
+          },
         },
       },
-      js: async (input:{
-        sdk: AppknitSDK,
+      js: async (input: {
+        sdk: AppknitSDK;
         configuration: {
-          last: string, dtPattern: string, interval: number, period: string,
-          prior: number, future: number, combinedTenth: boolean
-        },
+          last: string;
+          dtPattern: string;
+          interval: number;
+          period: string;
+          prior: number;
+          future: number;
+          combinedTenth: boolean;
+        };
       }): Promise<any> => {
-        const {
-          last, dtPattern, interval, period,
-          prior, future, combinedTenth } = input.configuration;
-        let dateSuffixes = await new DateIntervalUtil().getIntervalTimes(last, dtPattern, interval, period, prior, future, combinedTenth);
+        const { last, dtPattern, interval, period, prior, future, combinedTenth } = input.configuration;
+        let dateSuffixes = await new DateIntervalUtil().getIntervalTimes(
+          last,
+          dtPattern,
+          interval,
+          period,
+          prior,
+          future,
+          combinedTenth,
+        );
         return Promise.resolve(dateSuffixes);
       },
       outputSchema: {
-          type: 'array',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'array',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     convertToDocument: {
       description: 'Convert text/csv data to document structure',
@@ -999,29 +927,23 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-        // host, userName, passWord, prefix, account
-              data: {
-                title: 'Data',
-                type: 'string',
-              },
-              docLevels: {
-                title: 'Document levels definition',
-                type: 'object',
-              },
-            },
+          // host, userName, passWord, prefix, account
+          data: {
+            title: 'Data',
+            type: 'string',
           },
-          nodeSettings: nodeSettingsForObject,
+          docLevels: {
+            title: 'Document levels definition',
+            type: 'object',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          data: string, docLevels: DocLevelDefinition
-        },
+          data: string;
+          docLevels: DocLevelDefinition;
+        };
       }): Promise<any> => {
         let { data, docLevels } = input.configuration;
         let csvDocBuilder = new CsvToDocumentConverter();
@@ -1048,10 +970,10 @@ const extension: SdkExtension = {
         return Promise.resolve(doc);
       },
       outputSchema: {
-          type: 'string',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'string',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     convertToDocuments: {
       description: 'Convert to documents',
@@ -1059,34 +981,24 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              documentDetails: {
-                title: 'Items',
-                type: 'array',
-              },
-              processingConfig: {
-                title: 'File Processing Configuration',
-                type: 'array',
-              },
-            },
+          documentDetails: {
+            title: 'Items',
+            type: 'array',
           },
-          nodeSettings: nodeSettingsForObject,
+          processingConfig: {
+            title: 'File Processing Configuration',
+            type: 'array',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          documentDetails: Array<DocumentDetails>,
-          processingConfig: FileProcessingConfiguration[],
-        },
+          documentDetails: Array<DocumentDetails>;
+          processingConfig: FileProcessingConfiguration[];
+        };
       }): Promise<any> => {
-        const {
-          documentDetails,
-          processingConfig,
-        } = input.configuration;
+        const { documentDetails, processingConfig } = input.configuration;
 
         let configLen = processingConfig.length;
 
@@ -1112,7 +1024,7 @@ const extension: SdkExtension = {
         const defProConfig: FileProcessingConfiguration = {
           fileNamePattern: '*',
           mappingName: 'unmapped',
-          contentType: 'text'
+          contentType: 'text',
         };
         mappedDocs[defProConfig.mappingName] = [];
 
@@ -1137,9 +1049,7 @@ const extension: SdkExtension = {
                     fileContent.documents = [];
                     continue;
                   }
-                  let csvDataJson = csvDocBuilder.parseCSVWithUpperCaseHeaders(
-                    fileContent.fileData
-                  );
+                  let csvDataJson = csvDocBuilder.parseCSVWithUpperCaseHeaders(fileContent.fileData);
                   if (proConfig.docLevelid) {
                     // Fetch the docLevel json and parse it and use it as DocLevelDef
                     let docLevelDefs = {};
@@ -1168,7 +1078,7 @@ const extension: SdkExtension = {
                   for (let data of fileContent.documents) {
                     if (Array.isArray(data)) {
                       for (let dataDoc of data) {
-                        if (typeof (data) == 'object' && typeof (data) != 'string') {
+                        if (typeof data == 'object' && typeof data != 'string') {
                           dataDoc['UCM_DocumentName'] = docDet.DocumentName;
                           dataDoc['UCM_DocumentId'] = docDet.DocumentId;
                           dataDoc['UCM_fileName'] = fileContent.fileName;
@@ -1176,7 +1086,7 @@ const extension: SdkExtension = {
                         mappedDocs[proConfig.mappingName].push(dataDoc);
                       }
                     } else {
-                      if (typeof (data) == 'object' && typeof (data) != 'string') {
+                      if (typeof data == 'object' && typeof data != 'string') {
                         data['UCM_DocumentName'] = docDet.DocumentName;
                         data['UCM_DocumentId'] = docDet.DocumentId;
                         data['UCM_fileName'] = fileContent.fileName;
@@ -1192,7 +1102,6 @@ const extension: SdkExtension = {
                   data['UCM_fileName'] = fileContent.fileName;
                   data['UCM_SingleDoc'] = 'SINGLEDOC';
                   mappedDocs[proConfig.mappingName].push(data);
-
                 }
               }
               // mappedDocs[proConfig.mappingName].push({
@@ -1219,9 +1128,7 @@ const extension: SdkExtension = {
               let minLen = proConfig.minLength ? proConfig.minLength : 0;
               if (docDet.Content.length > minLen) {
                 if (proConfig.contentType == 'csv') {
-                  let csvDataJson = csvDocBuilder.parseCSVWithUpperCaseHeaders(
-                    docDet.Content.toString()
-                  );
+                  let csvDataJson = csvDocBuilder.parseCSVWithUpperCaseHeaders(docDet.Content.toString());
                   if (proConfig.docLevelid) {
                     // Fetch the docLevel json and parse it and use it as DocLevelDef
                     let docLevelDefs = {};
@@ -1251,46 +1158,38 @@ const extension: SdkExtension = {
         return Promise.resolve(mappedDocs);
       },
       outputSchema: {
-          title: 'Grouped and aggregated data',
-          type: 'array',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        title: 'Grouped and aggregated data',
+        type: 'array',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     groupByToObjects: {
       description: 'Group By',
       longDescription: 'Merge multiple items into one when they all have the same value for the groupByFields.',
       inputSchema: {
         type: 'object',
+
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              items: {
-                title: 'Items',
-                type: 'array',
-              },
-              groupByField: {
-                title: 'Group by fields',
-                type: 'string',
-              },
-            },
+          items: {
+            title: 'Items',
+            type: 'array',
           },
-          nodeSettings: nodeSettingsForObject,
+          groupByField: {
+            title: 'Group by fields',
+            type: 'string',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          items: Array<any>,
-          groupByField: string,
-        },
+          items: Array<any>;
+          groupByField: string;
+        };
       }): Promise<any> => {
-        const {
-          items,
-          groupByField,
-        } = input.configuration;
+        const { items, groupByField } = input.configuration;
         let result = [];
         if (items) {
           let registry = {};
@@ -1312,69 +1211,60 @@ const extension: SdkExtension = {
         return Promise.resolve(result);
       },
       outputSchema: {
-          title: 'Grouped and aggregated data',
-          type: 'array',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        title: 'Grouped and aggregated data',
+        type: 'array',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     groupBy: {
       description: 'Group By',
       longDescription: 'Merge multiple items into one when they all have the same value for the groupByFields.',
       inputSchema: {
         type: 'object',
+
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              items: {
-                title: 'Items',
-                type: 'array',
-              },
-              groupByFields: {
-                title: 'Group by fields',
-                type: 'array',
-              },
-              aggregations: {
-                title: 'Aggregations',
-                type: 'array',
-                items: {
-                  type: 'object',
-                  properties: {
-                    field: {
-                      title: 'Field',
-                      type: 'string',
-                    },
-                    operation: {
-                      title: 'Operation',
-                      type: 'string',
-                      enum: ['SUM'],
-                    },
-                  },
+          items: {
+            title: 'Items',
+            type: 'array',
+          },
+          groupByFields: {
+            title: 'Group by fields',
+            type: 'array',
+          },
+          aggregations: {
+            title: 'Aggregations',
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                field: {
+                  title: 'Field',
+                  type: 'string',
+                },
+                operation: {
+                  title: 'Operation',
+                  type: 'string',
+                  enum: ['SUM'],
                 },
               },
             },
           },
-          nodeSettings: nodeSettingsForObject,
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          items: Array<any>,
-          groupByFields: Array<string>,
+          items: Array<any>;
+          groupByFields: Array<string>;
           aggregations: Array<{
-            field: string,
-            operation: 'SUM',
-          }>,
-        },
+            field: string;
+            operation: 'SUM';
+          }>;
+        };
       }): Promise<any> => {
-        const {
-          items,
-          groupByFields,
-          aggregations,
-        } = input.configuration;
+        const { items, groupByFields, aggregations } = input.configuration;
 
         let aggregatedGroups = [];
 
@@ -1392,7 +1282,7 @@ const extension: SdkExtension = {
               if (!groupObj[itmKey]) {
                 const obj = Object.assign({}, itm);
                 groupObj[itmKey] = obj;
-                aggregatedGroups.push(obj)
+                aggregatedGroups.push(obj);
               } else {
                 const exist = groupObj[itmKey];
                 for (let aggr of aggregations) {
@@ -1409,16 +1299,14 @@ const extension: SdkExtension = {
           }
         }
 
-        return Promise.resolve(
-          aggregatedGroups
-        );
+        return Promise.resolve(aggregatedGroups);
       },
       outputSchema: {
-          title: 'Grouped and aggregated data',
-          type: 'array',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        title: 'Grouped and aggregated data',
+        type: 'array',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     mergeToItems: {
       description: 'Merge (copy properties of) an object to the item upto two levels deep',
@@ -1426,32 +1314,25 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              items: {
-                type: 'array'
-              },
-            },
+          items: {
+            type: 'array',
           },
-          nodeSettings: nodeSettingsForObject,
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          mergeTo: any,
-          mergeItems: Array<any>,
-          matchFields: Array<Array<string>>,
-          copyFields: Array<string>,
+          mergeTo: any;
+          mergeItems: Array<any>;
+          matchFields: Array<Array<string>>;
+          copyFields: Array<string>;
           levels: Array<{
-            item: string,
-            merge: string,
-            matchFields: Array<Array<string>>,
-            copyFields: Array<string>
-          }>
-        },
+            item: string;
+            merge: string;
+            matchFields: Array<Array<string>>;
+            copyFields: Array<string>;
+          }>;
+        };
       }): Promise<any> => {
         const { mergeTo, mergeItems, matchFields, copyFields, levels } = input.configuration;
         for (let obj of mergeTo) {
@@ -1527,10 +1408,10 @@ const extension: SdkExtension = {
         return mergeTo;
       },
       outputSchema: {
-          type: 'array',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'array',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     filterItemsWithPropertyMatching: {
       description: 'Filter items from an array  based on field values',
@@ -1538,37 +1419,30 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              items: {
-                title: 'Array to filter from',
-                type: 'array',
-              },
-              filterField: {
-                title: 'Fields whose values are used to filter',
-                type: 'string',
-              },
-              filterValues: {
-                title: 'Values for filtering',
-                type: 'array',
-                items: {
-                  type: 'string'
-                }
-              },
+          items: {
+            title: 'Array to filter from',
+            type: 'array',
+          },
+          filterField: {
+            title: 'Fields whose values are used to filter',
+            type: 'string',
+          },
+          filterValues: {
+            title: 'Values for filtering',
+            type: 'array',
+            items: {
+              type: 'string',
             },
           },
-          nodeSettings: nodeSettingsForObject,
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
           items: Array<any>;
           filterField: string;
           filterValues: Array<string>;
-        },
+        };
       }): Promise<any> => {
         const { items, filterField, filterValues } = input.configuration;
         let result = [];
@@ -1619,10 +1493,10 @@ const extension: SdkExtension = {
         return Promise.resolve({ found, result });
       },
       outputSchema: {
-          type: 'object',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'object',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     flattenHierarchyToMap: {
       description: 'Flattens on an array items and map',
@@ -1630,41 +1504,34 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              items: {
-                title: 'Items',
-                description: 'Items to do this operation on',
-                type: 'array',
-              },
-              itemName: {
-                title: 'Property name for the item in the mapping object',
-                type: 'string',
-              },
-              arrayPropertyPath: {
-                title: 'Property Path',
-                description: 'Path to the property from the current level',
-                type: 'string',
-              },
-              arrayItemName: {
-                title: 'Property name for the array item in the mapping object',
-                type: 'string',
-              },
-            },
+          items: {
+            title: 'Items',
+            description: 'Items to do this operation on',
+            type: 'array',
           },
-          nodeSettings: nodeSettingsForObject,
+          itemName: {
+            title: 'Property name for the item in the mapping object',
+            type: 'string',
+          },
+          arrayPropertyPath: {
+            title: 'Property Path',
+            description: 'Path to the property from the current level',
+            type: 'string',
+          },
+          arrayItemName: {
+            title: 'Property name for the array item in the mapping object',
+            type: 'string',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
           items: Array<any>;
-          itemName: string,
+          itemName: string;
           arrayPropertyPath: string;
-          arrayItemName: string,
-        },
+          arrayItemName: string;
+        };
       }): Promise<any> => {
         const { items, itemName, arrayPropertyPath, arrayItemName } = input.configuration;
         const pathArr = arrayPropertyPath.split('/');
@@ -1673,7 +1540,10 @@ const extension: SdkExtension = {
           let refObj = item;
           let found = false;
           for (const path of pathArr) {
-            if (!refObj) { found = false; break; }
+            if (!refObj) {
+              found = false;
+              break;
+            }
             refObj = refObj[path];
             found = true;
           }
@@ -1696,11 +1566,11 @@ const extension: SdkExtension = {
         return Promise.resolve(result);
       },
       outputSchema: {
-          type: 'array',
-          description: 'The array of mapping objects with each row having one item in the array mapped with the item',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'array',
+        description: 'The array of mapping objects with each row having one item in the array mapped with the item',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     combineArrays: {
       description: 'Combine two or more arrays',
@@ -1708,36 +1578,28 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              items: {
-                title: 'Arrays to combine',
-                type: 'array',
-                items: { type: 'array', }
-              },
-            },
+          items: {
+            title: 'Arrays to combine',
+            type: 'array',
+            items: { type: 'array' },
           },
-          nodeSettings: nodeSettingsForObject,
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
           items: Array<Array<any>>;
-        },
+        };
       }): Promise<any> => {
         const { items } = input.configuration;
         let result = [].concat.apply([], items);
         return Promise.resolve(result.filter(n => n !== null && n !== undefined));
       },
-
       outputSchema: {
-          type: 'array',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'array',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     separateItemsByCondition: {
       description: 'Exclude items from an array based on field values',
@@ -1745,48 +1607,41 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
+          items: {
+            title: 'Array to filter from',
+            type: 'array',
+          },
+          condition: {
+            title: 'Condition for excluding',
             type: 'object',
             properties: {
-              items: {
-                title: 'Array to filter from',
-                type: 'array',
+              field: {
+                title: 'Field to check',
+                type: 'string',
               },
-              condition: {
-                title: 'Condition for excluding',
-                type: 'object',
-                properties: {
-                  field: {
-                    title: 'Field to check',
-                    type: 'string',
-                  },
-                  comparison: {
-                    title: 'Comparison operator',
-                    type: 'string',
-                    enum: ['==', '===', '!=', '!==', '>', '>=', '<', '<=', 'contains', 'endsWith', 'startsWith', 'pattern'],
-                  },
-                  value: {
-                    title: 'Values for filtering',
-                    type: 'string',
-                  }
-                }
+              comparison: {
+                title: 'Comparison operator',
+                type: 'string',
+                enum: ['==', '===', '!=', '!==', '>', '>=', '<', '<=', 'contains', 'endsWith', 'startsWith', 'pattern'],
+              },
+              value: {
+                title: 'Values for filtering',
+                type: 'string',
               },
             },
           },
-          nodeSettings: nodeSettingsForObject,
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
           items: Array<any>;
           condition: {
-            field: string,
-            comparison: string,
-            value: string
-          }
-        },
+            field: string;
+            comparison: string;
+            value: string;
+          };
+        };
       }): Promise<any> => {
         const { items, condition } = input.configuration;
         //***** Each condition is done in a separate loop to avoid the if/switch for comaprison operation inside the loop *****/
@@ -1885,20 +1740,19 @@ const extension: SdkExtension = {
         }
         return Promise.resolve({ matching, nonMatching });
       },
-
       outputSchema: {
-          type: 'object',
-          properties: {
-            matching: {
-              type: 'array'
-            },
-            nonMatching: {
-              type: 'array'
-            }
-          }
+        type: 'object',
+        properties: {
+          matching: {
+            type: 'array',
+          },
+          nonMatching: {
+            type: 'array',
+          },
         },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     excludeItemsByCondition: {
       description: 'Exclude items from an array based on field values',
@@ -1906,48 +1760,41 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
+          items: {
+            title: 'Array to filter from',
+            type: 'array',
+          },
+          condition: {
+            title: 'Condition for excluding',
             type: 'object',
             properties: {
-              items: {
-                title: 'Array to filter from',
-                type: 'array',
+              field: {
+                title: 'Field to check',
+                type: 'string',
               },
-              condition: {
-                title: 'Condition for excluding',
-                type: 'object',
-                properties: {
-                  field: {
-                    title: 'Field to check',
-                    type: 'string',
-                  },
-                  comparison: {
-                    title: 'Comparison operator',
-                    type: 'string',
-                    enum: ['==', '===', '!=', '!==', '>', '>=', '<', '<=', 'contains', 'endsWith', 'startsWith', 'pattern'],
-                  },
-                  value: {
-                    title: 'Values for filtering',
-                    type: 'string',
-                  }
-                }
+              comparison: {
+                title: 'Comparison operator',
+                type: 'string',
+                enum: ['==', '===', '!=', '!==', '>', '>=', '<', '<=', 'contains', 'endsWith', 'startsWith', 'pattern'],
+              },
+              value: {
+                title: 'Values for filtering',
+                type: 'string',
               },
             },
           },
-          nodeSettings: nodeSettingsForObject,
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
           items: Array<any>;
           condition: {
-            field: string,
-            comparison: string,
-            value: string
-          }
-        },
+            field: string;
+            comparison: string;
+            value: string;
+          };
+        };
       }): Promise<any> => {
         const { items, condition } = input.configuration;
 
@@ -1961,7 +1808,6 @@ const extension: SdkExtension = {
         } else if (condition.comparison == '===') {
           for (const item of items) {
             if (item[condition.field] && condition.value && item[condition.field] === condition.value) {
-
             } else {
               result.push(item);
             }
@@ -1969,7 +1815,6 @@ const extension: SdkExtension = {
         } else if (condition.comparison == '!=') {
           for (const item of items) {
             if (item[condition.field] && condition.value && item[condition.field] != condition.value) {
-
             } else {
               result.push(item);
             }
@@ -1977,7 +1822,6 @@ const extension: SdkExtension = {
         } else if (condition.comparison == '!==') {
           for (const item of items) {
             if (item[condition.field] && condition.value && item[condition.field] !== condition.value) {
-
             } else {
               result.push(item);
             }
@@ -2003,7 +1847,6 @@ const extension: SdkExtension = {
         } else if (condition.comparison == '>') {
           for (const item of items) {
             if (item[condition.field] && condition.value && item[condition.field] > condition.value) {
-
             } else {
               result.push(item);
             }
@@ -2018,7 +1861,6 @@ const extension: SdkExtension = {
         } else if (condition.comparison == '<=') {
           for (const item of items) {
             if (item[condition.field] && condition.value && item[condition.field] <= condition.value) {
-
             } else {
               result.push(item);
             }
@@ -2026,7 +1868,6 @@ const extension: SdkExtension = {
         } else if (condition.comparison == '>=') {
           for (const item of items) {
             if (item[condition.field] && condition.value && item[condition.field] >= condition.value) {
-
             } else {
               result.push(item);
             }
@@ -2034,12 +1875,11 @@ const extension: SdkExtension = {
         }
         return Promise.resolve(result);
       },
-
       outputSchema: {
-          type: 'array',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'array',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     filterMatchShallowCopy: {
       description: 'Filter items from an array based on field values and shallow copy to an array',
@@ -2047,34 +1887,27 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              items: {
-                title: 'Array to filter from',
-                type: 'array',
-              },
-              filterFields: {
-                title: 'Fields whose values are used to filter',
-                type: 'string',
-              },
-              filterValues: {
-                title: 'Values for filtering',
-                type: 'string',
-              },
-            },
+          items: {
+            title: 'Array to filter from',
+            type: 'array',
           },
-          nodeSettings: nodeSettingsForObject,
+          filterFields: {
+            title: 'Fields whose values are used to filter',
+            type: 'string',
+          },
+          filterValues: {
+            title: 'Values for filtering',
+            type: 'string',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
           items: Array<any>;
           filterFields: string;
           filterValues: string;
-        },
+        };
       }): Promise<any> => {
         const { items, filterFields, filterValues } = input.configuration;
 
@@ -2096,10 +1929,10 @@ const extension: SdkExtension = {
         return Promise.resolve(result);
       },
       outputSchema: {
-          type: 'object',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'object',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     filterMatch: {
       description: 'Filter items from an array  based on field values',
@@ -2107,34 +1940,27 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              items: {
-                title: 'Array to filter from',
-                type: 'array',
-              },
-              filterFields: {
-                title: 'Fields whose values are used to filter',
-                type: 'string',
-              },
-              filterValues: {
-                title: 'Values for filtering',
-                type: 'string',
-              },
-            },
+          items: {
+            title: 'Array to filter from',
+            type: 'array',
           },
-          nodeSettings: nodeSettingsForObject,
+          filterFields: {
+            title: 'Fields whose values are used to filter',
+            type: 'string',
+          },
+          filterValues: {
+            title: 'Values for filtering',
+            type: 'string',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
           items: Array<any>;
           filterFields: string;
           filterValues: string;
-        },
+        };
       }): Promise<any> => {
         const { items, filterFields, filterValues } = input.configuration;
 
@@ -2155,12 +1981,11 @@ const extension: SdkExtension = {
         }
         return Promise.resolve(result);
       },
-
       outputSchema: {
-          type: 'object',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'object',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     proRateTaxes: {
       description: 'ProRateTaxCalculation',
@@ -2168,63 +1993,61 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              apSelfAssesTaxFlag: {
-                title: 'Self Assess Tax Flag',
-                type: 'string',
-              },
-              vendorBilledTax: {
-                title: 'Self Assess Tax Flag',
-                type: 'number',
-              },
-              taxedLines: {
-                title: 'Tolerance pct and amt',
-                type: 'array',
-                items: {
-                  // Should set the avalara taxline model ????
-                  type: 'object'
-                }
-              },
-              apTolerances: {
-                title: 'Tolerance pct and amt',
-                type: 'number',
-              },
+          apSelfAssesTaxFlag: {
+            title: 'Self Assess Tax Flag',
+            type: 'string',
+          },
+          vendorBilledTax: {
+            title: 'Self Assess Tax Flag',
+            type: 'number',
+          },
+          taxedLines: {
+            title: 'Tolerance pct and amt',
+            type: 'array',
+            items: {
+              // Should set the avalara taxline model ????
+              type: 'object',
             },
           },
-          nodeSettings: nodeSettingsForObject,
+          apTolerances: {
+            title: 'Tolerance pct and amt',
+            type: 'number',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          apSelfAssesTaxFlag: string,
-          vendorBilledTax: number,
-          taxedLines: Array<any>,
-          apTolerances: { tolerancePct: number, toleranceAmt: number },
-        },
+          apSelfAssesTaxFlag: string;
+          vendorBilledTax: number;
+          taxedLines: Array<any>;
+          apTolerances: { tolerancePct: number; toleranceAmt: number };
+        };
       }): Promise<any> => {
         const { apSelfAssesTaxFlag, vendorBilledTax, taxedLines, apTolerances } = input.configuration;
 
         ////////////////////////////////////////////////////////////////////
         // Calculate proRateTaxes by ProRateTaxCalculator
-        // 
+        //
         ///////////////////////////////////////////////////////////////////
 
         const proRateCalculator = new ProRateTaxCalculator();
-        let taxOverRideDtls = proRateCalculator.calculateProRateTax(apSelfAssesTaxFlag, vendorBilledTax, taxedLines, apTolerances.tolerancePct, apTolerances.toleranceAmt);
+        let taxOverRideDtls = proRateCalculator.calculateProRateTax(
+          apSelfAssesTaxFlag,
+          vendorBilledTax,
+          taxedLines,
+          apTolerances.tolerancePct,
+          apTolerances.toleranceAmt,
+        );
 
         return Promise.resolve(taxOverRideDtls);
       },
-
       outputSchema: {
-          type: 'object',
-          items: ProRateTaxDetailModel,
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'object',
+        items: ProRateTaxDetailModel,
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     createDetailTaxLines: {
       description: 'Create detail tax lines with taxes/copy field values',
@@ -2232,129 +2055,141 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              lineTaxAndDetail: {
-                title: 'Source object to copy from',
-                type: 'array',
-                items: {
+          lineTaxAndDetail: {
+            title: 'Source object to copy from',
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                line: {
                   type: 'object',
-                  properties: {
-                    line: {
-                      type: 'object',
-                    },
-                    dtl: {
-                      type: 'object',
-                    },
-                    taxedLine: {
-                      type: 'object',
-                    },
-                    taxDetails: {
-                      type: 'array',
-                    },
-                  },
                 },
-              },
-              commonValues: {
-                title: 'Common values to copy for all lines',
-                type: 'object'
-              },
-              fieldsMapping: {
-                title: 'Field Mapping as [source_Field,destination_Field]',
-                type: 'object',
-                properties: {
-                  taxableLineMapping: {
-                    type: 'string',
-                  },
-                  detailTaxLineMapping: {
-                    type: 'string',
-                  },
-                  lineTaxesMapping: {
-                    type: 'string',
-                  },
-                  taxDetailsMaping: {
-                    type: 'string',
-                  },
-                  columnSeparator: {
-                    title: 'Column separator for the fieldsMapping array',
-                    type: 'string',
-                  },
-                  mappingSeparator: {
-                    title: 'Column separator for the fieldsMapping array',
-                    type: 'string',
-                  },
+                dtl: {
+                  type: 'object',
+                },
+                taxedLine: {
+                  type: 'object',
+                },
+                taxDetails: {
+                  type: 'array',
                 },
               },
             },
           },
-          nodeSettings: nodeSettingsForObject,
+          commonValues: {
+            title: 'Common values to copy for all lines',
+            type: 'object',
+          },
+          fieldsMapping: {
+            title: 'Field Mapping as [source_Field,destination_Field]',
+            type: 'object',
+            properties: {
+              taxableLineMapping: {
+                type: 'string',
+              },
+              detailTaxLineMapping: {
+                type: 'string',
+              },
+              lineTaxesMapping: {
+                type: 'string',
+              },
+              taxDetailsMaping: {
+                type: 'string',
+              },
+              columnSeparator: {
+                title: 'Column separator for the fieldsMapping array',
+                type: 'string',
+              },
+              mappingSeparator: {
+                title: 'Column separator for the fieldsMapping array',
+                type: 'string',
+              },
+            },
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
           lineTaxAndDetail: Array<{
-            line,
-            dtl,
-            taxedLine,
-            taxDetails,
-          }>,
-          commonValues: any,
+            line;
+            dtl;
+            taxedLine;
+            taxDetails;
+          }>;
+          commonValues: any;
           fieldsMapping: {
-            taxableLineMapping,
-            detailTaxLineMapping,
-            lineTaxesMapping,
-            taxDetailsMaping,
-            commonValuesMaping,
-            columnSeparator,
-            mappingSeparator,
-          }
-        },
+            taxableLineMapping;
+            detailTaxLineMapping;
+            lineTaxesMapping;
+            taxDetailsMaping;
+            commonValuesMaping;
+            columnSeparator;
+            mappingSeparator;
+          };
+        };
       }): Promise<any> => {
         const { lineTaxAndDetail, commonValues, fieldsMapping } = input.configuration;
 
-        const tlColMap = toMappingArray(fieldsMapping.taxableLineMapping, fieldsMapping.columnSeparator, fieldsMapping.mappingSeparator);
+        const tlColMap = toMappingArray(
+          fieldsMapping.taxableLineMapping,
+          fieldsMapping.columnSeparator,
+          fieldsMapping.mappingSeparator,
+        );
 
-        const dtlColMap = toMappingArray(fieldsMapping.detailTaxLineMapping, fieldsMapping.columnSeparator, fieldsMapping.mappingSeparator);
+        const dtlColMap = toMappingArray(
+          fieldsMapping.detailTaxLineMapping,
+          fieldsMapping.columnSeparator,
+          fieldsMapping.mappingSeparator,
+        );
 
-        const ltColMap = toMappingArray(fieldsMapping.lineTaxesMapping, fieldsMapping.columnSeparator, fieldsMapping.mappingSeparator);
+        const ltColMap = toMappingArray(
+          fieldsMapping.lineTaxesMapping,
+          fieldsMapping.columnSeparator,
+          fieldsMapping.mappingSeparator,
+        );
 
-        const tdColMap = toMappingArray(fieldsMapping.taxDetailsMaping, fieldsMapping.columnSeparator, fieldsMapping.mappingSeparator);
-        const cvColMap = toMappingArray(fieldsMapping.commonValuesMaping, fieldsMapping.columnSeparator, fieldsMapping.mappingSeparator);
+        const tdColMap = toMappingArray(
+          fieldsMapping.taxDetailsMaping,
+          fieldsMapping.columnSeparator,
+          fieldsMapping.mappingSeparator,
+        );
+        const cvColMap = toMappingArray(
+          fieldsMapping.commonValuesMaping,
+          fieldsMapping.columnSeparator,
+          fieldsMapping.mappingSeparator,
+        );
 
         const detTaxLines = [];
         const wrapper = {};
         for (const combo of lineTaxAndDetail) {
           for (const taxDet of combo.taxDetails) {
-
             const detTaxLine = {};
             detTaxLines.push(detTaxLine);
 
             if (combo.line) {
               for (const dtc of tlColMap) {
-                detTaxLine[dtc[0]] = combo.line[dtc[1]]
+                detTaxLine[dtc[0]] = combo.line[dtc[1]];
               }
             }
             if (combo.dtl) {
               for (const dtc of dtlColMap) {
-                detTaxLine[dtc[0]] = combo.dtl[dtc[1]]
+                detTaxLine[dtc[0]] = combo.dtl[dtc[1]];
               }
             }
             if (combo.taxedLine) {
               for (const dtc of ltColMap) {
-                detTaxLine[dtc[0]] = combo.taxedLine[dtc[1]]
+                detTaxLine[dtc[0]] = combo.taxedLine[dtc[1]];
               }
             }
             if (combo.taxDetails) {
               for (const dtc of tdColMap) {
-                detTaxLine[dtc[0]] = taxDet[dtc[1]]
+                detTaxLine[dtc[0]] = taxDet[dtc[1]];
               }
             }
             if (commonValues) {
               for (const dtc of cvColMap) {
-                detTaxLine[dtc[0]] = commonValues[dtc[1]]
+                detTaxLine[dtc[0]] = commonValues[dtc[1]];
               }
             }
             if (taxDet.jurisdiction) {
@@ -2367,13 +2202,12 @@ const extension: SdkExtension = {
         wrapper['ns:DetailTaxLines'] = detTaxLines;
         return Promise.resolve(wrapper);
       },
-
       outputSchema: {
-          type: 'array',
-          items: DetailTaxLineModel,
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'array',
+        items: DetailTaxLineModel,
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     collect: {
       description: 'Collect',
@@ -2381,35 +2215,28 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
+          argument: {
+            title: 'Argument',
             type: 'object',
-            properties: {
-              argument: {
-                title: 'Argument',
-                type: 'object',
-              },
-              operation: {
-                title: 'Operation',
-                type: 'string',
-                enum: [CollectOperation.minus, CollectOperation.plus],
-              },
-              defaultValue: {
-                title: 'Default value',
-                type: 'number',
-              },
-            },
           },
-          nodeSettings: nodeSettingsForObject,
+          operation: {
+            title: 'Operation',
+            type: 'string',
+            enum: [CollectOperation.minus, CollectOperation.plus],
+          },
+          defaultValue: {
+            title: 'Default value',
+            type: 'number',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
           argument: any;
           operation: CollectOperation;
           defaultValue: number;
-        },
+        };
       }): Promise<any> => {
         const { argument, operation, defaultValue } = input.configuration;
 
@@ -2449,10 +2276,10 @@ const extension: SdkExtension = {
         return Promise.resolve(collector);
       },
       outputSchema: {
-          type: 'number',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'number',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     store: {
       description: 'Store',
@@ -2460,37 +2287,28 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
+          data: {
             type: 'object',
-            properties: {
-              data: {
-                type: 'object',
-              },
-            },
           },
-          nodeSettings: nodeSettingsForObject,
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          data: any,
-        },
+          data: any;
+        };
       }): Promise<any> => {
-        const {
-          data,
-        } = input.configuration;
+        const { data } = input.configuration;
 
         return Promise.resolve(data);
       },
       outputSchema: {
-          title: 'Data',
-          type: 'object',
-          description: 'The passed object',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        title: 'Data',
+        type: 'object',
+        description: 'The passed object',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     createObject: {
       description: 'Create new Object to use',
@@ -2498,37 +2316,28 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
+          data: {
             type: 'object',
-            properties: {
-              data: {
-                type: 'object',
-              },
-            },
           },
-          nodeSettings: nodeSettingsForObject,
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          data: any,
-        },
+          data: any;
+        };
       }): Promise<any> => {
-        const {
-          data,
-        } = input.configuration;
+        const { data } = input.configuration;
         const madeObj = {};
         return Promise.resolve(madeObj);
       },
       outputSchema: {
-          title: 'New object',
-          description: 'New object to use for later',
-          type: 'object'
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        title: 'New object',
+        description: 'New object to use for later',
+        type: 'object',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     createArray: {
       description: 'Create an empty array to use',
@@ -2536,36 +2345,27 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
+          data: {
             type: 'object',
-            properties: {
-              data: {
-                type: 'object',
-              },
-            },
           },
-          nodeSettings: nodeSettingsForObject,
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          data: any,
-        },
+          data: any;
+        };
       }): Promise<any> => {
-        const {
-          data,
-        } = input.configuration;
+        const { data } = input.configuration;
         const madeArray = [];
         return Promise.resolve(madeArray);
       },
       outputSchema: {
-          title: 'Data',
-          type: 'array',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        title: 'Data',
+        type: 'array',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     createNewObjectToArray: {
       description: 'Add a new object to the array',
@@ -2573,37 +2373,28 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              objects: {
-                title: 'Array of items to add new object to.',
-                type: 'array',
-              },
-            },
+          objects: {
+            title: 'Array of items to add new object to.',
+            type: 'array',
           },
-          nodeSettings: nodeSettingsForObject,
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          objects: Array<any>,
-        },
+          objects: Array<any>;
+        };
       }): Promise<any> => {
-        const {
-          objects,
-        } = input.configuration;
+        const { objects } = input.configuration;
         const addObject = {};
         objects.push(addObject);
         return Promise.resolve(objects);
       },
       outputSchema: {
-          title: 'Data',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        title: 'Data',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     pushObjectToArray: {
       description: 'Add a new object to the array',
@@ -2611,39 +2402,32 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
+          item: {
+            title: 'Array of items to add new object to.',
             type: 'object',
-            properties: {
-              item: {
-                title: 'Array of items to add new object to.',
-                type: 'object',
-              },
-              objects: {
-                title: 'Array of items to add new object to.',
-                type: 'array',
-              },
-            },
           },
-          nodeSettings: nodeSettingsForObject,
+          objects: {
+            title: 'Array of items to add new object to.',
+            type: 'array',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          item: any,
-          objects: Array<any>,
-        },
+          item: any;
+          objects: Array<any>;
+        };
       }): Promise<any> => {
-        const { item, objects, } = input.configuration;
+        const { item, objects } = input.configuration;
         objects.push(item);
         return Promise.resolve(objects);
       },
       outputSchema: {
-          title: 'Data',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        title: 'Data',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     append: {
       description: 'Append a value to another with a joiner',
@@ -2651,46 +2435,37 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              first: {
-                title: 'First',
-                type: 'string',
-              },
-              second: {
-                title: 'Second',
-                type: 'string',
-              },
-              joiner: {
-                title: 'Joiner',
-                type: 'string',
-              },
-            },
+          first: {
+            title: 'First',
+            type: 'string',
           },
-          nodeSettings: nodeSettingsForObject,
+          second: {
+            title: 'Second',
+            type: 'string',
+          },
+          joiner: {
+            title: 'Joiner',
+            type: 'string',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          first: string,
-          second: string,
-          joiner: string,
-        },
+          first: string;
+          second: string;
+          joiner: string;
+        };
       }): Promise<any> => {
-        const {
-          first, second, joiner
-        } = input.configuration;
+        const { first, second, joiner } = input.configuration;
 
         return Promise.resolve(first + joiner + second);
       },
       outputSchema: {
-          title: 'Data',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        title: 'Data',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     sumAll: {
       description: 'Sum the values of a field of all items in an array',
@@ -2698,34 +2473,27 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              items: {
-                title: 'Items to add field value',
-                type: 'array',
-              },
-              fields: {
-                title: 'Fields',
-                type: 'string',
-              },
-              separator: {
-                title: 'Field separator',
-                type: 'string',
-              },
-            },
+          items: {
+            title: 'Items to add field value',
+            type: 'array',
           },
-          nodeSettings: nodeSettingsForObject,
+          fields: {
+            title: 'Fields',
+            type: 'string',
+          },
+          separator: {
+            title: 'Field separator',
+            type: 'string',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          items: Array<any>,
-          fields: string,
-          separator: string,
-        },
+          items: Array<any>;
+          fields: string;
+          separator: string;
+        };
       }): Promise<any> => {
         const { items, fields, separator } = input.configuration;
         const fieldsArr = fields.split(separator);
@@ -2744,10 +2512,10 @@ const extension: SdkExtension = {
         return Promise.resolve(result);
       },
       outputSchema: {
-          title: 'Data',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        title: 'Data',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     match: {
       description: 'Match',
@@ -2755,29 +2523,22 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              values: {
-                title: 'Values to search for',
-                type: 'array',
-              },
-              mapping: {
-                title: 'Match all and return last value in Array',
-                type: 'array',
-              },
-            },
+          values: {
+            title: 'Values to search for',
+            type: 'array',
           },
-          nodeSettings: nodeSettingsForObject,
+          mapping: {
+            title: 'Match all and return last value in Array',
+            type: 'array',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          values: Array<any>,
+          values: Array<any>;
           mapping: Array<Array<any>>;
-        },
+        };
       }): Promise<any> => {
         const { values, mapping } = input.configuration;
 
@@ -2813,53 +2574,46 @@ const extension: SdkExtension = {
         // return Promise.resolve(configuration);
       },
       outputSchema: {
-          type: 'object',
-          properties: {
-            collector: {
-              type: 'number',
-            },
+        type: 'object',
+        properties: {
+          collector: {
+            type: 'number',
           },
         },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     matchCombination: {
       description: 'Match',
-      longDescription: 'Math array of values and return the result. If no matching found returns the default value(defVal)',
+      longDescription:
+        'Math array of values and return the result. If no matching found returns the default value(defVal)',
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              values: {
-                title: 'Values to search for',
-                type: 'array',
-              },
-              mapping: {
-                title: 'Mapping for matching. Each value separated by , and each row separated by //',
-                type: 'string',
-              },
-              defVal: {
-                title: 'Default value to return if no value found',
-                type: 'string'
-              },
-            },
+          values: {
+            title: 'Values to search for',
+            type: 'array',
           },
-          nodeSettings: nodeSettingsForObject,
+          mapping: {
+            title: 'Mapping for matching. Each value separated by , and each row separated by //',
+            type: 'string',
+          },
+          defVal: {
+            title: 'Default value to return if no value found',
+            type: 'string',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          values: Array<any>,
+          values: Array<any>;
           mapping: 'string';
-          defVal: 'string'
-        },
+          defVal: 'string';
+        };
       }): Promise<any> => {
         const { values, mapping, defVal } = input.configuration;
-
         const rowsStr = mapping.split('//');
         const rows = [];
         for (let row of rowsStr) {
@@ -2896,10 +2650,10 @@ const extension: SdkExtension = {
         return Promise.resolve(value);
       },
       outputSchema: {
-          type: 'string',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'string',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     fieldValues: {
       description: 'Create an Array containing the values of the fields from the object',
@@ -2907,29 +2661,22 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              fieldNames: {
-                title: 'Field names to get value',
-                type: 'string',
-              },
-              item: {
-                title: 'Object for values',
-                type: 'object',
-              },
-            },
+          fieldNames: {
+            title: 'Field names to get value',
+            type: 'string',
           },
-          nodeSettings: nodeSettingsForObject,
+          item: {
+            title: 'Object for values',
+            type: 'object',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
           fieldNames: string;
           item: any;
-        },
+        };
       }): Promise<any> => {
         const { fieldNames, item } = input.configuration;
         const result = [];
@@ -2941,13 +2688,13 @@ const extension: SdkExtension = {
         // return Promise.resolve(configuration);
       },
       outputSchema: {
-          type: 'array',
-          items: {
-            type: 'object'
-          }
+        type: 'array',
+        items: {
+          type: 'object',
         },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     setProperty: {
       description: 'Set a property to an object',
@@ -2955,34 +2702,27 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
+          setTo: {
+            title: 'Set to object',
             type: 'object',
-            properties: {
-              setTo: {
-                title: 'Set to object',
-                type: 'object',
-              },
-              fieldName: {
-                title: 'Name of the property',
-                type: 'string',
-              },
-              item: {
-                title: 'Setting property object',
-                type: 'object',
-              },
-            },
           },
-          nodeSettings: nodeSettingsForObject,
+          fieldName: {
+            title: 'Name of the property',
+            type: 'string',
+          },
+          item: {
+            title: 'Setting property object',
+            type: 'object',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          setTo: any,
+          setTo: any;
           fieldName: string;
           item: any;
-        },
+        };
       }): Promise<any> => {
         const { setTo, fieldName, item } = input.configuration;
         setTo[fieldName] = item;
@@ -2990,10 +2730,10 @@ const extension: SdkExtension = {
         // return Promise.resolve(configuration);
       },
       outputSchema: {
-          type: 'object',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'object',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     setProperties: {
       description: 'Set a property to an object',
@@ -3001,32 +2741,25 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
+          setTo: {
+            title: 'Set to object',
             type: 'object',
-            properties: {
-              setTo: {
-                title: 'Set to object',
-                type: 'object',
-              },
-              values: {
-                title: 'Name of the property',
-                type: 'string',
-              },
-            },
           },
-          nodeSettings: nodeSettingsForObject,
+          values: {
+            title: 'Name of the property',
+            type: 'string',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          setTo: any,
+          setTo: any;
           values: Array<{
-            path: string,
-            value: any
-          }>
-        },
+            path: string;
+            value: any;
+          }>;
+        };
       }): Promise<any> => {
         const { setTo, values } = input.configuration;
         for (let setVal of values) {
@@ -3050,10 +2783,10 @@ const extension: SdkExtension = {
         return Promise.resolve(setTo);
       },
       outputSchema: {
-          type: 'object',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'object',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     setReferenceTo: {
       description: 'Set a property to an object',
@@ -3061,34 +2794,27 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              items: {
-                title: 'Items',
-                type: 'array',
-              },
-              propertyName: {
-                title: 'Name of the property',
-                type: 'string',
-              },
-              setTo: {
-                title: 'Setting property',
-                type: 'string',
-              },
-            },
+          items: {
+            title: 'Items',
+            type: 'array',
           },
-          nodeSettings: nodeSettingsForObject,
+          propertyName: {
+            title: 'Name of the property',
+            type: 'string',
+          },
+          setTo: {
+            title: 'Setting property',
+            type: 'string',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
           items: Array<any>;
           propertyName: string;
-          setTo: string,
-        },
+          setTo: string;
+        };
       }): Promise<any> => {
         const { items, propertyName, setTo } = input.configuration;
         for (const item of items) {
@@ -3097,10 +2823,10 @@ const extension: SdkExtension = {
         return Promise.resolve(items);
       },
       outputSchema: {
-          type: 'array',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'array',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     setValuesToItems: {
       description: 'Set a property to an object',
@@ -3108,32 +2834,25 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              items: {
-                title: 'Items',
-                type: 'array',
-              },
-              setValues: {
-                type: 'array',
-              },
-            },
+          items: {
+            title: 'Items',
+            type: 'array',
           },
-          nodeSettings: nodeSettingsForObject,
+          setValues: {
+            type: 'array',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
           items: Array<any>;
           setValues: Array<{
-            propertyName: string,
-            setValue: any,
-            setTo: string,
-          }>,
-        },
+            propertyName: string;
+            setValue: any;
+            setTo: string;
+          }>;
+        };
       }): Promise<any> => {
         const { items, setValues: references } = input.configuration;
         for (const item of items) {
@@ -3148,10 +2867,10 @@ const extension: SdkExtension = {
         return Promise.resolve(items);
       },
       outputSchema: {
-          type: 'array',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'array',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     copyValueToNested: {
       description: 'Copy values of an object to its children',
@@ -3159,41 +2878,35 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              items: {
-                title: 'Items',
-                description: 'Items to do this operation on',
-                type: 'array',
-              },
-              propertyPath: {
-                title: 'Property Path',
-                description: 'Path to the property from the current level',
-                type: 'string',
-              },
-              copyValues: {
-                title: 'From and to to Set to',
-                description: 'Property name to set to',
-                type: 'array',
-              },
-            },
+          items: {
+            title: 'Items',
+            description: 'Items to do this operation on',
+            type: 'array',
           },
-          nodeSettings: nodeSettingsForObject,
+          propertyPath: {
+            title: 'Property Path',
+            description: 'Path to the property from the current level',
+            type: 'string',
+          },
+          copyValues: {
+            title: 'From and to to Set to',
+            description: 'Property name to set to',
+            type: 'array',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
           items: Array<any>;
           propertyPath: string;
-          copyValues: Array<{ setFrom: string, setTo: string }>,
-        },
+          copyValues: Array<{ setFrom: string; setTo: string }>;
+        };
       }): Promise<any> => {
         const { items, propertyPath, copyValues } = input.configuration;
         if (items) {
-          if (propertyPath && propertyPath.includes('.')) { }
+          if (propertyPath && propertyPath.includes('.')) {
+          }
           const pathArr = propertyPath.split('.');
           for (const item of items) {
             let refObj = item;
@@ -3215,18 +2928,18 @@ const extension: SdkExtension = {
                   refObj[cv.setTo] = item[cv.setFrom];
                 }
               }
-
             }
           }
         }
         return Promise.resolve(items);
       },
       outputSchema: {
-          type: 'object',
-          description: 'The array of items each with the property referred to by \'setTo\' set with the property found in the path',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'object',
+        description:
+          "The array of items each with the property referred to by 'setTo' set with the property found in the path",
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     pullUpAndSetReferenceTo: {
       description: 'Pulls up a property from same or down level and sets to a property at this level',
@@ -3234,37 +2947,30 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              items: {
-                title: 'Items',
-                description: 'Items to do this operation on',
-                type: 'array',
-              },
-              propertyPath: {
-                title: 'Property Path',
-                description: 'Path to the property from the current level',
-                type: 'string',
-              },
-              setTo: {
-                title: 'Set To',
-                description: 'Property name to set to',
-                type: 'string',
-              },
-            },
+          items: {
+            title: 'Items',
+            description: 'Items to do this operation on',
+            type: 'array',
           },
-          nodeSettings: nodeSettingsForObject,
+          propertyPath: {
+            title: 'Property Path',
+            description: 'Path to the property from the current level',
+            type: 'string',
+          },
+          setTo: {
+            title: 'Set To',
+            description: 'Property name to set to',
+            type: 'string',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
           items: Array<any>;
           propertyPath: string;
-          setTo: string,
-        },
+          setTo: string;
+        };
       }): Promise<any> => {
         const { items, propertyPath, setTo } = input.configuration;
         if (items) {
@@ -3273,7 +2979,10 @@ const extension: SdkExtension = {
             let refObj = item;
             let found = false;
             for (const path of pathArr) {
-              if (!refObj) { found = false; break; }
+              if (!refObj) {
+                found = false;
+                break;
+              }
               refObj = refObj[path];
               found = true;
             }
@@ -3285,11 +2994,12 @@ const extension: SdkExtension = {
         return Promise.resolve(items);
       },
       outputSchema: {
-          type: 'object',
-          description: 'The array of items each with the property referred to by \'setTo\' set with the property found in the path',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'object',
+        description:
+          "The array of items each with the property referred to by 'setTo' set with the property found in the path",
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     cloneAndExecuteForEach: {
       description: 'Clone the given items and execute the operations on them',
@@ -3297,32 +3007,25 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              items: {
-                title: 'Array of items to execute the operation',
-                type: 'array',
-              },
-              operations: {
-                title: 'Array of operations to execute',
-                type: 'array',
-                items: {
-                  type: 'string'
-                }
-              },
+          items: {
+            title: 'Array of items to execute the operation',
+            type: 'array',
+          },
+          operations: {
+            title: 'Array of operations to execute',
+            type: 'array',
+            items: {
+              type: 'string',
             },
           },
-          nodeSettings: nodeSettingsForObject,
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          items: Array<any>,
+          items: Array<any>;
           operations: Array<string>;
-        },
+        };
       }): Promise<any> => {
         const { items, operations } = input.configuration;
         let result = [];
@@ -3342,11 +3045,11 @@ const extension: SdkExtension = {
         return Promise.resolve({ found: result.length > 0, result });
       },
       outputSchema: {
-          type: 'array',
-          description: 'Items with field values matching to the given values',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'array',
+        description: 'Items with field values matching to the given values',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     executeForEach: {
       description: 'Execute the operations on each item of an array',
@@ -3354,32 +3057,25 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              items: {
-                title: 'Array of items to search',
-                type: 'array',
-              },
-              operations: {
-                title: 'Array of values to check',
-                type: 'array',
-                items: {
-                  type: 'string'
-                }
-              },
+          items: {
+            title: 'Array of items to search',
+            type: 'array',
+          },
+          operations: {
+            title: 'Array of values to check',
+            type: 'array',
+            items: {
+              type: 'string',
             },
           },
-          nodeSettings: nodeSettingsForObject,
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          items: Array<any>,
+          items: Array<any>;
           operations: Array<string>;
-        },
+        };
       }): Promise<any> => {
         const { items, operations } = input.configuration;
         if (items) {
@@ -3396,11 +3092,11 @@ const extension: SdkExtension = {
         return Promise.resolve({ found: items && items.length > 0, result: items });
       },
       outputSchema: {
-          type: 'array',
-          description: 'Items with field values matching to the given values',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'array',
+        description: 'Items with field values matching to the given values',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     findItemsWithFieldValues: {
       description: 'Find the first item in the array with matching values from source object or values',
@@ -3408,32 +3104,25 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              items: {
-                title: 'Array of items to search',
-                type: 'array',
-              },
-              matchFields: {
-                title: 'Array of values to check',
-                type: 'array',
-                items: {
-                  type: 'array'
-                }
-              },
+          items: {
+            title: 'Array of items to search',
+            type: 'array',
+          },
+          matchFields: {
+            title: 'Array of values to check',
+            type: 'array',
+            items: {
+              type: 'array',
             },
           },
-          nodeSettings: nodeSettingsForObject,
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          items: Array<any>,
-          matchFields: Array<{ field: string, value: any }>;
-        },
+          items: Array<any>;
+          matchFields: Array<{ field: string; value: any }>;
+        };
       }): Promise<any> => {
         const { items, matchFields } = input.configuration;
 
@@ -3454,11 +3143,11 @@ const extension: SdkExtension = {
         return Promise.resolve(result);
       },
       outputSchema: {
-          type: 'array',
-          description: 'Items with field values matching to the given values',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'array',
+        description: 'Items with field values matching to the given values',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     findItemsWithFieldValuesMatching: {
       description: 'Find the first item in the array with matching values from source object or values',
@@ -3466,32 +3155,25 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              items: {
-                title: 'Array of items to search',
-                type: 'array',
-              },
-              matchFields: {
-                title: 'Array of values to check',
-                type: 'array',
-                items: {
-                  type: 'array'
-                }
-              },
+          items: {
+            title: 'Array of items to search',
+            type: 'array',
+          },
+          matchFields: {
+            title: 'Array of values to check',
+            type: 'array',
+            items: {
+              type: 'array',
             },
           },
-          nodeSettings: nodeSettingsForObject,
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          items: Array<any>,
+          items: Array<any>;
           matchFields: Array<Array<any>>;
-        },
+        };
       }): Promise<any> => {
         const { items, matchFields } = input.configuration;
 
@@ -3512,11 +3194,11 @@ const extension: SdkExtension = {
         return Promise.resolve(result);
       },
       outputSchema: {
-          type: 'array',
-          description: 'Items with field values matching to the given values',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'array',
+        description: 'Items with field values matching to the given values',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     findMatch: {
       description: 'Find the first item in the array with matching values from source object and plain values',
@@ -3524,56 +3206,50 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
+          source: {
+            title: 'Object to get match values from',
             type: 'object',
-            properties: {
-              source: {
-                title: 'Object to get match values from',
-                type: 'object',
-              },
-              sourceFields: {
-                title: 'Fields to search for, comma separated',
-                type: 'string',
-              },
-              rawValues: {
-                title: 'Extra values to be checked, not field values',
-                type: 'string',
-              },
-              checkObjects: {
-                title: 'Array of items to search',
-                type: 'array',
-              },
-              matchFields: {
-                title: 'Fields to match ',
-                type: 'string',
-              },
-              matchVal: {
-                title: 'Value to return if matches',
-                type: 'string',
-              },
-              noMatchVal: {
-                title: 'Value to return if no match found',
-                type: 'string',
-              },
-            },
           },
-          nodeSettings: nodeSettingsForObject,
+          sourceFields: {
+            title: 'Fields to search for, comma separated',
+            type: 'string',
+          },
+          rawValues: {
+            title: 'Extra values to be checked, not field values',
+            type: 'string',
+          },
+          checkObjects: {
+            title: 'Array of items to search',
+            type: 'array',
+          },
+          matchFields: {
+            title: 'Fields to match ',
+            type: 'string',
+          },
+          matchVal: {
+            title: 'Value to return if matches',
+            type: 'string',
+          },
+          noMatchVal: {
+            title: 'Value to return if no match found',
+            type: 'string',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          source: any,
+          source: any;
           sourceFields: string;
           rawValues: string;
           checkObjects: Array<any>;
           matchFields: string;
           matchVal: string;
           noMatchVal: string;
-        },
+        };
       }): Promise<any> => {
-        const { source, sourceFields, rawValues, checkObjects, matchFields, matchVal, noMatchVal } = input.configuration;
+        const { source, sourceFields, rawValues, checkObjects, matchFields, matchVal, noMatchVal } =
+          input.configuration;
 
         const sfArr = sourceFields.split(',');
         let compareValues = [];
@@ -3607,11 +3283,11 @@ const extension: SdkExtension = {
         return Promise.resolve(result);
       },
       outputSchema: {
-          type: 'object',
-          description: 'The first found property in any of the objects',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'object',
+        description: 'The first found property in any of the objects',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     findMatchingObject: {
       description: 'Find combination of values in the objects',
@@ -3619,39 +3295,32 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
+          source: {
+            title: 'Object to get match values from',
             type: 'object',
-            properties: {
-              source: {
-                title: 'Object to get match values from',
-                type: 'object',
-              },
-              sourceFields: {
-                title: 'Fields to search for, comma separated',
-                type: 'string',
-              },
-              checkObjects: {
-                title: 'Array of items to search',
-                type: 'array',
-              },
-              matchFields: {
-                title: 'Fields to match ',
-                type: 'string',
-              },
-            },
           },
-          nodeSettings: nodeSettingsForObject,
+          sourceFields: {
+            title: 'Fields to search for, comma separated',
+            type: 'string',
+          },
+          checkObjects: {
+            title: 'Array of items to search',
+            type: 'array',
+          },
+          matchFields: {
+            title: 'Fields to match ',
+            type: 'string',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          source: any,
+          source: any;
           sourceFields: string;
           checkObjects: Array<any>;
           matchFields: string;
-        },
+        };
       }): Promise<any> => {
         const { source, sourceFields, checkObjects, matchFields } = input.configuration;
         let found = false;
@@ -3682,11 +3351,11 @@ const extension: SdkExtension = {
         return Promise.resolve({ found, result });
       },
       outputSchema: {
-          type: 'object',
-          description: 'The first found property in any of the objects',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'object',
+        description: 'The first found property in any of the objects',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     findWithPrefernce: {
       description: 'Find values with preference to earlier ones',
@@ -3694,29 +3363,22 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              fields: {
-                title: 'Fields to search for, comma separated',
-                type: 'string',
-              },
-              objects: {
-                title: 'Array of items to search',
-                type: 'array',
-              },
-            },
+          fields: {
+            title: 'Fields to search for, comma separated',
+            type: 'string',
           },
-          nodeSettings: nodeSettingsForObject,
+          objects: {
+            title: 'Array of items to search',
+            type: 'array',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
           fields: string;
           objects: Array<any>;
-        },
+        };
       }): Promise<any> => {
         const { fields, objects } = input.configuration;
 
@@ -3742,11 +3404,11 @@ const extension: SdkExtension = {
         return Promise.resolve({ found, result, matchingItem });
       },
       outputSchema: {
-          type: 'object',
-          description: 'The first found property in any of the objects',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'object',
+        description: 'The first found property in any of the objects',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     findWithPrefernceOrDefault: {
       description: 'Find values with preference to earlier ones',
@@ -3754,37 +3416,29 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              fields: {
-                title: 'Fields to search for, comma separated',
-                type: 'string',
-              },
-              objects: {
-                title: 'Array of items to search',
-                type: 'array',
-              },
-              defaultVal: {
-                title: 'Default value to return',
-                type: 'object',
-              },
-            },
+          fields: {
+            title: 'Fields to search for, comma separated',
+            type: 'string',
           },
-          nodeSettings: nodeSettingsForObject,
+          objects: {
+            title: 'Array of items to search',
+            type: 'array',
+          },
+          defaultVal: {
+            title: 'Default value to return',
+            type: 'object',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
           fields: string;
           objects: Array<any>;
           defaultVal: any;
-        },
+        };
       }): Promise<any> => {
         const { fields, objects, defaultVal } = input.configuration;
-
         let result = null;
         let found = false;
         let matchingItem = null;
@@ -3810,10 +3464,10 @@ const extension: SdkExtension = {
         return Promise.resolve({ found, result, matchingItem });
       },
       outputSchema: {
-          type: 'object',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'object',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     mapNested: {
       description: 'Map',
@@ -3821,51 +3475,44 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              mapping: {
-                title: 'Mapping',
-                type: 'array',
+          mapping: {
+            title: 'Mapping',
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
                 items: {
-                  type: 'object',
-                  properties: {
-                    items: {
-                      title: 'Objects to add to the existing mapping objects',
-                      type: 'array',
-                    },
-                    nestedPath: {
-                      title: 'Path to the nested items',
-                      type: 'string',
-                    },
-                    mapByField: {
-                      title: 'Object field to map by',
-                      type: 'string',
-                    },
-                    setToField: {
-                      title: 'Result field to assign object to',
-                      type: 'string',
-                    },
-                  },
+                  title: 'Objects to add to the existing mapping objects',
+                  type: 'array',
+                },
+                nestedPath: {
+                  title: 'Path to the nested items',
+                  type: 'string',
+                },
+                mapByField: {
+                  title: 'Object field to map by',
+                  type: 'string',
+                },
+                setToField: {
+                  title: 'Result field to assign object to',
+                  type: 'string',
                 },
               },
             },
           },
-          nodeSettings: nodeSettingsForObject,
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          items: Array<any>,
+          items: Array<any>;
           mapping: Array<{
-            itemsPath: string,
-            nestedPath: string,
-            mapByField: string,
-            setToField: string,
-          }>
-        },
+            itemsPath: string;
+            nestedPath: string;
+            mapByField: string;
+            setToField: string;
+          }>;
+        };
       }): Promise<any> => {
         const { items, mapping } = input.configuration;
         let combinedResults = [];
@@ -3875,7 +3522,7 @@ const extension: SdkExtension = {
             if (item[mapConf.itemsPath] && item[mapConf.itemsPath][mapConf.nestedPath]) {
               let arr = item[mapConf.itemsPath][mapConf.nestedPath];
               if (arr) {
-                subMappings.push({ items: arr, mapByField: mapConf.mapByField, setToField: mapConf.setToField })
+                subMappings.push({ items: arr, mapByField: mapConf.mapByField, setToField: mapConf.setToField });
               }
             } else {
               subMappings.push({ items: [], mapByField: mapConf.mapByField, setToField: mapConf.setToField });
@@ -3905,11 +3552,11 @@ const extension: SdkExtension = {
         return Promise.resolve(combinedResults);
       },
       outputSchema: {
-          type: 'object',
-          description: 'An array of the input map with the input objects mapped for each item',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'object',
+        description: 'An array of the input map with the input objects mapped for each item',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     mapToMap: {
       description: 'Map',
@@ -3917,58 +3564,51 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              mapping: {
-                title: 'Mapping',
-                type: 'array',
-                items: {
-                  type: 'object',
-                  properties: {
-                    addToMap: {
-                      title: 'Mapped array to include new objects',
-                      type: 'array',
-                    },
-                    mapByField: {
-                      title: 'Object field to map by',
-                      type: 'string',
-                    },
-                    objects: {
-                      title: 'Objects to add to the existing mapping objects',
-                      type: 'array',
-                    },
-                    setToField: {
-                      title: 'Result field to assign object to',
-                      type: 'string',
-                    },
-                    refObject: {
-                      title: 'Object to take the value to match with the map by field value of object',
-                      type: 'string',
-                    },
-                    refProperty: {
-                      title: 'Property to take the value from the refObject to match with the map by field value of object',
-                      type: 'string',
-                    },
-                  },
+          mapping: {
+            title: 'Mapping',
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                addToMap: {
+                  title: 'Mapped array to include new objects',
+                  type: 'array',
+                },
+                mapByField: {
+                  title: 'Object field to map by',
+                  type: 'string',
+                },
+                objects: {
+                  title: 'Objects to add to the existing mapping objects',
+                  type: 'array',
+                },
+                setToField: {
+                  title: 'Result field to assign object to',
+                  type: 'string',
+                },
+                refObject: {
+                  title: 'Object to take the value to match with the map by field value of object',
+                  type: 'string',
+                },
+                refProperty: {
+                  title: 'Property to take the value from the refObject to match with the map by field value of object',
+                  type: 'string',
                 },
               },
             },
           },
-          nodeSettings: nodeSettingsForObject,
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
           addToMap: Array<any>;
           mapByField: string;
           objects: Array<any>;
           setToField: string;
-          refObject: string,
-          refProperty: string,
-        },
+          refObject: string;
+          refProperty: string;
+        };
       }): Promise<any> => {
         const { addToMap, mapByField, objects, setToField, refObject, refProperty } = input.configuration;
         if (addToMap && objects) {
@@ -3990,11 +3630,11 @@ const extension: SdkExtension = {
         return Promise.resolve(addToMap);
       },
       outputSchema: {
-          type: 'object',
-          description: 'An array of the input map with the input objects mapped for each item',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'object',
+        description: 'An array of the input map with the input objects mapped for each item',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     copyProperties1: {
       description: 'Copy properties',
@@ -4002,44 +3642,37 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
+          source: {
+            title: 'Source object to copy from',
             type: 'object',
-            properties: {
-              source: {
-                title: 'Source object to copy from',
-                type: 'object',
-              },
-              destination: {
-                title: 'Destination object to copy to',
-                type: 'object',
-              },
-              fieldsMapping: {
-                title: 'Field Mapping as [source_Field,destination_Field]',
-                type: 'string',
-              },
-              rowSeparator: {
-                title: 'Row separator for the fieldsMapping array',
-                type: 'string',
-              },
-              columnSeparator: {
-                title: 'Column separator for the fieldsMapping array',
-                type: 'string',
-              },
-            },
           },
-          nodeSettings: nodeSettingsForObject,
+          destination: {
+            title: 'Destination object to copy to',
+            type: 'object',
+          },
+          fieldsMapping: {
+            title: 'Field Mapping as [source_Field,destination_Field]',
+            type: 'string',
+          },
+          rowSeparator: {
+            title: 'Row separator for the fieldsMapping array',
+            type: 'string',
+          },
+          columnSeparator: {
+            title: 'Column separator for the fieldsMapping array',
+            type: 'string',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
           source: any;
           destination: any;
           fieldsMapping: string;
           rowSeparator: string;
           columnSeparator: string;
-        },
+        };
       }): Promise<any> => {
         const { source, destination, fieldsMapping, rowSeparator, columnSeparator } = input.configuration;
 
@@ -4052,11 +3685,11 @@ const extension: SdkExtension = {
       },
 
       outputSchema: {
-          type: 'object',
-          description: 'Object with the properties defined in fieldsMapping copied from the source',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'object',
+        description: 'Object with the properties defined in fieldsMapping copied from the source',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     copyPropertiesToItems: {
       description: 'Copy properties',
@@ -4064,44 +3697,37 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
+          source: {
+            title: 'Source object to copy from',
             type: 'object',
-            properties: {
-              source: {
-                title: 'Source object to copy from',
-                type: 'object',
-              },
-              destination: {
-                title: 'Destination object to copy to',
-                type: 'object',
-              },
-              fieldsMapping: {
-                title: 'Field Mapping as [source_Field,destination_Field]',
-                type: 'string',
-              },
-              rowSeparator: {
-                title: 'Row separator for the fieldsMapping array',
-                type: 'string',
-              },
-              columnSeparator: {
-                title: 'Column separator for the fieldsMapping array',
-                type: 'string',
-              },
-            },
           },
-          nodeSettings: nodeSettingsForObject,
+          destination: {
+            title: 'Destination object to copy to',
+            type: 'object',
+          },
+          fieldsMapping: {
+            title: 'Field Mapping as [source_Field,destination_Field]',
+            type: 'string',
+          },
+          rowSeparator: {
+            title: 'Row separator for the fieldsMapping array',
+            type: 'string',
+          },
+          columnSeparator: {
+            title: 'Column separator for the fieldsMapping array',
+            type: 'string',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
           source: any;
           destination: any;
           fieldsMapping: string;
           rowSeparator: string;
           columnSeparator: string;
-        },
+        };
       }): Promise<any> => {
         const { source, destination, fieldsMapping, rowSeparator, columnSeparator } = input.configuration;
 
@@ -4112,12 +3738,11 @@ const extension: SdkExtension = {
         }
         return Promise.resolve(destination);
       },
-
       outputSchema: {
-          type: 'object',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'object',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     copyProperties: {
       description: 'Map',
@@ -4125,45 +3750,38 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              mapping: {
-                title: 'Mapping',
-                type: 'array',
-                items: {
+          mapping: {
+            title: 'Mapping',
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                source: {
+                  title: 'Source object to copy from',
                   type: 'object',
-                  properties: {
-                    source: {
-                      title: 'Source object to copy from',
-                      type: 'object',
-                    },
-                    destination: {
-                      title: 'Destination object to copy to',
-                      type: 'object',
-                    },
-                    fieldsMapping: {
-                      title: 'Field Mapping as array of string array[source_Field,destination_Field]',
-                      type: 'array',
-                    },
-                  },
+                },
+                destination: {
+                  title: 'Destination object to copy to',
+                  type: 'object',
+                },
+                fieldsMapping: {
+                  title: 'Field Mapping as array of string array[source_Field,destination_Field]',
+                  type: 'array',
                 },
               },
             },
           },
-          nodeSettings: nodeSettingsForObject,
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
           mapping: {
             source: any;
             destination: any;
             fieldsMapping: Array<string[]>;
           };
-        },
+        };
       }): Promise<any> => {
         const { mapping } = input.configuration;
 
@@ -4172,12 +3790,11 @@ const extension: SdkExtension = {
         }
         return Promise.resolve(mapping.destination);
       },
-
       outputSchema: {
-          type: 'object',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'object',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     createDetailTaxLine: {
       description: 'CreateDetailTaxLines',
@@ -4185,51 +3802,51 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
+          taxableLine: {
+            title: 'Create Detail TaxLines',
             type: 'object',
-            properties: {
-              taxableLine: {
-                title: 'Create Detail TaxLines',
-                type: 'object',
-              },
-              detailLinesArray: {
-                title: 'Array of detail tax lines to push to',
-                type: 'array',
-              },
-              internalOrganizationId: {
-                title: 'LegalEntityId',
-                type: 'string',
-              },
-              legalEntityId: {
-                title: 'LegalEntityId',
-                type: 'string',
-              },
-              errorMessageTypeFlag: {
-                title: 'ErrorMessageTypeFlag',
-                type: 'string',
-              },
-              errorString: {
-                title: 'ErrorString',
-                type: 'string',
-              },
-            },
           },
-          nodeSettings: nodeSettingsForObject,
+          detailLinesArray: {
+            title: 'Array of detail tax lines to push to',
+            type: 'array',
+          },
+          internalOrganizationId: {
+            title: 'LegalEntityId',
+            type: 'string',
+          },
+          legalEntityId: {
+            title: 'LegalEntityId',
+            type: 'string',
+          },
+          errorMessageTypeFlag: {
+            title: 'ErrorMessageTypeFlag',
+            type: 'string',
+          },
+          errorString: {
+            title: 'ErrorString',
+            type: 'string',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          taxableLine: any,
-          detailLinesArray: Array<any>,
-          internalOrganizationId: string,
-          legalEntityId: string,
-          errorMessageTypeFlag: string,
-          errorString: string,
-        },
+          taxableLine: any;
+          detailLinesArray: Array<any>;
+          internalOrganizationId: string;
+          legalEntityId: string;
+          errorMessageTypeFlag: string;
+          errorString: string;
+        };
       }): Promise<any> => {
-        const { taxableLine, detailLinesArray, internalOrganizationId, legalEntityId, errorMessageTypeFlag, errorString } = input.configuration;
+        const {
+          taxableLine,
+          detailLinesArray,
+          internalOrganizationId,
+          legalEntityId,
+          errorMessageTypeFlag,
+          errorString,
+        } = input.configuration;
         const detailTaxLine = {};
         detailTaxLine['ErrorMessageTypeFlag'] = errorMessageTypeFlag;
         detailTaxLine['ErrorString'] = errorString;
@@ -4254,11 +3871,11 @@ const extension: SdkExtension = {
       },
 
       outputSchema: {
-          type: 'array',
-          items: DetailTaxLineModel
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'array',
+        items: DetailTaxLineModel,
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     createDetailTaxLinesNoTax: {
       description: 'CreateDetailTaxLines',
@@ -4266,46 +3883,40 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              taxableLines: {
-                title: 'Create Detail TaxLines',
-                type: 'array',
-              },
-              internalOrganizationId: {
-                title: 'InternalOrganizationId',
-                type: 'string',
-              },
-              legalEntityId: {
-                title: 'LegalEntityId',
-                type: 'string',
-              },
-              errorMessageTypeFlag: {
-                title: 'ErrorMessageTypeFlag',
-                type: 'string',
-              },
-              errorString: {
-                title: 'ErrorString',
-                type: 'string',
-              },
-            },
+          taxableLines: {
+            title: 'Create Detail TaxLines',
+            type: 'array',
           },
-          nodeSettings: nodeSettingsForObject,
+          internalOrganizationId: {
+            title: 'InternalOrganizationId',
+            type: 'string',
+          },
+          legalEntityId: {
+            title: 'LegalEntityId',
+            type: 'string',
+          },
+          errorMessageTypeFlag: {
+            title: 'ErrorMessageTypeFlag',
+            type: 'string',
+          },
+          errorString: {
+            title: 'ErrorString',
+            type: 'string',
+          },
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
-          taxableLines: Array<any>,
-          internalOrganizationId: string,
-          legalEntityId: string,
-          errorMessageTypeFlag: string,
-          errorString: string,
-        },
+          taxableLines: Array<any>;
+          internalOrganizationId: string;
+          legalEntityId: string;
+          errorMessageTypeFlag: string;
+          errorString: string;
+        };
       }): Promise<any> => {
-        const { taxableLines, internalOrganizationId, legalEntityId, errorMessageTypeFlag, errorString } = input.configuration;
+        const { taxableLines, internalOrganizationId, legalEntityId, errorMessageTypeFlag, errorString } =
+          input.configuration;
         const detailTaxLines = [];
         for (const inputLine of taxableLines) {
           const detailTaxLine = {};
@@ -4331,11 +3942,11 @@ const extension: SdkExtension = {
       },
 
       outputSchema: {
-          type: 'array',
-          items: DetailTaxLineModel
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        type: 'array',
+        items: DetailTaxLineModel,
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     convertToXMLResponse: {
       description: 'convertToXml',
@@ -4343,33 +3954,26 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              data: {
-                title: 'Data',
-              },
-            },
+          data: {
+            title: 'Data',
           },
-          nodeSettings: nodeSettingsForObject,
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
           data: any;
-        },
+        };
       }): Promise<any> => {
         const { data } = input.configuration;
         const xml = input.sdk.serialization.xml.stringify(data);
         return Promise.resolve(data);
       },
       outputSchema: {
-          title: 'Data',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        title: 'Data',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     parseXML: {
       description: 'Parse XML to Json',
@@ -4377,33 +3981,26 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
-            type: 'object',
-            properties: {
-              data: {
-                title: 'Data',
-              },
-            },
+          data: {
+            title: 'Data',
           },
-          nodeSettings: nodeSettingsForObject,
         },
       },
-      js:  (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
           data: any;
-        },
+        };
       }): Promise<any> => {
         const { data } = input.configuration;
         const json = input.sdk.serialization.xml.parse(data);
         return Promise.resolve(json);
       },
       outputSchema: {
-          title: 'Data',
-        },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+        title: 'Data',
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
     convertToXmlAction: {
       description: 'Convert json to xml',
@@ -4411,45 +4008,38 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          calculableAttribute: {
-            title: 'Calculable Attribute',
+          data: {
+            title: 'Data',
             type: 'object',
-            properties: {
-              data: {
-                title: 'Data',
-                type: 'object',
-              },
-            },
           },
-          nodeSettings: nodeSettingsForObject,
         },
       },
-      js: (input:{
-        sdk: AppknitSDK,
+      js: (input: {
+        sdk: AppknitSDK;
         configuration: {
           jsonData: any;
-        },
+        };
       }): Promise<any> => {
         const { jsonData } = input.configuration;
         const xmlData = input.sdk.serialization.xml.stringify(jsonData);
         return Promise.resolve(xmlData);
       },
       outputSchema: {
-          type: 'object',
-          properties: {
-            status: {
-              type: 'integer',
-            },
-            headers: {
-              type: 'object',
-            },
-            body: {
-              type: 'object',
-            },
+        type: 'object',
+        properties: {
+          status: {
+            type: 'integer',
+          },
+          headers: {
+            type: 'object',
+          },
+          body: {
+            type: 'object',
           },
         },
-        viewSchema:viewSchema,
-      svgSymbolMarkup:()=>undefined,
+      },
+      viewSchema: {},
+      svgSymbolMarkup: {},
     },
   },
   graphFunctions:{},
