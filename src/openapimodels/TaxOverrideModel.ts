@@ -1,32 +1,32 @@
-import { SdkOpenApiSchemaProperty } from "appknit-platform-sdk-v2";
+import { SdkOpenApiSchemaProperty } from 'appknit-platform-sdk-v2';
 
 export const OverrideTaxDetailModel: SdkOpenApiSchemaProperty = {
-  description: "TaxOverrideModel",
-  type: "object",
+  description: 'TaxOverrideModel',
+  type: 'object',
   properties: {
     lineNum: {
-      type: "string",
-      description: "Line number for this over riding tax",
+      type: 'string',
+      description: 'Line number for this over riding tax',
     },
     TaxRate: {
-      type: "number",
-      description: "Tax rate for calculation",
+      type: 'number',
+      description: 'Tax rate for calculation',
     },
     TaxAmt: {
-      type: "number",
-      description: "Calculated Tax override",
+      type: 'number',
+      description: 'Calculated Tax override',
     },
     TaxAmtTaxCurr: {
-      type: "number",
-      description: "",
+      type: 'number',
+      description: '',
     },
     UnroundedTaxAmt: {
-      type: "number",
-      description: "",
+      type: 'number',
+      description: '',
     },
     ReturnVbtLineOnly: {
-      type: "boolean",
-      description: "If only VBT line has to be returned for this",
+      type: 'boolean',
+      description: 'If only VBT line has to be returned for this',
     },
   },
 };

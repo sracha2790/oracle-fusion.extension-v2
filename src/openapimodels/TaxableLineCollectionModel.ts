@@ -1,12 +1,12 @@
-import { TaxableLineModel } from "./TaxableLineModel";
-import { SdkOpenApiSchemaProperty } from "appknit-platform-sdk-v2";
+import { TaxableLineModel } from './TaxableLineModel';
+import { SdkOpenApiSchemaProperty } from 'appknit-platform-sdk-v2';
 
 export const TaxableLineCollectionModel: SdkOpenApiSchemaProperty = {
-  description: "TaxableLineCollectionModel",
-  type: "object",
+  description: 'TaxableLineCollectionModel',
+  type: 'object',
   properties: {
     taxableLine: {
-      type: "array",
+      type: 'array',
       items: TaxableLineModel,
     },
   },

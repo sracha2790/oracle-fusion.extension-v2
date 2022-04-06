@@ -1,18 +1,18 @@
-import { DocumentDetails } from "./DocumentDetails";
-const parser = require("fast-xml-parser");
+import { DocumentDetails } from './DocumentDetails';
+const parser = require('fast-xml-parser');
 
 export class MultiPartParser {
   ParserOptions = {
-    attributeNamePrefix: "@_",
-    attrNodeName: "attr", //default is 'false'
-    textNodeName: "#text",
+    attributeNamePrefix: '@_',
+    attrNodeName: 'attr', //default is 'false'
+    textNodeName: '#text',
     ignoreAttributes: false,
     ignoreNameSpace: true,
     allowBooleanAttributes: false,
     parseNodeValue: true,
     parseAttributeValue: true,
     trimValues: true,
-    cdataPositionChar: "\\c",
+    cdataPositionChar: '\\c',
     arrayMode: false, //"strict"
   };
   BOUNDARY = 'boundary="';
@@ -40,10 +40,10 @@ export class MultiPartParser {
         });
       }
       for (let doc of documentDetails) {
-        let dcid = "<" + doc.ContentID + ">";
+        let dcid = '<' + doc.ContentID + '>';
         for (let docData of docDatas) {
           if (docData.headers) {
-            if (docData.headers["Content-ID"] == dcid) {
+            if (docData.headers['Content-ID'] == dcid) {
               doc.Content = docData.content;
               break;
             }
@@ -70,13 +70,13 @@ export class MultiPartParser {
       }
     } catch (err) {
       console.log(err);
-      console.log("Failed to parse the xml.");
+      console.log('Failed to parse the xml.');
     }
     return null;
   }
 
   getBoundaryFromResponse(response) {
-    var contentType = response.headers["content-type"];
+    var contentType = response.headers['content-type'];
     return this.getBoundaryFromContentType(contentType);
   }
 
@@ -84,10 +84,7 @@ export class MultiPartParser {
     if (contentType) {
       let bidx = contentType.indexOf(this.BOUNDARY);
       if (bidx > -1) {
-        return contentType.substring(
-          bidx + this.BLEN,
-          contentType.indexOf('"', bidx + this.BLEN + 1)
-        );
+        return contentType.substring(bidx + this.BLEN, contentType.indexOf('"', bidx + this.BLEN + 1));
       }
     }
     return null;
@@ -95,8 +92,8 @@ export class MultiPartParser {
 
   getMultiParts(data, boundary) {
     // ADD TWO -- TO MAKE THE SEPARATION WORD
-    let sbuff = Buffer.from("--" + boundary + "\r\n");
-    let ebuff = Buffer.from("\r\n--" + boundary + "--\r\n");
+    let sbuff = Buffer.from('--' + boundary + '\r\n');
+    let ebuff = Buffer.from('\r\n--' + boundary + '--\r\n');
     let ebPos = data.indexOf(ebuff, 0);
     let buff = data.slice(0, ebPos);
 
@@ -106,13 +103,11 @@ export class MultiPartParser {
     if (buff.indexOf(sbuff) == 0) {
       start = sbuff.length;
     } else {
-      console.log(
-        "Didn't start with PartId [" + sbuff.toString() + "]. Not processing."
-      );
+      console.log("Didn't start with PartId [" + sbuff.toString() + ']. Not processing.');
       // console.log(data.toString())
       return null;
     }
-    sbuff = Buffer.from("\r\n--" + boundary + "\r\n");
+    sbuff = Buffer.from('\r\n--' + boundary + '\r\n');
 
     let blength = buff.length;
     while (start < blength) {
@@ -127,7 +122,7 @@ export class MultiPartParser {
   }
 
   splitToHeaderAndData(part) {
-    let sep = "\r\n\r\n";
+    let sep = '\r\n\r\n';
 
     let fpend = part.indexOf(sep);
     let sections = [];
@@ -139,7 +134,7 @@ export class MultiPartParser {
   }
 
   getHeaders(hdrPart) {
-    let splitter = "\r\n";
+    let splitter = '\r\n';
     let blength = hdrPart.length;
     let spLen = splitter.length;
     let start = 0;
@@ -150,7 +145,7 @@ export class MultiPartParser {
         index = hdrPart.length;
       }
       let hdr = hdrPart.slice(start, index);
-      let colIdx = hdr.indexOf(":");
+      let colIdx = hdr.indexOf(':');
       let key = hdr.slice(0, colIdx).toString().trim();
       let value = hdr
         .slice(colIdx + 1, hdr.length)
@@ -167,7 +162,7 @@ export class MultiPartParser {
       let resp = parser.parse(xml, this.ParserOptions);
       const body = resp.Envelope.Body;
       let res = body.getDocumentForDocumentIdResponse.result;
-      let cidTagVal = res.Content.Include.attr["@_href"];
+      let cidTagVal = res.Content.Include.attr['@_href'];
       let cid = cidTagVal.substring(4);
       let fileDetails: DocumentDetails = {
         DocumentName: res.DocumentName,
@@ -185,7 +180,7 @@ export class MultiPartParser {
       return fileDetails;
     } catch (err) {
       console.log(err);
-      console.log("Failed to parse the xml.");
+      console.log('Failed to parse the xml.');
     }
     return null;
   }
@@ -204,7 +199,7 @@ export class MultiPartParser {
       results = [body.getDocumentsForFilePrefixResponse.result];
     }
     for (let res of results) {
-      let cidTagVal = res.Content.Include.attr["@_href"];
+      let cidTagVal = res.Content.Include.attr['@_href'];
       let cid = cidTagVal.substring(4);
       let fileDetails: DocumentDetails = {
         DocumentName: res.DocumentName,
@@ -248,7 +243,7 @@ export class MultiPartParser {
       }
     } catch (err) {
       console.log(err);
-      console.log("Failed to parse the xml.");
+      console.log('Failed to parse the xml.');
     }
     return null;
   }

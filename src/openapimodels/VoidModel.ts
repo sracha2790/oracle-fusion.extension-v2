@@ -1,14 +1,14 @@
-import { SdkOpenApiSchemaProperty } from "appknit-platform-sdk-v2";
+import { SdkOpenApiSchemaProperty } from 'appknit-platform-sdk-v2';
 
 export const VoidModel: SdkOpenApiSchemaProperty = {
-  description: "VoidModel",
-  type: "object",
+  description: 'VoidModel',
+  type: 'object',
   properties: {
-    "ns:ErrorString": {
-      type: "string",
+    'ns:ErrorString': {
+      type: 'string',
     },
-    "ns:ErrorMessageCode": {
-      type: "string",
+    'ns:ErrorMessageCode': {
+      type: 'string',
     },
   },
 };

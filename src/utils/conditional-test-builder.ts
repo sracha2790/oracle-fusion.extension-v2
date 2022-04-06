@@ -12,47 +12,46 @@ class Conditions {
 }
 
 export class ConditionalTestBuilder {
-  funcStr = "";
+  funcStr = '';
 
   parseTest(test: Test) {
     if (test.conditionExpr.length > 0) {
-      this.funcStr += " " + test.conditionExpr[0];
+      this.funcStr += ' ' + test.conditionExpr[0];
       for (let i = 1; i < test.conditionExpr.length; i++) {
-        this.funcStr += " " + test.type;
-        this.funcStr += " " + test.conditionExpr[i];
+        this.funcStr += ' ' + test.type;
+        this.funcStr += ' ' + test.conditionExpr[i];
       }
     } else if (test.tests.length > 0) {
-      this.funcStr += "(";
+      this.funcStr += '(';
       this.parseTest(test.tests[0]);
-      this.funcStr += ")";
+      this.funcStr += ')';
       for (let i = 1; i < test.tests.length; i++) {
-        this.funcStr += " " + test.type;
-        this.funcStr += "(";
+        this.funcStr += ' ' + test.type;
+        this.funcStr += '(';
         this.parseTest(test.tests[i]);
-        this.funcStr += ")";
+        this.funcStr += ')';
       }
     } else if (test.compare) {
-      this.funcStr +=
-        test.compare.path + test.compare.comparison + test.compare.value;
+      this.funcStr += test.compare.path + test.compare.comparison + test.compare.value;
     }
   }
 
   buildTest(currentTest: Test, obj: any) {
     for (let prop in obj) {
       const item = obj[prop];
-      if (prop == "and") {
+      if (prop == 'and') {
         const t = new Test();
-        t.type = "&&";
+        t.type = '&&';
         currentTest.tests.push(t);
         this.buildTest(t, item);
-      } else if (prop == "or") {
+      } else if (prop == 'or') {
         const t = new Test();
-        t.type = "||";
+        t.type = '||';
         currentTest.tests.push(t);
         this.buildTest(t, item);
-      } else if (prop == "condition") {
+      } else if (prop == 'condition') {
         currentTest.conditionExpr.push(obj[prop]);
-      } else if (prop == "compare") {
+      } else if (prop == 'compare') {
         const t = new Test();
         t.compare = item;
         currentTest.tests.push(t);
@@ -60,14 +59,14 @@ export class ConditionalTestBuilder {
       } else {
         if (Array.isArray(item)) {
           for (let i of item) {
-            if (typeof i == "string") {
+            if (typeof i == 'string') {
               currentTest.conditionExpr.push(i);
             } else {
               this.buildTest(currentTest, i);
             }
           }
         } else {
-          if (typeof item == "string") {
+          if (typeof item == 'string') {
             currentTest.conditionExpr.push(item);
           } else {
             this.buildTest(currentTest, item);

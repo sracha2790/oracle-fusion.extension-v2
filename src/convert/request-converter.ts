@@ -1,9 +1,9 @@
 // import * as fs from "fs";
-import { AppknitSDK } from "appknit-platform-sdk-v2";
+import { AppknitSDK } from 'appknit-platform-sdk-v2';
 
 export class RequestConverter {
   convertFusionRequestToJson = (request: string) => {
-    console.log("Request " + request);
+    console.log('Request ' + request);
   };
 
   parseXml(xml: string): any {
@@ -19,13 +19,13 @@ export class RequestConverter {
       }
     } catch (err) {
       console.log(err);
-      console.log("Failed to parse the xml.");
+      console.log('Failed to parse the xml.');
     }
     return null;
   }
 
   mapBody(body: any): any {
-    console.log("Map body " + JSON.stringify(body, null, 2));
+    console.log('Map body ' + JSON.stringify(body, null, 2));
   }
 }
 

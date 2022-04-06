@@ -22,7 +22,7 @@
     "fast-xml-parser": "^3.17.4",
     "jszip": "^3.5.0",
     "zlib": "^1.0.5",
-    "@appknit-io/common-frameworks": "2.2.10"
+    "@appknit-io/common-frameworks": "2.2.11"
   },
   "devDependencies": {
     "@types/jest": "^26.0.9",

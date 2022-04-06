@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@appknit-io/common-frameworks@2.2.10":
-  version "2.2.10"
-  resolved "https://registry.yarnpkg.com/@appknit-io/common-frameworks/-/common-frameworks-2.2.10.tgz#f4aeec50f5c370ce212f97eeb219e175ab04177d"
-  integrity sha512-j5LkBG7k0MnSVoxit0WvY9v5k1LAB29xThv+PZ2GtwQoX7IrYqzMdJHo1WFf4WGtdeB9c17ab/L1s9YUXrOSmQ==
+"@appknit-io/common-frameworks@2.2.11":
+  version "2.2.11"
+  resolved "https://registry.yarnpkg.com/@appknit-io/common-frameworks/-/common-frameworks-2.2.11.tgz#1325665ea154ce9f943c487a9246af375cc9c01c"
+  integrity sha512-/h+V/ZssbwoHoqI7MK+q3DyT3RgmWVxiWIWSdYXEhHRc53iJ6BT6OMUzT9hySiCi+hlZVEYSZnHvyCDoVbqoWg==
   dependencies:
     appknit-platform-sdk "^1.0.63-0"
     appknit-platform-sdk-v2 "^1.0.6-0"

@@ -1,37 +1,84 @@
-import { DateIntervalUtil } from './utils/dateIntervalUtil';
-import { AuthenticationModel, AuthenticationHandler } from './authentication';
-import { FileProcessingConfiguration, DocLevelDefinition } from './batchfile/FileProcessingConfiguration';
-import { CsvToDocumentConverter } from './convert/CsvToDocumentConverter';
-import { DocumentDetails } from './batchfile/DocumentDetails';
 import { ProRateTaxDetailModel } from './openapimodels/ProRateTaxDetailModel';
-import { ProRateTaxCalculator } from './connector/proRateTaxCalculator';
 import { DetailTaxLineModel } from './openapimodels/DetailTaxLineModel';
-import { LineDetLineModel } from './openapimodels/LineDetLineModel';
-import { TaxableLineModel } from './openapimodels/TaxableLineModel';
-import { TaxableHeadersModel } from './openapimodels/TaxableHeadersModel';
-import { DataMapper } from './connector/dataMapper';
 import * as packageJson from '../package.json';
 import {
   AppknitSDK,
-  SdkIntegration,
   SdkAuthenticationCredentialType,
-  SdkIntegrationSourceType,
-  SdkTriggerType,
   SdkHttpRequestOptions,
-  SdkStopExecutionStatus,
-  SdkGenericErrorCodes,
-  SdkExecutionError,
 } from 'appknit-platform-sdk-v2';
-import { stringify } from 'csv/lib/sync';
-import { nodeSettingsForObject, SdkExtension } from '@appknit-io/common-frameworks';
+import {  SdkExtension } from '@appknit-io/common-frameworks';
+import { 
+  appendAction, 
+  cloneAndExecuteForEachAction, 
+  collectAction, 
+  combineArraysAction, 
+  convertToDocumentAction, 
+  convertToDocumentsAction, 
+  convertToXmlActions, 
+  convertToXMLResponseAction, 
+  copyProperties1Action, 
+  copyPropertiesAction, 
+  copyPropertiesToItemsAction, 
+  copyValueToNestedAction, 
+  createArrayAction, 
+  createDetailTaxLineAction, 
+  createDetailTaxLinesAction, 
+  createDetailTaxLinesNoTaxAction, 
+  createNewObjectToArrayAction, 
+  createObjectAction, 
+  excludeItemsByConditionAction, 
+  executeForEachAction, 
+  fieldValuesAction, 
+  filterByUniqueValuesAction, 
+  filterItemsWithPropertyMatchingAction, 
+  filterMatchAction, 
+  filterMatchShallowCopyAction, 
+  findItemsWithFieldValuesAction, 
+  findItemsWithFieldValuesMatchingAction, 
+  findMatchAction, 
+  findMatchingObjectAction, 
+  findWithPrefernceAction, 
+  findWithPrefernceOrDefaultAction, 
+  flattenHierarchyToMapAction, 
+  getIntervalTimesAction, 
+  groupByAction, 
+  groupByToObjectsAction, 
+  joinMapAction, 
+  joinValuesAction, 
+  mapFusionSoapRequestAction, 
+  mapNestedAction, 
+  mapToMapAction, 
+  matchAction, 
+  matchCombinationAction, 
+  mergeToItemsAction, 
+  parseXMLAction, 
+  proRateTaxesAction, 
+  pullUpAndSetReferenceToAction, 
+  pushObjectToArrayAction, 
+  replaceByLookupAction, 
+  separateItemsByConditionAction, 
+  setCombinedFieldValuesAction, 
+  setPropertiesAction, 
+  setPropertyAction, 
+  setReferenceToAction, 
+  setValuesToItemsAction, 
+  splitAction, 
+  splitAllAction, 
+  storeAction, 
+  sumAllAction, 
+  toCsvAction, 
+  toSeparateCsvsByFieldAction, 
+  toURLAction, 
+  uniqueValuesFromFieldsAction
+ } from './actions';
 
 const httpMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'TRACE', 'OPTIONS', 'CONNECT'];
-enum CollectOperation {
+export enum CollectOperation {
   minus = 'MINUS',
   plus = 'PLUS',
 }
 
-const toMappingArray = (arrayStr: string, colSeparator: string, mapSeparator: string): Array<string> => {
+export const toMappingArray = (arrayStr: string, colSeparator: string, mapSeparator: string): Array<string> => {
   const colMap = [];
   if (arrayStr) {
     const cols = arrayStr.split(colSeparator);
@@ -71,11 +118,11 @@ const extension: SdkExtension = {
   websiteUrl: '',
   documentationUrl: '',
   iconUrl: '',
-  description: 'Oracle Fusion Tax Partner API Integration - Listener for Tax Calls from Fusion',
-  longDescription: 'Oracle Fusion Tax Partner API Integration - Listener for Tax Calls from Fusion',
+  description: 'Oracle Fusion Tax Partner API Extension - Listener for Tax Calls from Fusion',
+  longDescription: 'Oracle Fusion Tax Partner API Extension - Listener for Tax Calls from Fusion',
   version: packageJson.version,
-  platformVersion: packageJson.dependencies['appknit-platform-sdk-v2'],
-  releaseChanges: 'Created integration',
+  platformVersion: packageJson.dependencies['@appknit-io/common-frameworks'],
+  releaseChanges: 'Created extension',
   flowFunctions: {
     joinValues: {
       description: 'Join the string values together with joiner',
@@ -93,28 +140,7 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          values: Array<string>;
-          joiner: string;
-        };
-      }): Promise<any> => {
-        const { values, joiner } = input.configuration;
-        let result = '';
-        if (values && values.length > 0) {
-          for (let idx = 0; idx < values.length; idx++) {
-            if (idx == 0) {
-              result = values[idx];
-            } else {
-              result = result + joiner + values[idx];
-            }
-          }
-        }
-        return Promise.resolve(result);
-      },
-      viewSchema: {},
-      svgSymbolMarkup: {},
+      js: joinValuesAction,
       outputSchema: {
         title: 'Result of joining all strings together',
       },
@@ -131,49 +157,10 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          urlString: string;
-        };
-      }): Promise<any> => {
-        const { urlString } = input.configuration;
-
-        const {
-          href,
-          origin,
-          protocol,
-          username,
-          password,
-          host,
-          hostname,
-          port,
-          pathname,
-          search,
-          searchParams,
-          hash,
-        }: URL = new URL(urlString);
-        // console.log('URL : ' + { hostname, protocol, host, username, password, pathname, searchParams, href, port, search });
-        return Promise.resolve({
-          href,
-          origin,
-          protocol,
-          username,
-          password,
-          host,
-          hostname,
-          port,
-          pathname,
-          search,
-          searchParams,
-          hash,
-        });
-      },
+      js: toURLAction,
       outputSchema: {
         type: 'string',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     mapFusionSoapRequest: {
       description: 'Map Fusion Soap Request values',
@@ -186,25 +173,10 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          body: string;
-        };
-      }): Promise<any> => {
-        const { body } = input.configuration;
-        let mappedData;
-        if (body) {
-          const mapper = new DataMapper();
-          mappedData = mapper.processIncomingSoapRequest(body);
-        }
-        return Promise.resolve(mappedData);
-      },
+      js: mapFusionSoapRequestAction,
       outputSchema: {
         type: 'object',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     filterByUniqueValues: {
       description: 'Filter items by unique field values',
@@ -223,66 +195,10 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          items: any;
-          uniqueFields: Array<string>;
-          selectBy: Array<{
-            criteria: string;
-            field: string;
-            valueType: string;
-          }>;
-        };
-      }): Promise<any> => {
-        const { items, uniqueFields, selectBy } = input.configuration;
-        const registry: { [k: string]: any } = {};
-        if (items && items['length'] > 0) {
-          for (let item of items) {
-            let key = '';
-            if (!uniqueFields || uniqueFields.length == 0) {
-              key = 'und_key';
-            } else {
-              for (let uf of uniqueFields) {
-                key = key + '-:-' + item[uf];
-              }
-            }
-            if (!registry[key]) {
-              registry[key] = item;
-            } else {
-              let selItem = registry[key];
-              if (selectBy) {
-                for (let sb of selectBy) {
-                  if (selItem[sb.field] != item[sb.field]) {
-                    if (sb.criteria == 'MAX') {
-                      if (item[sb.field] > selItem[sb.field]) {
-                        selItem = item;
-                        break;
-                      }
-                    } else if (sb.criteria == 'MIN') {
-                      if (item[sb.field] < selItem[sb.field]) {
-                        selItem = item;
-                        break;
-                      }
-                    }
-                  }
-                }
-                registry[key] = selItem;
-              }
-            }
-          }
-        }
-        let results = [];
-        for (let prop in registry) {
-          results.push(registry[prop]);
-        }
-        return Promise.resolve(results);
-      },
+      js: filterByUniqueValuesAction,
       outputSchema: {
         type: 'string',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     split: {
       description: 'Split a text to a text array',
@@ -299,21 +215,10 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          payload: string;
-          separator: string;
-        };
-      }): Promise<any> => {
-        const { payload, separator } = input.configuration;
-        return Promise.resolve(payload.split(separator));
-      },
+      js: splitAction,
       outputSchema: {
         type: 'string',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     splitAll: {
       description: 'Split all texts to array of text array',
@@ -333,25 +238,10 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          payload: Array<string>;
-          separator: string;
-        };
-      }): Promise<any> => {
-        const { payload, separator } = input.configuration;
-        let results = [];
-        for (let str of payload) {
-          results.push(str.split(separator));
-        }
-        return Promise.resolve(results);
-      },
+      js: splitAllAction,
       outputSchema: {
         type: 'string',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     toSeparateCsvsByField: {
       description: 'Serialize payload to separate CSV, grouped by field',
@@ -381,55 +271,10 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          payload: any;
-          groupByField: string;
-          header: boolean;
-          columns: Array<string>;
-          columnDelimiter: string;
-        };
-      }): Promise<any> => {
-        const { payload, groupByField, header, columns, columnDelimiter } = input.configuration;
-        let options = {};
-        if (header) {
-          options['header'] = true;
-        }
-        if (columns) {
-          options['columns'] = columns;
-        }
-        if (columnDelimiter) {
-          options['delimiter'] = columnDelimiter;
-        }
-        let resultObjects = [];
-        if (payload) {
-          let registry = {};
-          if (groupByField) {
-            for (let itm of payload) {
-              let itmKey = itm[groupByField];
-              let arr = registry[itmKey];
-              if (!arr) {
-                arr = [];
-                registry[itmKey] = arr;
-              }
-              arr.push(itm);
-            }
-          } else {
-            registry['all'] = payload;
-          }
-          for (let prop in registry) {
-            let result = stringify(registry[prop], options);
-            resultObjects.push({ key: prop, csv: result });
-          }
-        }
-        return Promise.resolve(resultObjects);
-      },
+      js: toSeparateCsvsByFieldAction,
       outputSchema: {
         type: 'string',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     toCsv: {
       description: 'Serialize payload to CSV',
@@ -456,34 +301,10 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          payload: any;
-          header: boolean;
-          columns: Array<string>;
-          columnDelimiter: string;
-        };
-      }): Promise<any> => {
-        const { payload, header, columns, columnDelimiter } = input.configuration;
-        let options = {};
-        if (header) {
-          options['header'] = true;
-        }
-        if (columns) {
-          options['columns'] = columns;
-        }
-        if (columnDelimiter) {
-          options['delimiter'] = columnDelimiter;
-        }
-        let result = stringify(payload, options);
-        return Promise.resolve(result);
-      },
+      js: toCsvAction,
       outputSchema: {
         type: 'string',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     joinMap: {
       description: 'Map items with an existing array of mapped objects',
@@ -505,94 +326,11 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          items: any;
-          join: {
-            itemsPath: string;
-            nestedPath: string;
-            mapByField: string;
-            setToField: string;
-          };
-          mapWith: {
-            itemsPath: string;
-            nestedPath: string;
-            mapByField: string;
-            setToField: string;
-          };
-          mapEmptyJoin: boolean;
-        };
-      }): Promise<any> => {
-        const { items, join, mapWith, mapEmptyJoin } = input.configuration;
-        let combinedResults = [];
-        const itemsArray = Array.isArray(items) ? items : [items];
-
-        for (let item of itemsArray) {
-          let joinItems = join.itemsPath ? item[join.itemsPath] : item;
-          let mapWithItems = item[mapWith.itemsPath];
-
-          let joinNestedItems;
-          if (joinItems) {
-            joinNestedItems = joinItems[join.nestedPath];
-            if (!joinNestedItems) {
-              joinNestedItems = [];
-            }
-          }
-          let mapWithNestedItems;
-          if (mapWithItems) {
-            mapWithNestedItems = mapWithItems[mapWith.nestedPath];
-            if (!mapWithNestedItems) {
-              mapWithNestedItems = [];
-            }
-          }
-          let result = [];
-          if (!joinNestedItems && !mapWithNestedItems) {
-          } else if (!joinNestedItems) {
-            if (mapEmptyJoin) {
-              for (let mni of mapWithNestedItems) {
-                let record = {};
-                record[mapWith.setToField] = mni;
-                result.push(record);
-              }
-            }
-          } else if (!mapWithNestedItems) {
-            for (let jni of joinNestedItems) {
-              let record = {};
-              record[join.setToField] = jni;
-              result.push(record);
-            }
-          } else {
-            for (let jni of joinNestedItems) {
-              let hasMatch = false;
-              for (let mni of mapWithNestedItems) {
-                if (jni[join.mapByField] == mni[mapWith.mapByField]) {
-                  let record = {};
-                  record[join.setToField] = jni;
-                  record[mapWith.setToField] = mni;
-                  result.push(record);
-                  hasMatch = true;
-                }
-              }
-              if (!hasMatch) {
-                let record = {};
-                record[join.setToField] = jni;
-                result.push(record);
-              }
-            }
-          }
-          combinedResults.push(result);
-        }
-        const results = Array.isArray(items) ? combinedResults : combinedResults[0];
-        console.log('Returning ', results);
-        return Promise.resolve(results);
-      },
+      js: joinMapAction,
       outputSchema: {
         type: 'object',
         description: 'An array of the input map with the input objects mapped for each item',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     replaceByLookup: {
       description: 'Replace field value by lookup value',
@@ -611,73 +349,12 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          items: Array<any>;
-          lookups: {
-            values: Array<any>;
-            key: string;
-            value: string;
-          };
-          replace: Array<{
-            itemPath: string;
-            fields: Array<string>;
-          }>;
-        };
-      }): Promise<any> => {
-        const { items, lookups, replace } = input.configuration;
-        let result = items;
-        if (items && lookups && replace) {
-          for (let item of items) {
-            for (let rep of replace) {
-              // console.log(field l+ ' : ' + item[field]);
-              let citem = item;
-              if (rep.itemPath && rep.itemPath.trim() != '.') {
-                if (rep.itemPath.includes('.')) {
-                  let path = rep.itemPath.split('.');
-                  // console.log(path);
-                  for (let p of path) {
-                    citem = citem[p];
-                    if (!citem) {
-                      // console.log('!citem ' + p);
-                      break;
-                    }
-                  }
-                } else {
-                  citem = citem[rep.itemPath];
-                }
-              }
-              if (citem) {
-                let citemArr = citem;
-                if (!Array.isArray(citem)) {
-                  citemArr = [citem];
-                }
-                for (let arrItem of citemArr) {
-                  for (let cfield of rep.fields) {
-                    if (arrItem[cfield]) {
-                      for (let kv of lookups.values) {
-                        if (arrItem[cfield] == kv[lookups.key]) {
-                          arrItem[cfield] = kv[lookups.value];
-                        }
-                      }
-                      // arrItem[cfield]=lookups[];
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-        return Promise.resolve(result);
-      },
+      js: replaceByLookupAction,
       outputSchema: {
         title: 'New object',
         description: 'New object to use for later',
         type: 'object',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     uniqueValuesFromFields: {
       description: 'Extract unique values from specified fields',
@@ -690,69 +367,12 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          items: any;
-          fields: Array<string>;
-          childItems: Array<{
-            name: string;
-            fields: Array<string>;
-          }>;
-        };
-      }): Promise<any> => {
-        const { items, fields, childItems } = input.configuration;
-        const result = [];
-        for (let item of items) {
-          if (fields) {
-            for (let field of fields) {
-              console.log(field + ' : ' + item[field]);
-              if (item[field] && result.indexOf(item[field] < 0)) {
-                result.push(item[field]);
-              }
-            }
-          }
-          if (childItems) {
-            for (let child of childItems) {
-              if (child.fields) {
-                let citem = item;
-                if (child.name.includes('.')) {
-                  let path = child.name.split('.');
-                  console.log(path);
-                  for (let p of path) {
-                    citem = citem[p];
-                    if (!citem) {
-                      // console.log('!citem ' + p);
-                      break;
-                    }
-                  }
-                }
-                if (citem) {
-                  let citemArr = citem;
-                  if (!Array.isArray(citem)) {
-                    citemArr = [citem];
-                  }
-                  for (let arrItem of citemArr) {
-                    for (let cfield of child.fields) {
-                      if (arrItem[cfield] && result.indexOf(arrItem[cfield] < 0)) {
-                        result.push(arrItem[cfield]);
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-        return Promise.resolve(result);
-      },
+      js: uniqueValuesFromFieldsAction,
       outputSchema: {
         title: 'New object',
         description: 'New object to use for later',
         type: 'object',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     setCombinedFieldValues: {
       description: 'Set the value of a field as the concatenation of given field values',
@@ -786,74 +406,12 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          items: Array<any>;
-          subPath: string;
-          setToField: string;
-          defaultVal: string;
-          joiner: string;
-          fields: Array<string>;
-        };
-      }): Promise<any> => {
-        const { items, subPath, setToField, defaultVal, joiner, fields } = input.configuration;
-        if (items) {
-          let path;
-          if (subPath && subPath.trim() != '.') {
-            if (subPath.includes('.')) {
-              path = subPath.split('.');
-            } else {
-              path = [subPath];
-            }
-          }
-          for (let item of items) {
-            let refObj = item;
-            if (path) {
-              for (let p of path) {
-                refObj = refObj[p];
-                if (!refObj) {
-                  // console.log('!citem ' + p);
-                  break;
-                }
-              }
-            }
-            if (refObj) {
-              let refObjArr;
-              if (Array.isArray(refObj)) {
-                refObjArr = refObj;
-              } else {
-                refObjArr = [refObj];
-              }
-              for (let roItem of refObjArr) {
-                let strVal = '';
-                for (let idx = 0; idx < fields.length; idx++) {
-                  let val = roItem[fields[idx]];
-                  if (val || val == 0 || defaultVal) {
-                    if (!val && val != 0) {
-                      val = defaultVal;
-                    }
-                    if (joiner && idx > 0) {
-                      strVal = strVal + joiner + val;
-                    } else {
-                      strVal = strVal + val;
-                    }
-                  }
-                }
-                roItem[setToField] = strVal;
-              }
-            }
-          }
-        }
-        return Promise.resolve(items);
-      },
+      js: setCombinedFieldValuesAction,
       outputSchema: {
         title: 'Data',
         type: 'object',
         description: 'The passed object',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     getIntervalTimes: {
       description: 'Download files from Oracle UCM',
@@ -891,35 +449,10 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: async (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          last: string;
-          dtPattern: string;
-          interval: number;
-          period: string;
-          prior: number;
-          future: number;
-          combinedTenth: boolean;
-        };
-      }): Promise<any> => {
-        const { last, dtPattern, interval, period, prior, future, combinedTenth } = input.configuration;
-        let dateSuffixes = await new DateIntervalUtil().getIntervalTimes(
-          last,
-          dtPattern,
-          interval,
-          period,
-          prior,
-          future,
-          combinedTenth,
-        );
-        return Promise.resolve(dateSuffixes);
-      },
+      js: getIntervalTimesAction,
       outputSchema: {
         type: 'array',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     convertToDocument: {
       description: 'Convert text/csv data to document structure',
@@ -938,42 +471,10 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          data: string;
-          docLevels: DocLevelDefinition;
-        };
-      }): Promise<any> => {
-        let { data, docLevels } = input.configuration;
-        let csvDocBuilder = new CsvToDocumentConverter();
-        let csvDataJson = csvDocBuilder.parseCSVWithUpperCaseHeaders(data);
-        // console.group('csvDataJson : ', csvDataJson);
-        let doc;
-        if (docLevels) {
-          csvDocBuilder.translateDocLevelDefinition(docLevels);
-          let root = csvDocBuilder.createHierarchy(csvDataJson, docLevels);
-          doc = root[docLevels.name];
-          // console.log('DOC : ' + JSON.stringify(doc, null, 2));
-        }
-        if (!doc) {
-          if (docLevels) {
-            if (docLevels.isArray) {
-              doc = [];
-            } else {
-              doc = {};
-            }
-          } else {
-            doc = {};
-          }
-        }
-        return Promise.resolve(doc);
-      },
+      js: convertToDocumentAction,
       outputSchema: {
         type: 'string',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     convertToDocuments: {
       description: 'Convert to documents',
@@ -991,178 +492,11 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          documentDetails: Array<DocumentDetails>;
-          processingConfig: FileProcessingConfiguration[];
-        };
-      }): Promise<any> => {
-        const { documentDetails, processingConfig } = input.configuration;
-
-        let configLen = processingConfig.length;
-
-        let mappedDocs = {};
-        let csvDocBuilder;
-        let regExps = [];
-        for (let idx = 0; idx < configLen; idx++) {
-          let pconfig = processingConfig[idx];
-          if (!mappedDocs[pconfig.mappingName]) {
-            mappedDocs[pconfig.mappingName] = [];
-          }
-          regExps[idx] = new RegExp(pconfig.fileNamePattern);
-          if (processingConfig[idx].contentType == 'csv') {
-            if (!csvDocBuilder) {
-              csvDocBuilder = new CsvToDocumentConverter();
-            }
-            if (processingConfig[idx].docLevels) {
-              csvDocBuilder.translateDocLevelDefinition(processingConfig[idx].docLevels);
-            }
-          }
-        }
-
-        const defProConfig: FileProcessingConfiguration = {
-          fileNamePattern: '*',
-          mappingName: 'unmapped',
-          contentType: 'text',
-        };
-        mappedDocs[defProConfig.mappingName] = [];
-
-        for (let docDet of documentDetails) {
-          if (docDet.fileContents) {
-            for (let fileContent of docDet.fileContents) {
-              // Find which processingConfig to use depending on the name pattern
-              let proConfig: FileProcessingConfiguration;
-              for (let idx = 0; idx < configLen; idx++) {
-                if (fileContent.fileName.match(regExps[idx])) {
-                  proConfig = processingConfig[idx];
-                  break;
-                }
-              }
-              if (!proConfig) {
-                proConfig = defProConfig;
-              }
-              let minLen = proConfig.minLength ? proConfig.minLength : 0;
-              if (fileContent.fileData.trim().length > minLen) {
-                if (proConfig.contentType == 'csv') {
-                  if (!fileContent.fileName.endsWith('.csv')) {
-                    fileContent.documents = [];
-                    continue;
-                  }
-                  let csvDataJson = csvDocBuilder.parseCSVWithUpperCaseHeaders(fileContent.fileData);
-                  if (proConfig.docLevelid) {
-                    // Fetch the docLevel json and parse it and use it as DocLevelDef
-                    let docLevelDefs = {};
-                    let root = csvDocBuilder.createHierarchy(csvDataJson, docLevelDefs);
-                    fileContent.documents = root[docLevelDefs['name']];
-                  } else if (proConfig.docLevels) {
-                    let root = csvDocBuilder.createHierarchy(csvDataJson, proConfig.docLevels);
-                    fileContent.documents = root[proConfig.docLevels.name];
-                  } else {
-                    fileContent.documents = [csvDataJson];
-                  }
-                } else {
-                  let fileDocs = [];
-                  fileContent.documents = fileDocs;
-                  if (proConfig.contentType == 'xml') {
-                    fileDocs.push(input.sdk.serialization.xml.parse(fileContent.fileData));
-                  } else if (proConfig.contentType == 'json') {
-                    fileDocs.push(input.sdk.serialization.json.parse(fileContent.fileData));
-                  } else {
-                    fileDocs.push(fileContent.fileData);
-                  }
-                }
-              }
-              if (fileContent.documents) {
-                if (Array.isArray(fileContent.documents)) {
-                  for (let data of fileContent.documents) {
-                    if (Array.isArray(data)) {
-                      for (let dataDoc of data) {
-                        if (typeof data == 'object' && typeof data != 'string') {
-                          dataDoc['UCM_DocumentName'] = docDet.DocumentName;
-                          dataDoc['UCM_DocumentId'] = docDet.DocumentId;
-                          dataDoc['UCM_fileName'] = fileContent.fileName;
-                        }
-                        mappedDocs[proConfig.mappingName].push(dataDoc);
-                      }
-                    } else {
-                      if (typeof data == 'object' && typeof data != 'string') {
-                        data['UCM_DocumentName'] = docDet.DocumentName;
-                        data['UCM_DocumentId'] = docDet.DocumentId;
-                        data['UCM_fileName'] = fileContent.fileName;
-                      }
-                      mappedDocs[proConfig.mappingName].push(data);
-                    }
-                  }
-                } else {
-                  // ? This wont happen since the [csvDataJson] wrapping is there now for csv docs without docleveldefinition
-                  let data = {};
-                  data['UCM_DocumentName'] = docDet.DocumentName;
-                  data['UCM_DocumentId'] = docDet.DocumentId;
-                  data['UCM_fileName'] = fileContent.fileName;
-                  data['UCM_SingleDoc'] = 'SINGLEDOC';
-                  mappedDocs[proConfig.mappingName].push(data);
-                }
-              }
-              // mappedDocs[proConfig.mappingName].push({
-              //   DocumentName: docDet.DocumentName,
-              //   DocumentId: docDet.DocumentId,
-              //   fileName: fileContent.fileName,
-              //   data: fileContent.documents,
-              // });
-            }
-          } else {
-            if (docDet.Content) {
-              let contentDocuments = [];
-              docDet.contentDocuments = contentDocuments;
-              let proConfig: FileProcessingConfiguration;
-              for (let idx = 0; idx < configLen; idx++) {
-                if (docDet.DocumentName.match(regExps[idx])) {
-                  proConfig = processingConfig[idx];
-                  break;
-                }
-              }
-              if (!proConfig) {
-                proConfig = defProConfig;
-              }
-              let minLen = proConfig.minLength ? proConfig.minLength : 0;
-              if (docDet.Content.length > minLen) {
-                if (proConfig.contentType == 'csv') {
-                  let csvDataJson = csvDocBuilder.parseCSVWithUpperCaseHeaders(docDet.Content.toString());
-                  if (proConfig.docLevelid) {
-                    // Fetch the docLevel json and parse it and use it as DocLevelDef
-                    let docLevelDefs = {};
-                    let root = csvDocBuilder.createHierarchy(csvDataJson, docLevelDefs);
-                    contentDocuments = root[docLevelDefs['name']];
-                  } else if (proConfig.docLevels) {
-                    let root = csvDocBuilder.createHierarchy(csvDataJson, proConfig.docLevels);
-                    contentDocuments = root[proConfig.docLevels.name];
-                  } else {
-                    contentDocuments = [csvDataJson];
-                  }
-                } else {
-                  if (proConfig.contentType == 'xml') {
-                    contentDocuments.push(input.sdk.serialization.xml.parse(docDet.Content.toString()));
-                  } else if (proConfig.contentType == 'json') {
-                    contentDocuments.push(input.sdk.serialization.json.parse(docDet.Content.toString()));
-                  } else {
-                    contentDocuments.push(docDet.Content.toString());
-                  }
-                }
-              }
-              mappedDocs[proConfig.mappingName].push(docDet);
-            }
-          }
-        }
-
-        return Promise.resolve(mappedDocs);
-      },
+      js: convertToDocumentsAction,
       outputSchema: {
         title: 'Grouped and aggregated data',
         type: 'array',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     groupByToObjects: {
       description: 'Group By',
@@ -1182,40 +516,11 @@ const extension: SdkExtension = {
         },
       },
 
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          items: Array<any>;
-          groupByField: string;
-        };
-      }): Promise<any> => {
-        const { items, groupByField } = input.configuration;
-        let result = [];
-        if (items) {
-          let registry = {};
-          if (groupByField) {
-            for (let itm of items) {
-              let itmKey = itm[groupByField];
-              let arr = registry[itmKey];
-              if (!arr) {
-                arr = [];
-                registry[itmKey] = arr;
-              }
-              arr.push(itm);
-            }
-          }
-          for (let prop in registry) {
-            result.push({ key: prop, values: registry[prop] });
-          }
-        }
-        return Promise.resolve(result);
-      },
+      js: groupByToObjectsAction,
       outputSchema: {
         title: 'Grouped and aggregated data',
         type: 'array',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     groupBy: {
       description: 'Group By',
@@ -1253,60 +558,11 @@ const extension: SdkExtension = {
         },
       },
 
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          items: Array<any>;
-          groupByFields: Array<string>;
-          aggregations: Array<{
-            field: string;
-            operation: 'SUM';
-          }>;
-        };
-      }): Promise<any> => {
-        const { items, groupByFields, aggregations } = input.configuration;
-
-        let aggregatedGroups = [];
-
-        const groupObj = {};
-
-        if (items) {
-          if (groupByFields) {
-            let gfSize = groupByFields.length;
-
-            for (let itm of items) {
-              let itmKey = itm[groupByFields[0]];
-              for (let idx = 1; idx < gfSize; idx++) {
-                itmKey += '}{' + itm[groupByFields[idx]];
-              }
-              if (!groupObj[itmKey]) {
-                const obj = Object.assign({}, itm);
-                groupObj[itmKey] = obj;
-                aggregatedGroups.push(obj);
-              } else {
-                const exist = groupObj[itmKey];
-                for (let aggr of aggregations) {
-                  if (itm[aggr.field]) {
-                    if (exist[aggr.field]) {
-                      exist[aggr.field] += itm[aggr.field];
-                    } else {
-                      exist[aggr.field] = itm[aggr.field];
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-
-        return Promise.resolve(aggregatedGroups);
-      },
+      js: groupByAction,
       outputSchema: {
         title: 'Grouped and aggregated data',
         type: 'array',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     mergeToItems: {
       description: 'Merge (copy properties of) an object to the item upto two levels deep',
@@ -1319,99 +575,10 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          mergeTo: any;
-          mergeItems: Array<any>;
-          matchFields: Array<Array<string>>;
-          copyFields: Array<string>;
-          levels: Array<{
-            item: string;
-            merge: string;
-            matchFields: Array<Array<string>>;
-            copyFields: Array<string>;
-          }>;
-        };
-      }): Promise<any> => {
-        const { mergeTo, mergeItems, matchFields, copyFields, levels } = input.configuration;
-        for (let obj of mergeTo) {
-          let matchingItem;
-          for (let incoming of mergeItems) {
-            // ! NOTE :- Leaving match fields empty will lead to copying all copyFields
-            let found = true;
-            if (matchFields) {
-              for (let mf of matchFields) {
-                if (obj[mf[0]] != incoming[mf[1]]) {
-                  found = false;
-                  break;
-                }
-              }
-            }
-            // ! NOTE :- Leaving match fields empty will lead to copying all copyFields
-            if (found) {
-              matchingItem = incoming;
-              for (let cpf of copyFields) {
-                obj[cpf] = matchingItem[cpf];
-              }
-              break;
-            }
-          }
-          if (matchingItem) {
-            if (levels) {
-              let mergeToParent = obj;
-              let mergingParent = matchingItem;
-              for (let level of levels) {
-                let mergeToLevelItems = mergeToParent[level.item];
-                let mergingLevelItems;
-                if (level.merge) {
-                  mergingLevelItems = mergingParent[level.merge];
-                } else {
-                  mergingLevelItems = mergingParent;
-                }
-                if (!mergeToLevelItems || !mergingLevelItems) {
-                  break;
-                }
-                if (!Array.isArray(mergeToLevelItems)) {
-                  mergeToLevelItems = [mergeToLevelItems];
-                }
-                if (!Array.isArray(mergingLevelItems)) {
-                  mergeToLevelItems = [mergingLevelItems];
-                }
-                for (let mergeObj of mergeToLevelItems) {
-                  for (let mergingObj of mergingLevelItems) {
-                    // ! NOTE :- Leaving match fields empty will lead to copying all copyFields
-                    let found = true;
-                    if (level.matchFields) {
-                      for (let mf of level.matchFields) {
-                        if (mergeObj[mf[0]] != mergingObj[mf[1]]) {
-                          found = false;
-                          break;
-                        }
-                      }
-                    }
-                    // ! NOTE :- Leaving match fields empty will lead to copying all copyFields
-                    if (found) {
-                      for (let cpf of level.copyFields) {
-                        mergeObj[cpf] = mergingObj[cpf];
-                      }
-                      mergeToParent = mergeObj;
-                      mergingParent = mergingObj;
-                      break;
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-        return mergeTo;
-      },
+      js: mergeToItemsAction,
       outputSchema: {
         type: 'array',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     filterItemsWithPropertyMatching: {
       description: 'Filter items from an array  based on field values',
@@ -1436,67 +603,10 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          items: Array<any>;
-          filterField: string;
-          filterValues: Array<string>;
-        };
-      }): Promise<any> => {
-        const { items, filterField, filterValues } = input.configuration;
-        let result = [];
-        let found = false;
-        const values = filterValues;
-
-        let path;
-        let field;
-        if (filterField.includes('.')) {
-          let fullPath = filterField.split('.');
-          path = fullPath.slice(0, fullPath.length - 1);
-          field = fullPath[fullPath.length - 1];
-        } else {
-          field = filterField;
-        }
-        for (const item of items) {
-          let refObj = item;
-          if (path && path.length > 0) {
-            for (let p of path) {
-              refObj = item[p];
-              if (!refObj) {
-                break;
-              }
-            }
-          }
-          if (refObj) {
-            let refObjArr;
-            if (Array.isArray(refObj)) {
-              refObjArr = refObj;
-            } else {
-              refObjArr = [refObj];
-            }
-            let match = false;
-            for (let refObjItem of refObjArr) {
-              for (let idx = 0; idx < values.length; idx++) {
-                if (refObjItem[field] == values[idx]) {
-                  match = true;
-                  break;
-                }
-              }
-            }
-            if (match) {
-              found = true;
-              result.push(item);
-            }
-          }
-        }
-        return Promise.resolve({ found, result });
-      },
+      js: filterItemsWithPropertyMatchingAction,
       outputSchema: {
         type: 'object',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     flattenHierarchyToMap: {
       description: 'Flattens on an array items and map',
@@ -1524,53 +634,11 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          items: Array<any>;
-          itemName: string;
-          arrayPropertyPath: string;
-          arrayItemName: string;
-        };
-      }): Promise<any> => {
-        const { items, itemName, arrayPropertyPath, arrayItemName } = input.configuration;
-        const pathArr = arrayPropertyPath.split('/');
-        const result = [];
-        for (const item of items) {
-          let refObj = item;
-          let found = false;
-          for (const path of pathArr) {
-            if (!refObj) {
-              found = false;
-              break;
-            }
-            refObj = refObj[path];
-            found = true;
-          }
-          if (found) {
-            if (Array.isArray(refObj)) {
-              for (let refObjItem of refObj) {
-                let obj = {};
-                obj[itemName] = item;
-                obj[arrayItemName] = refObjItem;
-                result.push(obj);
-              }
-            } else {
-              let obj = {};
-              obj[itemName] = item;
-              obj[arrayItemName] = refObj;
-              result.push(obj);
-            }
-          }
-        }
-        return Promise.resolve(result);
-      },
+      js: flattenHierarchyToMapAction,
       outputSchema: {
         type: 'array',
         description: 'The array of mapping objects with each row having one item in the array mapped with the item',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     combineArrays: {
       description: 'Combine two or more arrays',
@@ -1585,21 +653,10 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          items: Array<Array<any>>;
-        };
-      }): Promise<any> => {
-        const { items } = input.configuration;
-        let result = [].concat.apply([], items);
-        return Promise.resolve(result.filter(n => n !== null && n !== undefined));
-      },
+      js: combineArraysAction,
       outputSchema: {
         type: 'array',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     separateItemsByCondition: {
       description: 'Exclude items from an array based on field values',
@@ -1632,114 +689,7 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          items: Array<any>;
-          condition: {
-            field: string;
-            comparison: string;
-            value: string;
-          };
-        };
-      }): Promise<any> => {
-        const { items, condition } = input.configuration;
-        //***** Each condition is done in a separate loop to avoid the if/switch for comaprison operation inside the loop *****/
-        //***** This may not be optimal when multiple conditions need to be specified *****/
-        //* TODO : Implement all the comparisons */
-        let matching = [];
-        let nonMatching = [];
-        if (condition.comparison == '==') {
-          for (const item of items) {
-            if (item[condition.field] == condition.value) {
-              matching.push(item);
-            } else {
-              nonMatching.push(item);
-            }
-          }
-        } else if (condition.comparison == '===') {
-          for (const item of items) {
-            if (item[condition.field] && condition.value && item[condition.field] === condition.value) {
-              matching.push(item);
-            } else {
-              nonMatching.push(item);
-            }
-          }
-        } else if (condition.comparison == '!=') {
-          for (const item of items) {
-            if (item[condition.field] && condition.value && item[condition.field] != condition.value) {
-              matching.push(item);
-            } else {
-              nonMatching.push(item);
-            }
-          }
-        } else if (condition.comparison == '!==') {
-          for (const item of items) {
-            if (item[condition.field] && condition.value && item[condition.field] !== condition.value) {
-              matching.push(item);
-            } else {
-              nonMatching.push(item);
-            }
-          }
-        } else if (condition.comparison == 'startsWith') {
-          for (const item of items) {
-            if (item[condition.field].startsWith(condition.value)) {
-              matching.push(item);
-            } else {
-              nonMatching.push(item);
-            }
-          }
-        } else if (condition.comparison == 'endsWith') {
-          for (const item of items) {
-            if (item[condition.field].endsWith(condition.value)) {
-              matching.push(item);
-            } else {
-              nonMatching.push(item);
-            }
-          }
-        } else if (condition.comparison == 'contains') {
-          for (const item of items) {
-            if (item[condition.field].contains(condition.value)) {
-              matching.push(item);
-            } else {
-              nonMatching.push(item);
-            }
-          }
-        } else if (condition.comparison == '>') {
-          for (const item of items) {
-            if (item[condition.field] && condition.value && item[condition.field] > condition.value) {
-              matching.push(item);
-            } else {
-              nonMatching.push(item);
-            }
-          }
-        } else if (condition.comparison == '<') {
-          for (const item of items) {
-            if (item[condition.field] && condition.value && item[condition.field] < condition.value) {
-              matching.push(item);
-            } else {
-              nonMatching.push(item);
-            }
-          }
-        } else if (condition.comparison == '<=') {
-          for (const item of items) {
-            if (item[condition.field] && condition.value && item[condition.field] <= condition.value) {
-              matching.push(item);
-            } else {
-              nonMatching.push(item);
-            }
-          }
-        } else if (condition.comparison == '>=') {
-          for (const item of items) {
-            if (item[condition.field] && condition.value && item[condition.field] >= condition.value) {
-              matching.push(item);
-            } else {
-              nonMatching.push(item);
-            }
-          }
-        }
-        return Promise.resolve({ matching, nonMatching });
-      },
+      js: separateItemsByConditionAction,
       outputSchema: {
         type: 'object',
         properties: {
@@ -1751,8 +701,6 @@ const extension: SdkExtension = {
           },
         },
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     excludeItemsByCondition: {
       description: 'Exclude items from an array based on field values',
@@ -1785,101 +733,10 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          items: Array<any>;
-          condition: {
-            field: string;
-            comparison: string;
-            value: string;
-          };
-        };
-      }): Promise<any> => {
-        const { items, condition } = input.configuration;
-
-        let result = [];
-        if (condition.comparison == '==') {
-          for (const item of items) {
-            if (!(item[condition.field] == condition.value)) {
-              result.push(item);
-            }
-          }
-        } else if (condition.comparison == '===') {
-          for (const item of items) {
-            if (item[condition.field] && condition.value && item[condition.field] === condition.value) {
-            } else {
-              result.push(item);
-            }
-          }
-        } else if (condition.comparison == '!=') {
-          for (const item of items) {
-            if (item[condition.field] && condition.value && item[condition.field] != condition.value) {
-            } else {
-              result.push(item);
-            }
-          }
-        } else if (condition.comparison == '!==') {
-          for (const item of items) {
-            if (item[condition.field] && condition.value && item[condition.field] !== condition.value) {
-            } else {
-              result.push(item);
-            }
-          }
-        } else if (condition.comparison == 'startsWith') {
-          for (const item of items) {
-            if (!item[condition.field].startsWith(condition.value)) {
-              result.push(item);
-            }
-          }
-        } else if (condition.comparison == 'endsWith') {
-          for (const item of items) {
-            if (!item[condition.field].endsWith(condition.value)) {
-              result.push(item);
-            }
-          }
-        } else if (condition.comparison == 'contains') {
-          for (const item of items) {
-            if (!item[condition.field].contains(condition.value)) {
-              result.push(item);
-            }
-          }
-        } else if (condition.comparison == '>') {
-          for (const item of items) {
-            if (item[condition.field] && condition.value && item[condition.field] > condition.value) {
-            } else {
-              result.push(item);
-            }
-          }
-        } else if (condition.comparison == '<') {
-          for (const item of items) {
-            if (item[condition.field] && condition.value && item[condition.field] < condition.value) {
-            } else {
-              result.push(item);
-            }
-          }
-        } else if (condition.comparison == '<=') {
-          for (const item of items) {
-            if (item[condition.field] && condition.value && item[condition.field] <= condition.value) {
-            } else {
-              result.push(item);
-            }
-          }
-        } else if (condition.comparison == '>=') {
-          for (const item of items) {
-            if (item[condition.field] && condition.value && item[condition.field] >= condition.value) {
-            } else {
-              result.push(item);
-            }
-          }
-        }
-        return Promise.resolve(result);
-      },
+      js: excludeItemsByConditionAction,
       outputSchema: {
         type: 'array',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     filterMatchShallowCopy: {
       description: 'Filter items from an array based on field values and shallow copy to an array',
@@ -1901,38 +758,10 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          items: Array<any>;
-          filterFields: string;
-          filterValues: string;
-        };
-      }): Promise<any> => {
-        const { items, filterFields, filterValues } = input.configuration;
-
-        const fields = filterFields.split(',');
-        const values = filterValues.split(',');
-        let result = [];
-        for (const item of items) {
-          let match = true;
-          for (let idx = 0; idx < values.length; idx++) {
-            if (item[fields[idx]] != values[idx]) {
-              match = false;
-              break;
-            }
-          }
-          if (match) {
-            result.push(Object.assign({}, item));
-          }
-        }
-        return Promise.resolve(result);
-      },
+      js: filterMatchShallowCopyAction,
       outputSchema: {
         type: 'object',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     filterMatch: {
       description: 'Filter items from an array  based on field values',
@@ -1954,38 +783,10 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          items: Array<any>;
-          filterFields: string;
-          filterValues: string;
-        };
-      }): Promise<any> => {
-        const { items, filterFields, filterValues } = input.configuration;
-
-        const fields = filterFields.split(',');
-        const values = filterValues.split(',');
-        let result = [];
-        for (const item of items) {
-          let match = true;
-          for (let idx = 0; idx < values.length; idx++) {
-            if (item[fields[idx]] != values[idx]) {
-              match = false;
-              break;
-            }
-          }
-          if (match) {
-            result.push(item);
-          }
-        }
-        return Promise.resolve(result);
-      },
+      js: filterMatchAction,
       outputSchema: {
         type: 'object',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     proRateTaxes: {
       description: 'ProRateTaxCalculation',
@@ -2015,39 +816,11 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          apSelfAssesTaxFlag: string;
-          vendorBilledTax: number;
-          taxedLines: Array<any>;
-          apTolerances: { tolerancePct: number; toleranceAmt: number };
-        };
-      }): Promise<any> => {
-        const { apSelfAssesTaxFlag, vendorBilledTax, taxedLines, apTolerances } = input.configuration;
-
-        ////////////////////////////////////////////////////////////////////
-        // Calculate proRateTaxes by ProRateTaxCalculator
-        //
-        ///////////////////////////////////////////////////////////////////
-
-        const proRateCalculator = new ProRateTaxCalculator();
-        let taxOverRideDtls = proRateCalculator.calculateProRateTax(
-          apSelfAssesTaxFlag,
-          vendorBilledTax,
-          taxedLines,
-          apTolerances.tolerancePct,
-          apTolerances.toleranceAmt,
-        );
-
-        return Promise.resolve(taxOverRideDtls);
-      },
+      js: proRateTaxesAction,
       outputSchema: {
         type: 'object',
         items: ProRateTaxDetailModel,
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     createDetailTaxLines: {
       description: 'Create detail tax lines with taxes/copy field values',
@@ -2108,106 +881,11 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          lineTaxAndDetail: Array<{
-            line;
-            dtl;
-            taxedLine;
-            taxDetails;
-          }>;
-          commonValues: any;
-          fieldsMapping: {
-            taxableLineMapping;
-            detailTaxLineMapping;
-            lineTaxesMapping;
-            taxDetailsMaping;
-            commonValuesMaping;
-            columnSeparator;
-            mappingSeparator;
-          };
-        };
-      }): Promise<any> => {
-        const { lineTaxAndDetail, commonValues, fieldsMapping } = input.configuration;
-
-        const tlColMap = toMappingArray(
-          fieldsMapping.taxableLineMapping,
-          fieldsMapping.columnSeparator,
-          fieldsMapping.mappingSeparator,
-        );
-
-        const dtlColMap = toMappingArray(
-          fieldsMapping.detailTaxLineMapping,
-          fieldsMapping.columnSeparator,
-          fieldsMapping.mappingSeparator,
-        );
-
-        const ltColMap = toMappingArray(
-          fieldsMapping.lineTaxesMapping,
-          fieldsMapping.columnSeparator,
-          fieldsMapping.mappingSeparator,
-        );
-
-        const tdColMap = toMappingArray(
-          fieldsMapping.taxDetailsMaping,
-          fieldsMapping.columnSeparator,
-          fieldsMapping.mappingSeparator,
-        );
-        const cvColMap = toMappingArray(
-          fieldsMapping.commonValuesMaping,
-          fieldsMapping.columnSeparator,
-          fieldsMapping.mappingSeparator,
-        );
-
-        const detTaxLines = [];
-        const wrapper = {};
-        for (const combo of lineTaxAndDetail) {
-          for (const taxDet of combo.taxDetails) {
-            const detTaxLine = {};
-            detTaxLines.push(detTaxLine);
-
-            if (combo.line) {
-              for (const dtc of tlColMap) {
-                detTaxLine[dtc[0]] = combo.line[dtc[1]];
-              }
-            }
-            if (combo.dtl) {
-              for (const dtc of dtlColMap) {
-                detTaxLine[dtc[0]] = combo.dtl[dtc[1]];
-              }
-            }
-            if (combo.taxedLine) {
-              for (const dtc of ltColMap) {
-                detTaxLine[dtc[0]] = combo.taxedLine[dtc[1]];
-              }
-            }
-            if (combo.taxDetails) {
-              for (const dtc of tdColMap) {
-                detTaxLine[dtc[0]] = taxDet[dtc[1]];
-              }
-            }
-            if (commonValues) {
-              for (const dtc of cvColMap) {
-                detTaxLine[dtc[0]] = commonValues[dtc[1]];
-              }
-            }
-            if (taxDet.jurisdiction) {
-              // detTaxLine['ns:TaxJurisdictionCode'] = (taxDet.jurisdiction['JurisPrefix'] ? taxDet.jurisdiction['JurisPrefix'] : '') + taxDet.jurisdiction['JurisCode'];
-              detTaxLine['ns:TaxJurisdictionCode'] = 'USTJ7' + taxDet.jurisdiction['JurisCode'];
-              detTaxLine['ns:TaxStatusCode'] = taxDet.jurisdiction['RateCode'];
-            }
-          }
-        }
-        wrapper['ns:DetailTaxLines'] = detTaxLines;
-        return Promise.resolve(wrapper);
-      },
+      js: createDetailTaxLinesAction,
       outputSchema: {
         type: 'array',
         items: DetailTaxLineModel,
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     collect: {
       description: 'Collect',
@@ -2230,56 +908,10 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          argument: any;
-          operation: CollectOperation;
-          defaultValue: number;
-        };
-      }): Promise<any> => {
-        const { argument, operation, defaultValue } = input.configuration;
-
-        let collector = defaultValue ? defaultValue : 0;
-
-        if (Array.isArray(argument)) {
-          for (const item of argument) {
-            if (typeof item !== 'number') {
-              console.log('item is not of type `number`', {
-                item,
-                type: typeof item,
-              });
-
-              continue;
-            }
-
-            if (operation === CollectOperation.plus) {
-              collector += item;
-            } else if (operation === CollectOperation.minus) {
-              collector -= item;
-            } else {
-              console.error('Unknown operation', {
-                operation,
-              });
-            }
-
-            console.log('Collector is updated', {
-              collector,
-              operation,
-              item,
-            });
-          }
-        } else {
-          console.log('Argument is not array');
-        }
-
-        return Promise.resolve(collector);
-      },
+      js: collectAction,
       outputSchema: {
         type: 'number',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     store: {
       description: 'Store',
@@ -2292,23 +924,12 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          data: any;
-        };
-      }): Promise<any> => {
-        const { data } = input.configuration;
-
-        return Promise.resolve(data);
-      },
+      js: storeAction,
       outputSchema: {
         title: 'Data',
         type: 'object',
         description: 'The passed object',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     createObject: {
       description: 'Create new Object to use',
@@ -2321,23 +942,12 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          data: any;
-        };
-      }): Promise<any> => {
-        const { data } = input.configuration;
-        const madeObj = {};
-        return Promise.resolve(madeObj);
-      },
+      js: createObjectAction,
       outputSchema: {
         title: 'New object',
         description: 'New object to use for later',
         type: 'object',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     createArray: {
       description: 'Create an empty array to use',
@@ -2350,22 +960,11 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          data: any;
-        };
-      }): Promise<any> => {
-        const { data } = input.configuration;
-        const madeArray = [];
-        return Promise.resolve(madeArray);
-      },
+      js: createArrayAction,
       outputSchema: {
         title: 'Data',
         type: 'array',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     createNewObjectToArray: {
       description: 'Add a new object to the array',
@@ -2379,22 +978,10 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          objects: Array<any>;
-        };
-      }): Promise<any> => {
-        const { objects } = input.configuration;
-        const addObject = {};
-        objects.push(addObject);
-        return Promise.resolve(objects);
-      },
+      js: createNewObjectToArrayAction,
       outputSchema: {
         title: 'Data',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     pushObjectToArray: {
       description: 'Add a new object to the array',
@@ -2412,22 +999,10 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          item: any;
-          objects: Array<any>;
-        };
-      }): Promise<any> => {
-        const { item, objects } = input.configuration;
-        objects.push(item);
-        return Promise.resolve(objects);
-      },
+      js: pushObjectToArrayAction,
       outputSchema: {
         title: 'Data',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     append: {
       description: 'Append a value to another with a joiner',
@@ -2449,23 +1024,10 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          first: string;
-          second: string;
-          joiner: string;
-        };
-      }): Promise<any> => {
-        const { first, second, joiner } = input.configuration;
-
-        return Promise.resolve(first + joiner + second);
-      },
+      js: appendAction,
       outputSchema: {
         title: 'Data',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     sumAll: {
       description: 'Sum the values of a field of all items in an array',
@@ -2487,35 +1049,10 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          items: Array<any>;
-          fields: string;
-          separator: string;
-        };
-      }): Promise<any> => {
-        const { items, fields, separator } = input.configuration;
-        const fieldsArr = fields.split(separator);
-        const faLen = fieldsArr.length;
-        const result = [];
-        for (let i = 0; i < faLen; i++) {
-          result[i] = 0;
-        }
-        for (const item of items) {
-          for (let i = 0; i < faLen; i++) {
-            if (item[fieldsArr[i]]) {
-              result[i] = result[i] + item[fieldsArr[i]];
-            }
-          }
-        }
-        return Promise.resolve(result);
-      },
+      js: sumAllAction,
       outputSchema: {
         title: 'Data',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     match: {
       description: 'Match',
@@ -2533,46 +1070,7 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          values: Array<any>;
-          mapping: Array<Array<any>>;
-        };
-      }): Promise<any> => {
-        const { values, mapping } = input.configuration;
-
-        let value: string = null;
-        let max = 0;
-        const vlen = values.length;
-        let matches = false;
-        for (const row of mapping) {
-          max = row.length < vlen ? row.length : vlen;
-          for (let i = 0; i < max; i++) {
-            matches = false;
-            if (row[i] === '*') {
-              matches = true;
-              continue;
-            }
-            const rval = row[i].split('|');
-            for (const mval of rval) {
-              if (values[i] === mval) {
-                matches = true;
-                break;
-              }
-            }
-            if (!matches) {
-              break;
-            }
-          }
-          if (matches) {
-            value = row[row.length - 1];
-            break;
-          }
-        }
-        return Promise.resolve(value);
-        // return Promise.resolve(configuration);
-      },
+      js: matchAction,
       outputSchema: {
         type: 'object',
         properties: {
@@ -2581,8 +1079,6 @@ const extension: SdkExtension = {
           },
         },
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     matchCombination: {
       description: 'Match',
@@ -2605,55 +1101,10 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          values: Array<any>;
-          mapping: 'string';
-          defVal: 'string';
-        };
-      }): Promise<any> => {
-        const { values, mapping, defVal } = input.configuration;
-        const rowsStr = mapping.split('//');
-        const rows = [];
-        for (let row of rowsStr) {
-          rows.push(row.split(','));
-        }
-        let value: string = defVal;
-        let max = 0;
-        const vlen = values.length;
-        let matches = false;
-        for (const row of rows) {
-          max = row.length - 1 < vlen ? row.length - 1 : vlen;
-          for (let i = 0; i < max; i++) {
-            matches = false;
-            if (row[i] === '*') {
-              matches = true;
-              continue;
-            }
-            const rval = row[i].split('|');
-            for (const mval of rval) {
-              if (values[i] === mval) {
-                matches = true;
-                break;
-              }
-            }
-            if (!matches) {
-              break;
-            }
-          }
-          if (matches) {
-            value = row[row.length - 1];
-            break;
-          }
-        }
-        return Promise.resolve(value);
-      },
+      js: matchCombinationAction,
       outputSchema: {
         type: 'string',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     fieldValues: {
       description: 'Create an Array containing the values of the fields from the object',
@@ -2671,30 +1122,13 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          fieldNames: string;
-          item: any;
-        };
-      }): Promise<any> => {
-        const { fieldNames, item } = input.configuration;
-        const result = [];
-        const fnArray = fieldNames.split(',');
-        for (const fn of fnArray) {
-          result.push(item[fn]);
-        }
-        return Promise.resolve(result);
-        // return Promise.resolve(configuration);
-      },
+      js: fieldValuesAction,
       outputSchema: {
         type: 'array',
         items: {
           type: 'object',
         },
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     setProperty: {
       description: 'Set a property to an object',
@@ -2716,24 +1150,10 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          setTo: any;
-          fieldName: string;
-          item: any;
-        };
-      }): Promise<any> => {
-        const { setTo, fieldName, item } = input.configuration;
-        setTo[fieldName] = item;
-        return Promise.resolve(setTo);
-        // return Promise.resolve(configuration);
-      },
+      js: setPropertyAction,
       outputSchema: {
         type: 'object',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     setProperties: {
       description: 'Set a property to an object',
@@ -2751,42 +1171,10 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          setTo: any;
-          values: Array<{
-            path: string;
-            value: any;
-          }>;
-        };
-      }): Promise<any> => {
-        const { setTo, values } = input.configuration;
-        for (let setVal of values) {
-          let item = setTo;
-          let fieldName = setVal.path;
-          if (setVal.path.includes('.')) {
-            let fullPath = setVal.path.split('.');
-            fieldName = fullPath[fullPath.length - 1];
-            let path = fullPath.slice(0, fullPath.length - 1);
-            for (let p of path) {
-              item = item[p];
-              if (!item) {
-                break;
-              }
-            }
-          }
-          if (item) {
-            item[fieldName] = setVal.value;
-          }
-        }
-        return Promise.resolve(setTo);
-      },
+      js: setPropertiesAction,
       outputSchema: {
         type: 'object',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     setReferenceTo: {
       description: 'Set a property to an object',
@@ -2808,25 +1196,10 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          items: Array<any>;
-          propertyName: string;
-          setTo: string;
-        };
-      }): Promise<any> => {
-        const { items, propertyName, setTo } = input.configuration;
-        for (const item of items) {
-          item[setTo] = item[propertyName];
-        }
-        return Promise.resolve(items);
-      },
+      js: setReferenceToAction,
       outputSchema: {
         type: 'array',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     setValuesToItems: {
       description: 'Set a property to an object',
@@ -2843,34 +1216,10 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          items: Array<any>;
-          setValues: Array<{
-            propertyName: string;
-            setValue: any;
-            setTo: string;
-          }>;
-        };
-      }): Promise<any> => {
-        const { items, setValues: references } = input.configuration;
-        for (const item of items) {
-          for (let ref of references) {
-            if (ref.setValue) {
-              item[ref.setTo] = ref.setValue;
-            } else if (ref.propertyName) {
-              item[ref.setTo] = item[ref.propertyName];
-            }
-          }
-        }
-        return Promise.resolve(items);
-      },
+      js: setValuesToItemsAction,
       outputSchema: {
         type: 'array',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     copyValueToNested: {
       description: 'Copy values of an object to its children',
@@ -2895,51 +1244,12 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          items: Array<any>;
-          propertyPath: string;
-          copyValues: Array<{ setFrom: string; setTo: string }>;
-        };
-      }): Promise<any> => {
-        const { items, propertyPath, copyValues } = input.configuration;
-        if (items) {
-          if (propertyPath && propertyPath.includes('.')) {
-          }
-          const pathArr = propertyPath.split('.');
-          for (const item of items) {
-            let refObj = item;
-            for (const path of pathArr) {
-              refObj = refObj[path];
-              if (!refObj) {
-                break;
-              }
-            }
-            if (refObj) {
-              if (Array.isArray(refObj)) {
-                for (let robj of refObj) {
-                  for (let cv of copyValues) {
-                    robj[cv.setTo] = item[cv.setFrom];
-                  }
-                }
-              } else {
-                for (let cv of copyValues) {
-                  refObj[cv.setTo] = item[cv.setFrom];
-                }
-              }
-            }
-          }
-        }
-        return Promise.resolve(items);
-      },
+      js: copyValueToNestedAction,
       outputSchema: {
         type: 'object',
         description:
           "The array of items each with the property referred to by 'setTo' set with the property found in the path",
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     pullUpAndSetReferenceTo: {
       description: 'Pulls up a property from same or down level and sets to a property at this level',
@@ -2964,42 +1274,12 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          items: Array<any>;
-          propertyPath: string;
-          setTo: string;
-        };
-      }): Promise<any> => {
-        const { items, propertyPath, setTo } = input.configuration;
-        if (items) {
-          const pathArr = propertyPath.split('/');
-          for (const item of items) {
-            let refObj = item;
-            let found = false;
-            for (const path of pathArr) {
-              if (!refObj) {
-                found = false;
-                break;
-              }
-              refObj = refObj[path];
-              found = true;
-            }
-            if (found) {
-              item[setTo] = refObj;
-            }
-          }
-        }
-        return Promise.resolve(items);
-      },
+      js: pullUpAndSetReferenceToAction,
       outputSchema: {
         type: 'object',
         description:
           "The array of items each with the property referred to by 'setTo' set with the property found in the path",
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     cloneAndExecuteForEach: {
       description: 'Clone the given items and execute the operations on them',
@@ -3020,36 +1300,11 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          items: Array<any>;
-          operations: Array<string>;
-        };
-      }): Promise<any> => {
-        const { items, operations } = input.configuration;
-        let result = [];
-        if (items) {
-          let fn = [];
-          for (let index = 0; index < operations.length; index++) {
-            fn[index] = new Function('obj', '{' + operations[index] + '; }');
-          }
-          for (let obj of items) {
-            const cloned = Object.assign({}, obj);
-            for (let func of fn) {
-              func(cloned);
-            }
-            result.push(cloned);
-          }
-        }
-        return Promise.resolve({ found: result.length > 0, result });
-      },
+      js: cloneAndExecuteForEachAction,
       outputSchema: {
         type: 'array',
         description: 'Items with field values matching to the given values',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     executeForEach: {
       description: 'Execute the operations on each item of an array',
@@ -3070,33 +1325,11 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          items: Array<any>;
-          operations: Array<string>;
-        };
-      }): Promise<any> => {
-        const { items, operations } = input.configuration;
-        if (items) {
-          let fn = [];
-          for (let index = 0; index < operations.length; index++) {
-            fn[index] = new Function('obj', '{' + operations[index] + '; }');
-          }
-          for (let obj of items) {
-            for (let func of fn) {
-              func(obj);
-            }
-          }
-        }
-        return Promise.resolve({ found: items && items.length > 0, result: items });
-      },
+      js: executeForEachAction,
       outputSchema: {
         type: 'array',
         description: 'Items with field values matching to the given values',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     findItemsWithFieldValues: {
       description: 'Find the first item in the array with matching values from source object or values',
@@ -3117,37 +1350,11 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          items: Array<any>;
-          matchFields: Array<{ field: string; value: any }>;
-        };
-      }): Promise<any> => {
-        const { items, matchFields } = input.configuration;
-
-        let result = [];
-
-        for (let obj of items) {
-          let matches = true;
-          for (let mf of matchFields) {
-            if (obj[mf.field] !== mf.value) {
-              matches = false;
-              break;
-            }
-          }
-          if (matches) {
-            result.push(obj);
-          }
-        }
-        return Promise.resolve(result);
-      },
+      js: findItemsWithFieldValuesAction,
       outputSchema: {
         type: 'array',
         description: 'Items with field values matching to the given values',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     findItemsWithFieldValuesMatching: {
       description: 'Find the first item in the array with matching values from source object or values',
@@ -3168,37 +1375,11 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          items: Array<any>;
-          matchFields: Array<Array<any>>;
-        };
-      }): Promise<any> => {
-        const { items, matchFields } = input.configuration;
-
-        let result = [];
-
-        for (let obj of items) {
-          let matches = true;
-          for (let i = 0; i < matchFields.length; i++) {
-            if (obj[matchFields[i][0]] !== matchFields[i][1]) {
-              matches = false;
-              break;
-            }
-          }
-          if (matches) {
-            result.push(obj);
-          }
-        }
-        return Promise.resolve(result);
-      },
+      js: findItemsWithFieldValuesMatchingAction,
       outputSchema: {
         type: 'array',
         description: 'Items with field values matching to the given values',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     findMatch: {
       description: 'Find the first item in the array with matching values from source object and plain values',
@@ -3236,58 +1417,11 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          source: any;
-          sourceFields: string;
-          rawValues: string;
-          checkObjects: Array<any>;
-          matchFields: string;
-          matchVal: string;
-          noMatchVal: string;
-        };
-      }): Promise<any> => {
-        const { source, sourceFields, rawValues, checkObjects, matchFields, matchVal, noMatchVal } =
-          input.configuration;
-
-        const sfArr = sourceFields.split(',');
-        let compareValues = [];
-
-        for (let i = 0; i < sfArr.length; i++) {
-          compareValues.push(source[sfArr[i]]);
-        }
-        if (rawValues) {
-          const rowValsArr = rawValues.split(',');
-          for (let i = 0; i < rowValsArr.length; i++) {
-            compareValues.push(rowValsArr[i]);
-          }
-        }
-
-        let result = noMatchVal;
-        let found = false;
-        const matchArr = matchFields.split(',');
-        for (let obj of checkObjects) {
-          let matches = true;
-          for (let i = 0; i < matchArr.length; i++) {
-            if (compareValues[i] !== obj[matchArr[i]]) {
-              matches = false;
-              break;
-            }
-          }
-          if (matches) {
-            result = matchVal;
-            break;
-          }
-        }
-        return Promise.resolve(result);
-      },
+      js: findMatchAction,
       outputSchema: {
         type: 'object',
         description: 'The first found property in any of the objects',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     findMatchingObject: {
       description: 'Find combination of values in the objects',
@@ -3313,49 +1447,11 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          source: any;
-          sourceFields: string;
-          checkObjects: Array<any>;
-          matchFields: string;
-        };
-      }): Promise<any> => {
-        const { source, sourceFields, checkObjects, matchFields } = input.configuration;
-        let found = false;
-        let result;
-        if (checkObjects) {
-          const sfArr = sourceFields.split(',');
-          let sourceVals = [];
-
-          for (let i = 0; i < sfArr.length; i++) {
-            sourceVals.push(source[sfArr[i]]);
-          }
-          const matchArr = matchFields.split(',');
-          for (let obj of checkObjects) {
-            let matches = true;
-            for (let i = 0; i < matchArr.length; i++) {
-              if (sourceVals[i] !== obj[matchArr[i]]) {
-                matches = false;
-                break;
-              }
-            }
-            if (matches) {
-              result = obj;
-              found = true;
-              break;
-            }
-          }
-        }
-        return Promise.resolve({ found, result });
-      },
+      js: findMatchingObjectAction,
       outputSchema: {
         type: 'object',
         description: 'The first found property in any of the objects',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     findWithPrefernce: {
       description: 'Find values with preference to earlier ones',
@@ -3373,42 +1469,11 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          fields: string;
-          objects: Array<any>;
-        };
-      }): Promise<any> => {
-        const { fields, objects } = input.configuration;
-
-        let result = null;
-        let found = false;
-        let matchingItem = null;
-        if (objects) {
-          const arr = fields.split(',');
-          for (let i = 0; i < arr.length; i++) {
-            for (const item of objects) {
-              if (item[arr[i]]) {
-                found = true;
-                matchingItem = item;
-                result = item[arr[i]];
-                break;
-              }
-            }
-            if (result) {
-              break;
-            }
-          }
-        }
-        return Promise.resolve({ found, result, matchingItem });
-      },
+      js: findWithPrefernceAction,
       outputSchema: {
         type: 'object',
         description: 'The first found property in any of the objects',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     findWithPrefernceOrDefault: {
       description: 'Find values with preference to earlier ones',
@@ -3430,44 +1495,10 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          fields: string;
-          objects: Array<any>;
-          defaultVal: any;
-        };
-      }): Promise<any> => {
-        const { fields, objects, defaultVal } = input.configuration;
-        let result = null;
-        let found = false;
-        let matchingItem = null;
-        if (objects) {
-          const arr = fields.split(',');
-          for (let i = 0; i < arr.length; i++) {
-            for (const item of objects) {
-              if (item[arr[i]]) {
-                result = item[arr[i]];
-                found = true;
-                matchingItem = item;
-                break;
-              }
-            }
-            if (result) {
-              break;
-            }
-          }
-          if (!result) {
-            result = defaultVal;
-          }
-        }
-        return Promise.resolve({ found, result, matchingItem });
-      },
+      js: findWithPrefernceOrDefaultAction,
       outputSchema: {
         type: 'object',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     mapNested: {
       description: 'Map',
@@ -3502,61 +1533,11 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          items: Array<any>;
-          mapping: Array<{
-            itemsPath: string;
-            nestedPath: string;
-            mapByField: string;
-            setToField: string;
-          }>;
-        };
-      }): Promise<any> => {
-        const { items, mapping } = input.configuration;
-        let combinedResults = [];
-        let subMappings = [];
-        for (let item of items) {
-          for (let mapConf of mapping) {
-            if (item[mapConf.itemsPath] && item[mapConf.itemsPath][mapConf.nestedPath]) {
-              let arr = item[mapConf.itemsPath][mapConf.nestedPath];
-              if (arr) {
-                subMappings.push({ items: arr, mapByField: mapConf.mapByField, setToField: mapConf.setToField });
-              }
-            } else {
-              subMappings.push({ items: [], mapByField: mapConf.mapByField, setToField: mapConf.setToField });
-            }
-          }
-
-          const registry: { [k: string]: {} } = {};
-
-          for (const mappingItem of subMappings) {
-            for (const object of mappingItem.items) {
-              if (registry.hasOwnProperty(object[mappingItem.mapByField])) {
-                registry[object[mappingItem.mapByField]][mappingItem.setToField] = object;
-              } else {
-                registry[object[mappingItem.mapByField]] = {
-                  [mappingItem.setToField]: object,
-                };
-              }
-            }
-          }
-          let result = [];
-          for (const key of Object.keys(registry)) {
-            result.push(registry[key]);
-          }
-          combinedResults.push(result);
-        }
-
-        return Promise.resolve(combinedResults);
-      },
+      js: mapNestedAction,
       outputSchema: {
         type: 'object',
         description: 'An array of the input map with the input objects mapped for each item',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     mapToMap: {
       description: 'Map',
@@ -3599,42 +1580,11 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          addToMap: Array<any>;
-          mapByField: string;
-          objects: Array<any>;
-          setToField: string;
-          refObject: string;
-          refProperty: string;
-        };
-      }): Promise<any> => {
-        const { addToMap, mapByField, objects, setToField, refObject, refProperty } = input.configuration;
-        if (addToMap && objects) {
-          for (const mappingItem of addToMap) {
-            const ref = mappingItem[refObject];
-            if (ref) {
-              const val = ref[refProperty];
-              if (val) {
-                for (const object of objects) {
-                  if (object[mapByField] == val) {
-                    mappingItem[setToField] = object;
-                    break;
-                  }
-                }
-              }
-            }
-          }
-        }
-        return Promise.resolve(addToMap);
-      },
+      js: mapToMapAction,
       outputSchema: {
         type: 'object',
         description: 'An array of the input map with the input objects mapped for each item',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     copyProperties1: {
       description: 'Copy properties',
@@ -3664,32 +1614,12 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          source: any;
-          destination: any;
-          fieldsMapping: string;
-          rowSeparator: string;
-          columnSeparator: string;
-        };
-      }): Promise<any> => {
-        const { source, destination, fieldsMapping, rowSeparator, columnSeparator } = input.configuration;
-
-        const rows = fieldsMapping.split(rowSeparator);
-        for (const row of rows) {
-          const cols = row.split(columnSeparator);
-          destination[cols[1]] = source[cols[0]];
-        }
-        return Promise.resolve(destination);
-      },
+      js: copyProperties1Action,
 
       outputSchema: {
         type: 'object',
         description: 'Object with the properties defined in fieldsMapping copied from the source',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     copyPropertiesToItems: {
       description: 'Copy properties',
@@ -3719,30 +1649,10 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          source: any;
-          destination: any;
-          fieldsMapping: string;
-          rowSeparator: string;
-          columnSeparator: string;
-        };
-      }): Promise<any> => {
-        const { source, destination, fieldsMapping, rowSeparator, columnSeparator } = input.configuration;
-
-        const rows = fieldsMapping.split(rowSeparator);
-        for (const row of rows) {
-          const cols = row.split(columnSeparator);
-          destination[cols[1]] = source[cols[0]];
-        }
-        return Promise.resolve(destination);
-      },
+      js: copyPropertiesToItemsAction,
       outputSchema: {
         type: 'object',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     copyProperties: {
       description: 'Map',
@@ -3773,28 +1683,10 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          mapping: {
-            source: any;
-            destination: any;
-            fieldsMapping: Array<string[]>;
-          };
-        };
-      }): Promise<any> => {
-        const { mapping } = input.configuration;
-
-        for (const fieldMap of mapping.fieldsMapping) {
-          mapping.destination[fieldMap[1]] = mapping.source[fieldMap[0]];
-        }
-        return Promise.resolve(mapping.destination);
-      },
+      js: copyPropertiesAction,
       outputSchema: {
         type: 'object',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     createDetailTaxLine: {
       description: 'CreateDetailTaxLines',
@@ -3828,54 +1720,12 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          taxableLine: any;
-          detailLinesArray: Array<any>;
-          internalOrganizationId: string;
-          legalEntityId: string;
-          errorMessageTypeFlag: string;
-          errorString: string;
-        };
-      }): Promise<any> => {
-        const {
-          taxableLine,
-          detailLinesArray,
-          internalOrganizationId,
-          legalEntityId,
-          errorMessageTypeFlag,
-          errorString,
-        } = input.configuration;
-        const detailTaxLine = {};
-        detailTaxLine['ErrorMessageTypeFlag'] = errorMessageTypeFlag;
-        detailTaxLine['ErrorString'] = errorString;
-
-        detailTaxLine['ApplicationId'] = taxableLine['ns:ApplicationId'];
-        detailTaxLine['EntityCode'] = taxableLine['ns:EntityCode'];
-        detailTaxLine['EventClassCode'] = taxableLine['ns:EventClassCode'];
-        detailTaxLine['LineAmt'] = taxableLine['ns:LineAmt'];
-        detailTaxLine['TrxId'] = taxableLine['ns:TrxId'];
-        detailTaxLine['TrxCurrencyCode'] = taxableLine['ns:TrxCurrencyCode'];
-        detailTaxLine['TrxLineId'] = taxableLine['ns:TrxLineId'];
-        detailTaxLine['TrxLineNumber'] = taxableLine['ns:TrxLineNumber'];
-        detailTaxLine['TrxLevelType'] = taxableLine['ns:TrxLevelType'];
-
-        detailTaxLine['ns:InternalOrganizationId '] = internalOrganizationId;
-        detailTaxLine['ns:LegalEntityId '] = legalEntityId;
-        detailTaxLine['LinesDetFactorId '] = taxableLine['ns:LinesDetFactorId '];
-
-        detailLinesArray.push(detailTaxLine);
-
-        return Promise.resolve(detailTaxLine);
-      },
+      js:createDetailTaxLineAction,
 
       outputSchema: {
         type: 'array',
         items: DetailTaxLineModel,
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     createDetailTaxLinesNoTax: {
       description: 'CreateDetailTaxLines',
@@ -3905,48 +1755,12 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          taxableLines: Array<any>;
-          internalOrganizationId: string;
-          legalEntityId: string;
-          errorMessageTypeFlag: string;
-          errorString: string;
-        };
-      }): Promise<any> => {
-        const { taxableLines, internalOrganizationId, legalEntityId, errorMessageTypeFlag, errorString } =
-          input.configuration;
-        const detailTaxLines = [];
-        for (const inputLine of taxableLines) {
-          const detailTaxLine = {};
-          detailTaxLine['ns:ErrorMessageTypeFlag'] = errorMessageTypeFlag;
-          detailTaxLine['ns:ErrorString'] = errorString;
-
-          detailTaxLine['ns:ApplicationId'] = inputLine['ns:ApplicationId'];
-          detailTaxLine['ns:EntityCode'] = inputLine['ns:EntityCode'];
-          detailTaxLine['ns:EventClassCode'] = inputLine['ns:EventClassCode'];
-          detailTaxLine['ns:LineAmt'] = inputLine['ns:LineAmt'];
-          detailTaxLine['ns:TrxId'] = inputLine['ns:TrxId'];
-          detailTaxLine['ns:TrxCurrencyCode'] = inputLine['ns:TrxCurrencyCode'];
-          detailTaxLine['ns:TrxLineId'] = inputLine['ns:TrxLineId'];
-          detailTaxLine['ns:TrxLineNumber'] = inputLine['ns:TrxLineNumber'];
-          detailTaxLine['ns:TrxLevelType'] = inputLine['ns:TrxLevelType'];
-
-          detailTaxLine['ns:InternalOrganizationId '] = internalOrganizationId;
-          detailTaxLine['ns:LegalEntityId '] = legalEntityId;
-          detailTaxLine['ns:LinesDetFactorId '] = inputLine['ns:LinesDetFactorId'];
-          detailTaxLines.push(detailTaxLine);
-        }
-        return Promise.resolve(detailTaxLines);
-      },
+      js: createDetailTaxLinesNoTaxAction,
 
       outputSchema: {
         type: 'array',
         items: DetailTaxLineModel,
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     convertToXMLResponse: {
       description: 'convertToXml',
@@ -3959,21 +1773,10 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          data: any;
-        };
-      }): Promise<any> => {
-        const { data } = input.configuration;
-        const xml = input.sdk.serialization.xml.stringify(data);
-        return Promise.resolve(data);
-      },
+      js: convertToXMLResponseAction,
       outputSchema: {
         title: 'Data',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     parseXML: {
       description: 'Parse XML to Json',
@@ -3986,21 +1789,10 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          data: any;
-        };
-      }): Promise<any> => {
-        const { data } = input.configuration;
-        const json = input.sdk.serialization.xml.parse(data);
-        return Promise.resolve(json);
-      },
+      js: parseXMLAction,
       outputSchema: {
         title: 'Data',
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
     convertToXmlAction: {
       description: 'Convert json to xml',
@@ -4014,16 +1806,7 @@ const extension: SdkExtension = {
           },
         },
       },
-      js: (input: {
-        sdk: AppknitSDK;
-        configuration: {
-          jsonData: any;
-        };
-      }): Promise<any> => {
-        const { jsonData } = input.configuration;
-        const xmlData = input.sdk.serialization.xml.stringify(jsonData);
-        return Promise.resolve(xmlData);
-      },
+      js: convertToXmlActions,
       outputSchema: {
         type: 'object',
         properties: {
@@ -4038,11 +1821,1708 @@ const extension: SdkExtension = {
           },
         },
       },
-      viewSchema: {},
-      svgSymbolMarkup: {},
     },
   },
-  graphFunctions:{},
+  graphFunctions:{
+    joinValues: {
+      description: 'Join the string values together with joiner',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          values: {
+            title: 'Values to join',
+            type: 'array',
+          },
+          joiner: {
+            title: 'Joiner',
+            type: 'string',
+          },
+        },
+      },
+      js: joinValuesAction,
+      outputSchema: {
+        title: 'Result of joining all strings together',
+      },
+    },
+    toURL: {
+      description: 'Convert string to URL object',
+      longDescription: 'Converts the given url string to URL object',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          urlString: {
+            type: 'string',
+            title: 'String representation of the URL',
+          },
+        },
+      },
+      js: toURLAction,
+      outputSchema: {
+        type: 'string',
+      },
+    },
+    mapFusionSoapRequest: {
+      description: 'Map Fusion Soap Request values',
+      longDescription: 'Maps the fusion tax calculation request and create document and VBT details',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          body: {
+            type: 'object',
+          },
+        },
+      },
+      js: mapFusionSoapRequestAction,
+      outputSchema: {
+        type: 'object',
+      },
+    },
+    filterByUniqueValues: {
+      description: 'Filter items by unique field values',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          items: {
+            type: 'string',
+          },
+          uniqueFields: {
+            type: 'array',
+          },
+          selectBy: {
+            type: 'array',
+          },
+        },
+      },
+      js: filterByUniqueValuesAction,
+      outputSchema: {
+        type: 'string',
+      },
+    },
+    split: {
+      description: 'Split a text to a text array',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          payload: {
+            type: 'string',
+          },
+          separator: {
+            type: 'string',
+            default: ',',
+          },
+        },
+      },
+      js: splitAction,
+      outputSchema: {
+        type: 'string',
+      },
+    },
+    splitAll: {
+      description: 'Split all texts to array of text array',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          payload: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+          },
+          separator: {
+            type: 'string',
+            default: ',',
+          },
+        },
+      },
+      js: splitAllAction,
+      outputSchema: {
+        type: 'string',
+      },
+    },
+    toSeparateCsvsByField: {
+      description: 'Serialize payload to separate CSV, grouped by field',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          payload: {
+            type: 'array',
+          },
+          groupByField: {
+            type: 'string',
+          },
+          header: {
+            type: 'boolean',
+            default: true,
+          },
+          columns: {
+            type: 'array',
+            items: {
+              type: 'object',
+            },
+          },
+          columnDelimiter: {
+            type: 'string',
+            default: ',',
+          },
+        },
+      },
+      js: toSeparateCsvsByFieldAction,
+      outputSchema: {
+        type: 'string',
+      },
+    },
+    toCsv: {
+      description: 'Serialize payload to CSV',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          payload: {
+            type: 'array',
+          },
+          header: {
+            type: 'boolean',
+            default: true,
+          },
+          columns: {
+            type: 'array',
+            items: {
+              type: 'object',
+            },
+          },
+          columnDelimiter: {
+            type: 'string',
+            default: ',',
+          },
+        },
+      },
+      js: toCsvAction,
+      outputSchema: {
+        type: 'string',
+      },
+    },
+    joinMap: {
+      description: 'Map items with an existing array of mapped objects',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          items: {
+            title: 'Objects to add to the existing mapping objects',
+            type: 'array',
+          },
+          join: {
+            title: 'Join details',
+            type: 'object',
+          },
+          mapWith: {
+            title: 'Join details',
+            type: 'object',
+          },
+        },
+      },
+      js: joinMapAction,
+      outputSchema: {
+        type: 'object',
+        description: 'An array of the input map with the input objects mapped for each item',
+      },
+    },
+    replaceByLookup: {
+      description: 'Replace field value by lookup value',
+      longDescription: 'Replace field value by lookup value',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          items: {
+            type: 'array',
+          },
+          lookups: {
+            type: 'object',
+          },
+          replace: {
+            type: 'object',
+          },
+        },
+      },
+      js: replaceByLookupAction,
+      outputSchema: {
+        title: 'New object',
+        description: 'New object to use for later',
+        type: 'object',
+      },
+    },
+    uniqueValuesFromFields: {
+      description: 'Extract unique values from specified fields',
+      longDescription: 'Extract unique values from specified fields',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          data: {
+            type: 'object',
+          },
+        },
+      },
+      js: uniqueValuesFromFieldsAction,
+      outputSchema: {
+        title: 'New object',
+        description: 'New object to use for later',
+        type: 'object',
+      },
+    },
+    setCombinedFieldValues: {
+      description: 'Set the value of a field as the concatenation of given field values',
+      longDescription: 'Set the value of a field as the concatenation of given field values',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          items: {
+            title: 'Host',
+            type: 'string',
+          },
+          path: {
+            title: 'path of items',
+            type: 'string',
+          },
+          setToField: {
+            title: 'setToField',
+            type: 'string',
+          },
+          defaultVal: {
+            title: 'defaultVal',
+            type: 'string',
+          },
+          joiner: {
+            title: 'joiner',
+            type: 'string',
+          },
+          fields: {
+            title: 'fields',
+            type: 'array',
+          },
+        },
+      },
+      js: setCombinedFieldValuesAction,
+      outputSchema: {
+        title: 'Data',
+        type: 'object',
+        description: 'The passed object',
+      },
+    },
+    getIntervalTimes: {
+      description: 'Download files from Oracle UCM',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          last: {
+            title: 'Last',
+            type: 'string',
+          },
+          dtPattern: {
+            title: 'Date Pattern',
+            type: 'string',
+          },
+          interval: {
+            title: 'Interval',
+            type: 'string',
+          },
+          period: {
+            title: 'Period',
+            type: 'string',
+          },
+          prior: {
+            title: 'Prior',
+            type: 'string',
+          },
+          future: {
+            title: 'Future',
+            type: 'string',
+          },
+          combinedTenth: {
+            title: 'Combine tenths (XYZ10 to XYZ19 will be trimmed to XYZ1 and so on)',
+            type: 'string',
+          },
+        },
+      },
+      js: getIntervalTimesAction,
+      outputSchema: {
+        type: 'array',
+      },
+    },
+    convertToDocument: {
+      description: 'Convert text/csv data to document structure',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          // host, userName, passWord, prefix, account
+          data: {
+            title: 'Data',
+            type: 'string',
+          },
+          docLevels: {
+            title: 'Document levels definition',
+            type: 'object',
+          },
+        },
+      },
+      js: convertToDocumentAction,
+      outputSchema: {
+        type: 'string',
+      },
+    },
+    convertToDocuments: {
+      description: 'Convert to documents',
+      longDescription: 'Convert text data to documents, following the processing configuration',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          documentDetails: {
+            title: 'Items',
+            type: 'array',
+          },
+          processingConfig: {
+            title: 'File Processing Configuration',
+            type: 'array',
+          },
+        },
+      },
+      js: convertToDocumentsAction,
+      outputSchema: {
+        title: 'Grouped and aggregated data',
+        type: 'array',
+      },
+    },
+    groupByToObjects: {
+      description: 'Group By',
+      longDescription: 'Merge multiple items into one when they all have the same value for the groupByFields.',
+      inputSchema: {
+        type: 'object',
+
+        properties: {
+          items: {
+            title: 'Items',
+            type: 'array',
+          },
+          groupByField: {
+            title: 'Group by fields',
+            type: 'string',
+          },
+        },
+      },
+
+      js: groupByToObjectsAction,
+      outputSchema: {
+        title: 'Grouped and aggregated data',
+        type: 'array',
+      },
+    },
+    groupBy: {
+      description: 'Group By',
+      longDescription: 'Merge multiple items into one when they all have the same value for the groupByFields.',
+      inputSchema: {
+        type: 'object',
+
+        properties: {
+          items: {
+            title: 'Items',
+            type: 'array',
+          },
+          groupByFields: {
+            title: 'Group by fields',
+            type: 'array',
+          },
+          aggregations: {
+            title: 'Aggregations',
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                field: {
+                  title: 'Field',
+                  type: 'string',
+                },
+                operation: {
+                  title: 'Operation',
+                  type: 'string',
+                  enum: ['SUM'],
+                },
+              },
+            },
+          },
+        },
+      },
+
+      js: groupByAction,
+      outputSchema: {
+        title: 'Grouped and aggregated data',
+        type: 'array',
+      },
+    },
+    mergeToItems: {
+      description: 'Merge (copy properties of) an object to the item upto two levels deep',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          items: {
+            type: 'array',
+          },
+        },
+      },
+      js: mergeToItemsAction,
+      outputSchema: {
+        type: 'array',
+      },
+    },
+    filterItemsWithPropertyMatching: {
+      description: 'Filter items from an array  based on field values',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          items: {
+            title: 'Array to filter from',
+            type: 'array',
+          },
+          filterField: {
+            title: 'Fields whose values are used to filter',
+            type: 'string',
+          },
+          filterValues: {
+            title: 'Values for filtering',
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+          },
+        },
+      },
+      js: filterItemsWithPropertyMatchingAction,
+      outputSchema: {
+        type: 'object',
+      },
+    },
+    flattenHierarchyToMap: {
+      description: 'Flattens on an array items and map',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          items: {
+            title: 'Items',
+            description: 'Items to do this operation on',
+            type: 'array',
+          },
+          itemName: {
+            title: 'Property name for the item in the mapping object',
+            type: 'string',
+          },
+          arrayPropertyPath: {
+            title: 'Property Path',
+            description: 'Path to the property from the current level',
+            type: 'string',
+          },
+          arrayItemName: {
+            title: 'Property name for the array item in the mapping object',
+            type: 'string',
+          },
+        },
+      },
+      js: flattenHierarchyToMapAction,
+      outputSchema: {
+        type: 'array',
+        description: 'The array of mapping objects with each row having one item in the array mapped with the item',
+      },
+    },
+    combineArrays: {
+      description: 'Combine two or more arrays',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          items: {
+            title: 'Arrays to combine',
+            type: 'array',
+            items: { type: 'array' },
+          },
+        },
+      },
+      js: combineArraysAction,
+      outputSchema: {
+        type: 'array',
+      },
+    },
+    separateItemsByCondition: {
+      description: 'Exclude items from an array based on field values',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          items: {
+            title: 'Array to filter from',
+            type: 'array',
+          },
+          condition: {
+            title: 'Condition for excluding',
+            type: 'object',
+            properties: {
+              field: {
+                title: 'Field to check',
+                type: 'string',
+              },
+              comparison: {
+                title: 'Comparison operator',
+                type: 'string',
+                enum: ['==', '===', '!=', '!==', '>', '>=', '<', '<=', 'contains', 'endsWith', 'startsWith', 'pattern'],
+              },
+              value: {
+                title: 'Values for filtering',
+                type: 'string',
+              },
+            },
+          },
+        },
+      },
+      js: separateItemsByConditionAction,
+      outputSchema: {
+        type: 'object',
+        properties: {
+          matching: {
+            type: 'array',
+          },
+          nonMatching: {
+            type: 'array',
+          },
+        },
+      },
+    },
+    excludeItemsByCondition: {
+      description: 'Exclude items from an array based on field values',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          items: {
+            title: 'Array to filter from',
+            type: 'array',
+          },
+          condition: {
+            title: 'Condition for excluding',
+            type: 'object',
+            properties: {
+              field: {
+                title: 'Field to check',
+                type: 'string',
+              },
+              comparison: {
+                title: 'Comparison operator',
+                type: 'string',
+                enum: ['==', '===', '!=', '!==', '>', '>=', '<', '<=', 'contains', 'endsWith', 'startsWith', 'pattern'],
+              },
+              value: {
+                title: 'Values for filtering',
+                type: 'string',
+              },
+            },
+          },
+        },
+      },
+      js: excludeItemsByConditionAction,
+      outputSchema: {
+        type: 'array',
+      },
+    },
+    filterMatchShallowCopy: {
+      description: 'Filter items from an array based on field values and shallow copy to an array',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          items: {
+            title: 'Array to filter from',
+            type: 'array',
+          },
+          filterFields: {
+            title: 'Fields whose values are used to filter',
+            type: 'string',
+          },
+          filterValues: {
+            title: 'Values for filtering',
+            type: 'string',
+          },
+        },
+      },
+      js: filterMatchShallowCopyAction,
+      outputSchema: {
+        type: 'object',
+      },
+    },
+    filterMatch: {
+      description: 'Filter items from an array  based on field values',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          items: {
+            title: 'Array to filter from',
+            type: 'array',
+          },
+          filterFields: {
+            title: 'Fields whose values are used to filter',
+            type: 'string',
+          },
+          filterValues: {
+            title: 'Values for filtering',
+            type: 'string',
+          },
+        },
+      },
+      js: filterMatchAction,
+      outputSchema: {
+        type: 'object',
+      },
+    },
+    proRateTaxes: {
+      description: 'ProRateTaxCalculation',
+      longDescription: 'Calculate ProRate taxes for AP module, return pro-rated tax for each line',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          apSelfAssesTaxFlag: {
+            title: 'Self Assess Tax Flag',
+            type: 'string',
+          },
+          vendorBilledTax: {
+            title: 'Self Assess Tax Flag',
+            type: 'number',
+          },
+          taxedLines: {
+            title: 'Tolerance pct and amt',
+            type: 'array',
+            items: {
+              // Should set the avalara taxline model ????
+              type: 'object',
+            },
+          },
+          apTolerances: {
+            title: 'Tolerance pct and amt',
+            type: 'number',
+          },
+        },
+      },
+      js: proRateTaxesAction,
+      outputSchema: {
+        type: 'object',
+        items: ProRateTaxDetailModel,
+      },
+    },
+    createDetailTaxLines: {
+      description: 'Create detail tax lines with taxes/copy field values',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          lineTaxAndDetail: {
+            title: 'Source object to copy from',
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                line: {
+                  type: 'object',
+                },
+                dtl: {
+                  type: 'object',
+                },
+                taxedLine: {
+                  type: 'object',
+                },
+                taxDetails: {
+                  type: 'array',
+                },
+              },
+            },
+          },
+          commonValues: {
+            title: 'Common values to copy for all lines',
+            type: 'object',
+          },
+          fieldsMapping: {
+            title: 'Field Mapping as [source_Field,destination_Field]',
+            type: 'object',
+            properties: {
+              taxableLineMapping: {
+                type: 'string',
+              },
+              detailTaxLineMapping: {
+                type: 'string',
+              },
+              lineTaxesMapping: {
+                type: 'string',
+              },
+              taxDetailsMaping: {
+                type: 'string',
+              },
+              columnSeparator: {
+                title: 'Column separator for the fieldsMapping array',
+                type: 'string',
+              },
+              mappingSeparator: {
+                title: 'Column separator for the fieldsMapping array',
+                type: 'string',
+              },
+            },
+          },
+        },
+      },
+      js: createDetailTaxLinesAction,
+      outputSchema: {
+        type: 'array',
+        items: DetailTaxLineModel,
+      },
+    },
+    collect: {
+      description: 'Collect',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          argument: {
+            title: 'Argument',
+            type: 'object',
+          },
+          operation: {
+            title: 'Operation',
+            type: 'string',
+            enum: [CollectOperation.minus, CollectOperation.plus],
+          },
+          defaultValue: {
+            title: 'Default value',
+            type: 'number',
+          },
+        },
+      },
+      js: collectAction,
+      outputSchema: {
+        type: 'number',
+      },
+    },
+    store: {
+      description: 'Store',
+      longDescription: 'Place a data that so that it can be referred to the by step/action',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          data: {
+            type: 'object',
+          },
+        },
+      },
+      js: storeAction,
+      outputSchema: {
+        title: 'Data',
+        type: 'object',
+        description: 'The passed object',
+      },
+    },
+    createObject: {
+      description: 'Create new Object to use',
+      longDescription: 'Create object to use in later actions',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          data: {
+            type: 'object',
+          },
+        },
+      },
+      js: createObjectAction,
+      outputSchema: {
+        title: 'New object',
+        description: 'New object to use for later',
+        type: 'object',
+      },
+    },
+    createArray: {
+      description: 'Create an empty array to use',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          data: {
+            type: 'object',
+          },
+        },
+      },
+      js: createArrayAction,
+      outputSchema: {
+        title: 'Data',
+        type: 'array',
+      },
+    },
+    createNewObjectToArray: {
+      description: 'Add a new object to the array',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          objects: {
+            title: 'Array of items to add new object to.',
+            type: 'array',
+          },
+        },
+      },
+      js: createNewObjectToArrayAction,
+      outputSchema: {
+        title: 'Data',
+      },
+    },
+    pushObjectToArray: {
+      description: 'Add a new object to the array',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          item: {
+            title: 'Array of items to add new object to.',
+            type: 'object',
+          },
+          objects: {
+            title: 'Array of items to add new object to.',
+            type: 'array',
+          },
+        },
+      },
+      js: pushObjectToArrayAction,
+      outputSchema: {
+        title: 'Data',
+      },
+    },
+    append: {
+      description: 'Append a value to another with a joiner',
+      longDescription: 'Appends a value to the other with the joiner',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          first: {
+            title: 'First',
+            type: 'string',
+          },
+          second: {
+            title: 'Second',
+            type: 'string',
+          },
+          joiner: {
+            title: 'Joiner',
+            type: 'string',
+          },
+        },
+      },
+      js: appendAction,
+      outputSchema: {
+        title: 'Data',
+      },
+    },
+    sumAll: {
+      description: 'Sum the values of a field of all items in an array',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          items: {
+            title: 'Items to add field value',
+            type: 'array',
+          },
+          fields: {
+            title: 'Fields',
+            type: 'string',
+          },
+          separator: {
+            title: 'Field separator',
+            type: 'string',
+          },
+        },
+      },
+      js: sumAllAction,
+      outputSchema: {
+        title: 'Data',
+      },
+    },
+    match: {
+      description: 'Match',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          values: {
+            title: 'Values to search for',
+            type: 'array',
+          },
+          mapping: {
+            title: 'Match all and return last value in Array',
+            type: 'array',
+          },
+        },
+      },
+      js: matchAction,
+      outputSchema: {
+        type: 'object',
+        properties: {
+          collector: {
+            type: 'number',
+          },
+        },
+      },
+    },
+    matchCombination: {
+      description: 'Match',
+      longDescription:
+        'Math array of values and return the result. If no matching found returns the default value(defVal)',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          values: {
+            title: 'Values to search for',
+            type: 'array',
+          },
+          mapping: {
+            title: 'Mapping for matching. Each value separated by , and each row separated by //',
+            type: 'string',
+          },
+          defVal: {
+            title: 'Default value to return if no value found',
+            type: 'string',
+          },
+        },
+      },
+      js: matchCombinationAction,
+      outputSchema: {
+        type: 'string',
+      },
+    },
+    fieldValues: {
+      description: 'Create an Array containing the values of the fields from the object',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          fieldNames: {
+            title: 'Field names to get value',
+            type: 'string',
+          },
+          item: {
+            title: 'Object for values',
+            type: 'object',
+          },
+        },
+      },
+      js: fieldValuesAction,
+      outputSchema: {
+        type: 'array',
+        items: {
+          type: 'object',
+        },
+      },
+    },
+    setProperty: {
+      description: 'Set a property to an object',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          setTo: {
+            title: 'Set to object',
+            type: 'object',
+          },
+          fieldName: {
+            title: 'Name of the property',
+            type: 'string',
+          },
+          item: {
+            title: 'Setting property object',
+            type: 'object',
+          },
+        },
+      },
+      js: setPropertyAction,
+      outputSchema: {
+        type: 'object',
+      },
+    },
+    setProperties: {
+      description: 'Set a property to an object',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          setTo: {
+            title: 'Set to object',
+            type: 'object',
+          },
+          values: {
+            title: 'Name of the property',
+            type: 'string',
+          },
+        },
+      },
+      js: setPropertiesAction,
+      outputSchema: {
+        type: 'object',
+      },
+    },
+    setReferenceTo: {
+      description: 'Set a property to an object',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          items: {
+            title: 'Items',
+            type: 'array',
+          },
+          propertyName: {
+            title: 'Name of the property',
+            type: 'string',
+          },
+          setTo: {
+            title: 'Setting property',
+            type: 'string',
+          },
+        },
+      },
+      js: setReferenceToAction,
+      outputSchema: {
+        type: 'array',
+      },
+    },
+    setValuesToItems: {
+      description: 'Set a property to an object',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          items: {
+            title: 'Items',
+            type: 'array',
+          },
+          setValues: {
+            type: 'array',
+          },
+        },
+      },
+      js: setValuesToItemsAction,
+      outputSchema: {
+        type: 'array',
+      },
+    },
+    copyValueToNested: {
+      description: 'Copy values of an object to its children',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          items: {
+            title: 'Items',
+            description: 'Items to do this operation on',
+            type: 'array',
+          },
+          propertyPath: {
+            title: 'Property Path',
+            description: 'Path to the property from the current level',
+            type: 'string',
+          },
+          copyValues: {
+            title: 'From and to to Set to',
+            description: 'Property name to set to',
+            type: 'array',
+          },
+        },
+      },
+      js: copyValueToNestedAction,
+      outputSchema: {
+        type: 'object',
+        description:
+          "The array of items each with the property referred to by 'setTo' set with the property found in the path",
+      },
+    },
+    pullUpAndSetReferenceTo: {
+      description: 'Pulls up a property from same or down level and sets to a property at this level',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          items: {
+            title: 'Items',
+            description: 'Items to do this operation on',
+            type: 'array',
+          },
+          propertyPath: {
+            title: 'Property Path',
+            description: 'Path to the property from the current level',
+            type: 'string',
+          },
+          setTo: {
+            title: 'Set To',
+            description: 'Property name to set to',
+            type: 'string',
+          },
+        },
+      },
+      js: pullUpAndSetReferenceToAction,
+      outputSchema: {
+        type: 'object',
+        description:
+          "The array of items each with the property referred to by 'setTo' set with the property found in the path",
+      },
+    },
+    cloneAndExecuteForEach: {
+      description: 'Clone the given items and execute the operations on them',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          items: {
+            title: 'Array of items to execute the operation',
+            type: 'array',
+          },
+          operations: {
+            title: 'Array of operations to execute',
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+          },
+        },
+      },
+      js: cloneAndExecuteForEachAction,
+      outputSchema: {
+        type: 'array',
+        description: 'Items with field values matching to the given values',
+      },
+    },
+    executeForEach: {
+      description: 'Execute the operations on each item of an array',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          items: {
+            title: 'Array of items to search',
+            type: 'array',
+          },
+          operations: {
+            title: 'Array of values to check',
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+          },
+        },
+      },
+      js: executeForEachAction,
+      outputSchema: {
+        type: 'array',
+        description: 'Items with field values matching to the given values',
+      },
+    },
+    findItemsWithFieldValues: {
+      description: 'Find the first item in the array with matching values from source object or values',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          items: {
+            title: 'Array of items to search',
+            type: 'array',
+          },
+          matchFields: {
+            title: 'Array of values to check',
+            type: 'array',
+            items: {
+              type: 'array',
+            },
+          },
+        },
+      },
+      js: findItemsWithFieldValuesAction,
+      outputSchema: {
+        type: 'array',
+        description: 'Items with field values matching to the given values',
+      },
+    },
+    findItemsWithFieldValuesMatching: {
+      description: 'Find the first item in the array with matching values from source object or values',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          items: {
+            title: 'Array of items to search',
+            type: 'array',
+          },
+          matchFields: {
+            title: 'Array of values to check',
+            type: 'array',
+            items: {
+              type: 'array',
+            },
+          },
+        },
+      },
+      js: findItemsWithFieldValuesMatchingAction,
+      outputSchema: {
+        type: 'array',
+        description: 'Items with field values matching to the given values',
+      },
+    },
+    findMatch: {
+      description: 'Find the first item in the array with matching values from source object and plain values',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          source: {
+            title: 'Object to get match values from',
+            type: 'object',
+          },
+          sourceFields: {
+            title: 'Fields to search for, comma separated',
+            type: 'string',
+          },
+          rawValues: {
+            title: 'Extra values to be checked, not field values',
+            type: 'string',
+          },
+          checkObjects: {
+            title: 'Array of items to search',
+            type: 'array',
+          },
+          matchFields: {
+            title: 'Fields to match ',
+            type: 'string',
+          },
+          matchVal: {
+            title: 'Value to return if matches',
+            type: 'string',
+          },
+          noMatchVal: {
+            title: 'Value to return if no match found',
+            type: 'string',
+          },
+        },
+      },
+      js: findMatchAction,
+      outputSchema: {
+        type: 'object',
+        description: 'The first found property in any of the objects',
+      },
+    },
+    findMatchingObject: {
+      description: 'Find combination of values in the objects',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          source: {
+            title: 'Object to get match values from',
+            type: 'object',
+          },
+          sourceFields: {
+            title: 'Fields to search for, comma separated',
+            type: 'string',
+          },
+          checkObjects: {
+            title: 'Array of items to search',
+            type: 'array',
+          },
+          matchFields: {
+            title: 'Fields to match ',
+            type: 'string',
+          },
+        },
+      },
+      js: findMatchingObjectAction,
+      outputSchema: {
+        type: 'object',
+        description: 'The first found property in any of the objects',
+      },
+    },
+    findWithPrefernce: {
+      description: 'Find values with preference to earlier ones',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          fields: {
+            title: 'Fields to search for, comma separated',
+            type: 'string',
+          },
+          objects: {
+            title: 'Array of items to search',
+            type: 'array',
+          },
+        },
+      },
+      js: findWithPrefernceAction,
+      outputSchema: {
+        type: 'object',
+        description: 'The first found property in any of the objects',
+      },
+    },
+    findWithPrefernceOrDefault: {
+      description: 'Find values with preference to earlier ones',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          fields: {
+            title: 'Fields to search for, comma separated',
+            type: 'string',
+          },
+          objects: {
+            title: 'Array of items to search',
+            type: 'array',
+          },
+          defaultVal: {
+            title: 'Default value to return',
+            type: 'object',
+          },
+        },
+      },
+      js: findWithPrefernceOrDefaultAction,
+      outputSchema: {
+        type: 'object',
+      },
+    },
+    mapNested: {
+      description: 'Map',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          mapping: {
+            title: 'Mapping',
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                items: {
+                  title: 'Objects to add to the existing mapping objects',
+                  type: 'array',
+                },
+                nestedPath: {
+                  title: 'Path to the nested items',
+                  type: 'string',
+                },
+                mapByField: {
+                  title: 'Object field to map by',
+                  type: 'string',
+                },
+                setToField: {
+                  title: 'Result field to assign object to',
+                  type: 'string',
+                },
+              },
+            },
+          },
+        },
+      },
+      js: mapNestedAction,
+      outputSchema: {
+        type: 'object',
+        description: 'An array of the input map with the input objects mapped for each item',
+      },
+    },
+    mapToMap: {
+      description: 'Map',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          mapping: {
+            title: 'Mapping',
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                addToMap: {
+                  title: 'Mapped array to include new objects',
+                  type: 'array',
+                },
+                mapByField: {
+                  title: 'Object field to map by',
+                  type: 'string',
+                },
+                objects: {
+                  title: 'Objects to add to the existing mapping objects',
+                  type: 'array',
+                },
+                setToField: {
+                  title: 'Result field to assign object to',
+                  type: 'string',
+                },
+                refObject: {
+                  title: 'Object to take the value to match with the map by field value of object',
+                  type: 'string',
+                },
+                refProperty: {
+                  title: 'Property to take the value from the refObject to match with the map by field value of object',
+                  type: 'string',
+                },
+              },
+            },
+          },
+        },
+      },
+      js: mapToMapAction,
+      outputSchema: {
+        type: 'object',
+        description: 'An array of the input map with the input objects mapped for each item',
+      },
+    },
+    copyProperties1: {
+      description: 'Copy properties',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          source: {
+            title: 'Source object to copy from',
+            type: 'object',
+          },
+          destination: {
+            title: 'Destination object to copy to',
+            type: 'object',
+          },
+          fieldsMapping: {
+            title: 'Field Mapping as [source_Field,destination_Field]',
+            type: 'string',
+          },
+          rowSeparator: {
+            title: 'Row separator for the fieldsMapping array',
+            type: 'string',
+          },
+          columnSeparator: {
+            title: 'Column separator for the fieldsMapping array',
+            type: 'string',
+          },
+        },
+      },
+      js: copyProperties1Action,
+
+      outputSchema: {
+        type: 'object',
+        description: 'Object with the properties defined in fieldsMapping copied from the source',
+      },
+    },
+    copyPropertiesToItems: {
+      description: 'Copy properties',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          source: {
+            title: 'Source object to copy from',
+            type: 'object',
+          },
+          destination: {
+            title: 'Destination object to copy to',
+            type: 'object',
+          },
+          fieldsMapping: {
+            title: 'Field Mapping as [source_Field,destination_Field]',
+            type: 'string',
+          },
+          rowSeparator: {
+            title: 'Row separator for the fieldsMapping array',
+            type: 'string',
+          },
+          columnSeparator: {
+            title: 'Column separator for the fieldsMapping array',
+            type: 'string',
+          },
+        },
+      },
+      js: copyPropertiesToItemsAction,
+      outputSchema: {
+        type: 'object',
+      },
+    },
+    copyProperties: {
+      description: 'Map',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          mapping: {
+            title: 'Mapping',
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                source: {
+                  title: 'Source object to copy from',
+                  type: 'object',
+                },
+                destination: {
+                  title: 'Destination object to copy to',
+                  type: 'object',
+                },
+                fieldsMapping: {
+                  title: 'Field Mapping as array of string array[source_Field,destination_Field]',
+                  type: 'array',
+                },
+              },
+            },
+          },
+        },
+      },
+      js: copyPropertiesAction,
+      outputSchema: {
+        type: 'object',
+      },
+    },
+    createDetailTaxLine: {
+      description: 'CreateDetailTaxLines',
+      longDescription: 'Creates detail tax lines from TaxableLines',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          taxableLine: {
+            title: 'Create Detail TaxLines',
+            type: 'object',
+          },
+          detailLinesArray: {
+            title: 'Array of detail tax lines to push to',
+            type: 'array',
+          },
+          internalOrganizationId: {
+            title: 'LegalEntityId',
+            type: 'string',
+          },
+          legalEntityId: {
+            title: 'LegalEntityId',
+            type: 'string',
+          },
+          errorMessageTypeFlag: {
+            title: 'ErrorMessageTypeFlag',
+            type: 'string',
+          },
+          errorString: {
+            title: 'ErrorString',
+            type: 'string',
+          },
+        },
+      },
+      js:createDetailTaxLineAction,
+
+      outputSchema: {
+        type: 'array',
+        items: DetailTaxLineModel,
+      },
+    },
+    createDetailTaxLinesNoTax: {
+      description: 'CreateDetailTaxLines',
+      longDescription: 'Creates detail tax lines from TaxableLines',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          taxableLines: {
+            title: 'Create Detail TaxLines',
+            type: 'array',
+          },
+          internalOrganizationId: {
+            title: 'InternalOrganizationId',
+            type: 'string',
+          },
+          legalEntityId: {
+            title: 'LegalEntityId',
+            type: 'string',
+          },
+          errorMessageTypeFlag: {
+            title: 'ErrorMessageTypeFlag',
+            type: 'string',
+          },
+          errorString: {
+            title: 'ErrorString',
+            type: 'string',
+          },
+        },
+      },
+      js: createDetailTaxLinesNoTaxAction,
+
+      outputSchema: {
+        type: 'array',
+        items: DetailTaxLineModel,
+      },
+    },
+    convertToXMLResponse: {
+      description: 'convertToXml',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          data: {
+            title: 'Data',
+          },
+        },
+      },
+      js: convertToXMLResponseAction,
+      outputSchema: {
+        title: 'Data',
+      },
+    },
+    parseXML: {
+      description: 'Parse XML to Json',
+      longDescription: 'Parses XML and returns JSON',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          data: {
+            title: 'Data',
+          },
+        },
+      },
+      js: parseXMLAction,
+      outputSchema: {
+        title: 'Data',
+      },
+    },
+    convertToXmlAction: {
+      description: 'Convert json to xml',
+      longDescription: '',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          data: {
+            title: 'Data',
+            type: 'object',
+          },
+        },
+      },
+      js: convertToXmlActions,
+      outputSchema: {
+        type: 'object',
+        properties: {
+          status: {
+            type: 'integer',
+          },
+          headers: {
+            type: 'object',
+          },
+          body: {
+            type: 'object',
+          },
+        },
+      },
+    },
+  },
   expressionFunctions:{},
 };
 

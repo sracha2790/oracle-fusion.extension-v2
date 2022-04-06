@@ -1,33 +1,27 @@
 export class ProRateTaxCalculator {
-  calculateProRateTax(
-    apSelfAssesTaxFlag: string,
-    vendorBilledTax,
-    avalaraTaxLines,
-    tolerancePct,
-    toleranceAmt
-  ) {
+  calculateProRateTax(apSelfAssesTaxFlag: string, vendorBilledTax, avalaraTaxLines, tolerancePct, toleranceAmt) {
     let proRateTaxDet = {};
 
     let overRides = new Map();
     let taxOverrideDetails = [];
     let vbtTaxAmtDetails = new Map();
 
-    proRateTaxDet["ReturnOnlyVbtLines"] = false;
-    proRateTaxDet["overRides"] = overRides;
-    proRateTaxDet["vbtTaxAmtDetails"] = vbtTaxAmtDetails;
-    proRateTaxDet["taxOverrideDetails"] = taxOverrideDetails;
+    proRateTaxDet['ReturnOnlyVbtLines'] = false;
+    proRateTaxDet['overRides'] = overRides;
+    proRateTaxDet['vbtTaxAmtDetails'] = vbtTaxAmtDetails;
+    proRateTaxDet['taxOverrideDetails'] = taxOverrideDetails;
 
-    if (apSelfAssesTaxFlag != "Y") {
-      proRateTaxDet["ReturnOnlyVbtLines"] = true;
+    if (apSelfAssesTaxFlag != 'Y') {
+      proRateTaxDet['ReturnOnlyVbtLines'] = true;
       for (const aoTl of avalaraTaxLines) {
         let taxDet = {};
-        taxDet["lineNumber"] = aoTl.lineNumber;
-        taxDet["override"] = aoTl.taxCalculated;
-        taxDet["taxRate"] = aoTl.rate * 100;
-        taxDet["taxDetails"] = aoTl.taxDetails;
-        taxDet["taxAmtTaxCurr"] = aoTl.tax;
-        taxDet["unroundedTaxAmt"] = aoTl.tax;
-        taxDet["ReturnVbtLineOnly"] = true; // will return vbt lines only
+        taxDet['lineNumber'] = aoTl.lineNumber;
+        taxDet['override'] = aoTl.taxCalculated;
+        taxDet['taxRate'] = aoTl.rate * 100;
+        taxDet['taxDetails'] = aoTl.taxDetails;
+        taxDet['taxAmtTaxCurr'] = aoTl.tax;
+        taxDet['unroundedTaxAmt'] = aoTl.tax;
+        taxDet['ReturnVbtLineOnly'] = true; // will return vbt lines only
         taxOverrideDetails.push(taxDet);
       }
       return proRateTaxDet;
@@ -64,12 +58,7 @@ export class ProRateTaxCalculator {
       totalTaxCalculated = 1;
     }
 
-    withinTolerance = this.isVBTDiffWithinTolerance(
-      vendorTax,
-      totalTaxCalculated,
-      tolerancePct,
-      toleranceAmt
-    );
+    withinTolerance = this.isVBTDiffWithinTolerance(vendorTax, totalTaxCalculated, tolerancePct, toleranceAmt);
     // console.log('vbtWithinTolerance : ' + withinTolerance)
 
     // check whether the vendortax was exact
@@ -79,8 +68,8 @@ export class ProRateTaxCalculator {
       // console.log('Line : ' + tl.lineNumber + ', Rate : ' + tl.rate)
       let taxDet = {};
       // Most scenarios will need taxCalculated to be set as override, so set it here and reset it when differ
-      taxDet["override"] = tl.taxCalculated;
-      taxDet["lineNumber"] = tl.lineNumber;
+      taxDet['override'] = tl.taxCalculated;
+      taxDet['lineNumber'] = tl.lineNumber;
       taxOverrideDetails.push(taxDet);
       // if (tl.rate > 0) {
 
@@ -100,60 +89,60 @@ export class ProRateTaxCalculator {
       // console.log('Balance : ' + parseFloat(balance))
       if (balance < 0) {
         overRides.set(tl.no, tl.taxCalculated); //set VBT -- correct one
-        taxDet["taxRate"] = tl.rate;
-        taxDet["taxDetails"] = tl.taxDetails;
-        taxDet["ReturnVbtLineOnly"] = true; // will return vbt lines only
+        taxDet['taxRate'] = tl.rate;
+        taxDet['taxDetails'] = tl.taxDetails;
+        taxDet['ReturnVbtLineOnly'] = true; // will return vbt lines only
         let taxToSet = 0;
         if (withinTolerance) {
           taxToSet = tl.tax;
         } else {
           taxToSet = tl.taxCalculated;
         }
-        taxDet["taxAmt"] = taxToSet;
-        taxDet["taxAmtTaxCurr"] = taxToSet;
-        taxDet["unroundedTaxAmt"] = taxToSet;
+        taxDet['taxAmt'] = taxToSet;
+        taxDet['taxAmtTaxCurr'] = taxToSet;
+        taxDet['unroundedTaxAmt'] = taxToSet;
 
         vbtTaxAmtDetails.set(tl.lineNumber, taxDet);
       } else if (balance > 0) {
-        proRateTaxDet["ReturnOnlyVbtLines"] = false;
+        proRateTaxDet['ReturnOnlyVbtLines'] = false;
         if (withinTolerance) {
           overRides.set(tl.lineNumber, tl.taxCalculated); // setting
-          taxDet["taxRate"] = tl.rate;
-          taxDet["taxAmt"] = tl.tax;
-          taxDet["taxAmtTaxCurr"] = tl.tax;
-          taxDet["unroundedTaxAmt"] = tl.tax;
+          taxDet['taxRate'] = tl.rate;
+          taxDet['taxAmt'] = tl.tax;
+          taxDet['taxAmtTaxCurr'] = tl.tax;
+          taxDet['unroundedTaxAmt'] = tl.tax;
 
-          taxDet["ReturnVbtLineOnly"] = true;
+          taxDet['ReturnVbtLineOnly'] = true;
         } else {
           if (idx == tlSize - 1) {
             finalProrateAmount = vendorTax - prevRunningProrateVBTTotal;
             overRides.set(tl.lineNumber, finalProrateAmount);
-            taxDet["override"] = finalProrateAmount;
-            taxDet["taxRate"] = (finalProrateAmount / totalTaxable) * 100;
-            taxDet["taxAmt"] = finalProrateAmount;
-            taxDet["taxAmtTaxCurr"] = finalProrateAmount;
-            taxDet["unroundedTaxAmt"] = finalProrateAmount;
+            taxDet['override'] = finalProrateAmount;
+            taxDet['taxRate'] = (finalProrateAmount / totalTaxable) * 100;
+            taxDet['taxAmt'] = finalProrateAmount;
+            taxDet['taxAmtTaxCurr'] = finalProrateAmount;
+            taxDet['unroundedTaxAmt'] = finalProrateAmount;
           } else {
             overRides.set(tl.lineNumber, prorateVBT);
-            taxDet["override"] = prorateVBT;
-            taxDet["taxRate"] = (prorateVBT / totalTaxable) * 100;
-            taxDet["taxAmt"] = prorateVBT;
-            taxDet["taxAmtTaxCurr"] = prorateVBT;
-            taxDet["unroundedTaxAmt"] = prorateVBT;
+            taxDet['override'] = prorateVBT;
+            taxDet['taxRate'] = (prorateVBT / totalTaxable) * 100;
+            taxDet['taxAmt'] = prorateVBT;
+            taxDet['taxAmtTaxCurr'] = prorateVBT;
+            taxDet['unroundedTaxAmt'] = prorateVBT;
           }
-          taxDet["ReturnVbtLineOnly"] = false;
+          taxDet['ReturnVbtLineOnly'] = false;
         }
         vbtTaxAmtDetails.set(tl.lineNumber, taxDet);
       } else {
-        proRateTaxDet["ReturnOnlyVbtLines"] = true;
+        proRateTaxDet['ReturnOnlyVbtLines'] = true;
 
         overRides.set(tl.lineNumber, tl.taxCalculated); // setting correct VBT
-        taxDet["taxRate"] = tl.rate;
-        taxDet["taxAmt"] = tl.taxCalculated;
-        taxDet["taxAmtTaxCurr"] = tl.taxCalculated;
-        taxDet["unroundedTaxAmt"] = tl.taxCalculated;
+        taxDet['taxRate'] = tl.rate;
+        taxDet['taxAmt'] = tl.taxCalculated;
+        taxDet['taxAmtTaxCurr'] = tl.taxCalculated;
+        taxDet['unroundedTaxAmt'] = tl.taxCalculated;
         // taxDet['taxDetails']=tl.getTaxDetails();
-        taxDet["ReturnVbtLineOnly"] = true;
+        taxDet['ReturnVbtLineOnly'] = true;
 
         vbtTaxAmtDetails.set(tl.lineNumber, taxDet);
       }
@@ -171,12 +160,7 @@ export class ProRateTaxCalculator {
     return proRateTaxDet;
   }
 
-  isVBTDiffWithinTolerance(
-    vendorBilledTax,
-    calculatedTax,
-    tolerancePct,
-    toleranceAmt
-  ) {
+  isVBTDiffWithinTolerance(vendorBilledTax, calculatedTax, tolerancePct, toleranceAmt) {
     if (vendorBilledTax == 0) {
       return false;
     }
@@ -201,32 +185,25 @@ export class ProRateTaxCalculator {
     let ZERO = 0;
     let HUNDRED = 100;
     // const fs = require("fs");
-    console.log("Test - proRateTest");
+    console.log('Test - proRateTest');
     // const file = '../docs/PRLMBDATST224005-res.json';
     // const file = '../docs/PRLMBDATST227044-res.json'
-    const file =
-      "/media/prajeesh/WORKSPACE/CLIENT/SMARTERP/AWS/TESTFILES/avaresp222_INVOICE_275004-2.json";
+    const file = '/media/prajeesh/WORKSPACE/CLIENT/SMARTERP/AWS/TESTFILES/avaresp222_INVOICE_275004-2.json';
 
     let vbt = 5000;
     // let avaTaxResponse = JSON.parse(fs.readFileSync(file, "utf-8"));
     let avaTaxResponse;
-    let proRateDetails = this.calculateProRateTax(
-      "Y",
-      vbt,
-      avaTaxResponse.lines,
-      0.5,
-      0.5
-    );
+    let proRateDetails = this.calculateProRateTax('Y', vbt, avaTaxResponse.lines, 0.5, 0.5);
 
     console.log(JSON.stringify(proRateDetails, null, 2));
-    console.log("--- Details ---");
-    for (let [key, val] of proRateDetails["overRides"]) {
-      console.log("Key : " + key);
+    console.log('--- Details ---');
+    for (let [key, val] of proRateDetails['overRides']) {
+      console.log('Key : ' + key);
       console.log(JSON.stringify(val, null, 2));
     }
-    console.log("--- OverRidesTaxDetails ---");
-    for (let [key, val] of proRateDetails["vbtTaxAmtDetails"]) {
-      console.log("Key : " + key);
+    console.log('--- OverRidesTaxDetails ---');
+    for (let [key, val] of proRateDetails['vbtTaxAmtDetails']) {
+      console.log('Key : ' + key);
       console.log(JSON.stringify(val, null, 2));
     }
   }
