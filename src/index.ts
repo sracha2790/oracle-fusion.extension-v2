@@ -1,11 +1,6 @@
 import { ProRateTaxDetailModel } from './openapimodels/ProRateTaxDetailModel';
 import { DetailTaxLineModel } from './openapimodels/DetailTaxLineModel';
 import * as packageJson from '../package.json';
-import {
-  AppknitSDK,
-  SdkAuthenticationCredentialType,
-  SdkHttpRequestOptions,
-} from 'appknit-platform-sdk-v2';
 import {  SdkExtension } from '@appknit-io/common-frameworks';
 import { 
   appendAction, 
@@ -94,27 +89,9 @@ export const toMappingArray = (arrayStr: string, colSeparator: string, mapSepara
   return colMap;
 }
 
-function addAuthenticationHeaders(
-  sdk: AppknitSDK,
-  requestOptions: SdkHttpRequestOptions,
-  credentialType: SdkAuthenticationCredentialType,
-  credential: any,
-): Promise<void> {
-  if (credential && credentialType == SdkAuthenticationCredentialType.custom) {
-    let secret = `${credential.username}:${credential.password}`;
-    secret = Buffer.from(secret, 'utf-8').toString('base64');
-    requestOptions.headers.Authorization = `Basic ${secret}`;
-    if (credential.endPoint) {
-      const url = new URL(credential.endPoint);
-      requestOptions.baseURL = url.origin;
-      requestOptions.path = url.pathname;
-    }
-  }
-  return;
-}
 
 const extension: SdkExtension = {
-  name: 'oracle-fusion-extension-v2',
+  name: 'oracle-fusion.extension-v2',
   websiteUrl: '',
   documentationUrl: '',
   iconUrl: '',

@@ -1,10 +1,10 @@
 {
-  "name": "oracle-fusion-extension-v2",
-  "version": "2.0.0",
+  "name": "oracle-fusion.extension-v2",
+  "version": "2.0.1",
   "description": "Oracle Fusion Tax Partner API connector",
   "main": "dist/index.js",
   "author": "Prince Kaushal <prince.kaushal@appknit.io>",
-  "repository": "https://bitbucket.org/appknit/oracle-fusion-extension-v2",
+  "repository": "https://bitbucket.org/appknit/oracle-fusion.extension-v2",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
