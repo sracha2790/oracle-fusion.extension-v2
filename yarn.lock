@@ -2,13 +2,12 @@
 # yarn lockfile v1
 
 
-"@appknit-io/common-frameworks@2.2.11":
-  version "2.2.11"
-  resolved "https://registry.yarnpkg.com/@appknit-io/common-frameworks/-/common-frameworks-2.2.11.tgz#1325665ea154ce9f943c487a9246af375cc9c01c"
-  integrity sha512-/h+V/ZssbwoHoqI7MK+q3DyT3RgmWVxiWIWSdYXEhHRc53iJ6BT6OMUzT9hySiCi+hlZVEYSZnHvyCDoVbqoWg==
+"@appknit-io/common-frameworks@2.3.2":
+  version "2.3.2"
+  resolved "https://registry.yarnpkg.com/@appknit-io/common-frameworks/-/common-frameworks-2.3.2.tgz#61596f973046d0f609a8e04f0b2805371c3b84a8"
+  integrity sha512-rod5aD6qBk+asLTMCuHmRZEyru+K+nY2vnEono8I25EBU5984UQVHNduYUU/dhM1aBwdgaKJh5oE11+SakG5Hw==
   dependencies:
-    appknit-platform-sdk "^1.0.63-0"
-    appknit-platform-sdk-v2 "^1.0.6-0"
+    appknit-platform-sdk-v2 "^1.0.8-0"
     class-transformer "^0.5.1"
     fast-formula-parser "^1.0.19"
     fast-redact "^3.1.0"
@@ -896,22 +895,10 @@ anymatch@^3.0.3:
     normalize-path "^3.0.0"
     picomatch "^2.0.4"
 
-appknit-platform-sdk-v2@^1.0.6-0:
-  version "1.0.6-0"
-  resolved "https://registry.yarnpkg.com/appknit-platform-sdk-v2/-/appknit-platform-sdk-v2-1.0.6-0.tgz#517718aedd15cc70a05f9d9822c3b8f5a5844763"
-  integrity sha512-yso1Lq2s9166IWyxGVnIXtd3k5uQ/kcr1XQy2of55Br1hYGNKep/yxRETPyymxySOlzUq3f/mdOEP6iB0CX5LA==
-  dependencies:
-    fast-xml-parser "^3.17.4"
-    form-data "^3.0.0"
-    lodash "^4.17.20"
-    mime-types "^2.1.27"
-    short-uuid "^3.1.1"
-    yaml "^1.10.0"
-
-appknit-platform-sdk@^1.0.63-0:
-  version "1.0.63-0"
-  resolved "https://registry.yarnpkg.com/appknit-platform-sdk/-/appknit-platform-sdk-1.0.63-0.tgz#6c9d68b6f44aff5cdeed6e92c1c62d085584c350"
-  integrity sha512-zKysXyFxcvjxRqnswGfkB8IrUeoEy9bSsV62/33nBWyNy811/ppcMLR5ocop00JN4qel0c+7w8pKHDQTyuJeGw==
+appknit-platform-sdk-v2@^1.0.8-0:
+  version "1.0.8-0"
+  resolved "https://registry.yarnpkg.com/appknit-platform-sdk-v2/-/appknit-platform-sdk-v2-1.0.8-0.tgz#de0acdf748c2637709d4526e68e6b6352f0bb70c"
+  integrity sha512-nu1GWNsv1qL4IpHNfZFbbn4KcEhIh0AizoGtnJEcuw5vR7sqm49JU3O8iKDsHYUNhIDtX4qcFPjpdR856SThkw==
   dependencies:
     fast-xml-parser "^3.17.4"
     form-data "^3.0.0"
