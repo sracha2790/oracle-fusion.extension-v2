@@ -7,10 +7,10 @@ import { DataMapper } from './connector/dataMapper';
 import { ProRateTaxCalculator } from './connector/proRateTaxCalculator';
 import { CsvToDocumentConverter } from './convert/CsvToDocumentConverter';
 import { DateIntervalUtil } from './utils/dateIntervalUtil';
-import { AppknitGraphSDK, SdkFlowFunctionArgument, SdkGraphFunctionArgument } from '@appknit-io/common-frameworks';
+import { AppknitGraphSDK } from '@appknit-io/common-frameworks';
 
-export const joinValuesAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { values, joiner } = input.configuration;
+export const joinValuesAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { values, joiner } = configuration;
   let result = '';
   if (values && values.length > 0) {
     for (let idx = 0; idx < values.length; idx++) {
@@ -23,8 +23,8 @@ export const joinValuesAction = (input: SdkFlowFunctionArgument | SdkGraphFuncti
   }
   return Promise.resolve(result);
 };
-export const toURLAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { urlString } = input.configuration;
+export const toURLAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { urlString } = configuration;
 
   const {
     href,
@@ -56,8 +56,8 @@ export const toURLAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArg
     hash,
   });
 };
-export const mapFusionSoapRequestAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { body } = input.configuration;
+export const mapFusionSoapRequestAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { body } = configuration;
   let mappedData;
   if (body) {
     const mapper = new DataMapper();
@@ -65,8 +65,8 @@ export const mapFusionSoapRequestAction = (input: SdkFlowFunctionArgument | SdkG
   }
   return Promise.resolve(mappedData);
 };
-export const filterByUniqueValuesAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { items, uniqueFields, selectBy } = input.configuration;
+export const filterByUniqueValuesAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { items, uniqueFields, selectBy } = configuration;
   const registry: { [k: string]: any } = {};
   if (items && items['length'] > 0) {
     for (let item of items) {
@@ -109,22 +109,20 @@ export const filterByUniqueValuesAction = (input: SdkFlowFunctionArgument | SdkG
   }
   return Promise.resolve(results);
 };
-export const splitAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { payload, separator } = input.configuration;
+export const splitAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { payload, separator } = configuration;
   return Promise.resolve(payload.split(separator));
 };
-export const splitAllAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { payload, separator } = input.configuration;
+export const splitAllAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { payload, separator } = configuration;
   let results = [];
   for (let str of payload) {
     results.push(str.split(separator));
   }
   return Promise.resolve(results);
 };
-export const toSeparateCsvsByFieldAction = (
-  input: SdkFlowFunctionArgument | SdkGraphFunctionArgument,
-): Promise<any> => {
-  const { payload, groupByField, header, columns, columnDelimiter } = input.configuration;
+export const toSeparateCsvsByFieldAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { payload, groupByField, header, columns, columnDelimiter } = configuration;
   let options = {};
   if (header) {
     options['header'] = true;
@@ -158,8 +156,8 @@ export const toSeparateCsvsByFieldAction = (
   }
   return Promise.resolve(resultObjects);
 };
-export const toCsvAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { payload, header, columns, columnDelimiter } = input.configuration;
+export const toCsvAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { payload, header, columns, columnDelimiter } = configuration;
   let options = {};
   if (header) {
     options['header'] = true;
@@ -173,8 +171,8 @@ export const toCsvAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArg
   let result = stringify(payload, options);
   return Promise.resolve(result);
 };
-export const joinMapAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { items, join, mapWith, mapEmptyJoin } = input.configuration;
+export const joinMapAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { items, join, mapWith, mapEmptyJoin } = configuration;
   let combinedResults = [];
   const itemsArray = Array.isArray(items) ? items : [items];
 
@@ -237,8 +235,8 @@ export const joinMapAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionA
   console.log('Returning ', results);
   return Promise.resolve(results);
 };
-export const replaceByLookupAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { items, lookups, replace } = input.configuration;
+export const replaceByLookupAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { items, lookups, replace } = configuration;
   let result = items;
   if (items && lookups && replace) {
     for (let item of items) {
@@ -283,10 +281,8 @@ export const replaceByLookupAction = (input: SdkFlowFunctionArgument | SdkGraphF
   }
   return Promise.resolve(result);
 };
-export const uniqueValuesFromFieldsAction = (
-  input: SdkFlowFunctionArgument | SdkGraphFunctionArgument,
-): Promise<any> => {
-  const { items, fields, childItems } = input.configuration;
+export const uniqueValuesFromFieldsAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { items, fields, childItems } = configuration;
   const result = [];
   for (let item of items) {
     if (fields) {
@@ -331,10 +327,8 @@ export const uniqueValuesFromFieldsAction = (
   }
   return Promise.resolve(result);
 };
-export const setCombinedFieldValuesAction = (
-  input: SdkFlowFunctionArgument | SdkGraphFunctionArgument,
-): Promise<any> => {
-  const { items, subPath, setToField, defaultVal, joiner, fields } = input.configuration;
+export const setCombinedFieldValuesAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { items, subPath, setToField, defaultVal, joiner, fields } = configuration;
   if (items) {
     let path;
     if (subPath && subPath.trim() != '.') {
@@ -384,10 +378,8 @@ export const setCombinedFieldValuesAction = (
   }
   return Promise.resolve(items);
 };
-export const getIntervalTimesAction = async (
-  input: SdkFlowFunctionArgument | SdkGraphFunctionArgument,
-): Promise<any> => {
-  const { last, dtPattern, interval, period, prior, future, combinedTenth } = input.configuration;
+export const getIntervalTimesAction = async (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { last, dtPattern, interval, period, prior, future, combinedTenth } = configuration;
   let dateSuffixes = await new DateIntervalUtil().getIntervalTimes(
     last,
     dtPattern,
@@ -399,8 +391,8 @@ export const getIntervalTimesAction = async (
   );
   return Promise.resolve(dateSuffixes);
 };
-export const convertToDocumentAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  let { data, docLevels } = input.configuration;
+export const convertToDocumentAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  let { data, docLevels } = configuration;
   let csvDocBuilder = new CsvToDocumentConverter();
   let csvDataJson = csvDocBuilder.parseCSVWithUpperCaseHeaders(data);
   // console.group('csvDataJson : ', csvDataJson);
@@ -424,13 +416,13 @@ export const convertToDocumentAction = (input: SdkFlowFunctionArgument | SdkGrap
   }
   return Promise.resolve(doc);
 };
-export const convertToDocumentsAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { documentDetails, processingConfig } = input.configuration;
+export const convertToDocumentsAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { documentDetails, processingConfig } = configuration;
 
   let configLen = processingConfig.length;
   // @TODO: remove this if block after missing functions are added to AppknitGraphSDK
 
-  if (input.sdk instanceof AppknitGraphSDK) {
+  if (sdk instanceof AppknitGraphSDK) {
     throw new SdkExecutionError(SdkGenericErrorCodes.invalidArgument, 'Invalid SDK');
   }
   let mappedDocs = {};
@@ -496,9 +488,9 @@ export const convertToDocumentsAction = (input: SdkFlowFunctionArgument | SdkGra
             let fileDocs = [];
             fileContent.documents = fileDocs;
             if (proConfig.contentType == 'xml') {
-              fileDocs.push(input.sdk.serialization.xml.parse(fileContent.fileData));
+              fileDocs.push(sdk.serialization.xml.parse(fileContent.fileData));
             } else if (proConfig.contentType == 'json') {
-              fileDocs.push(input.sdk.serialization.json.parse(fileContent.fileData));
+              fileDocs.push(sdk.serialization.json.parse(fileContent.fileData));
             } else {
               fileDocs.push(fileContent.fileData);
             }
@@ -573,9 +565,9 @@ export const convertToDocumentsAction = (input: SdkFlowFunctionArgument | SdkGra
             }
           } else {
             if (proConfig.contentType == 'xml') {
-              contentDocuments.push(input.sdk.serialization.xml.parse(docDet.Content.toString()));
+              contentDocuments.push(sdk.serialization.xml.parse(docDet.Content.toString()));
             } else if (proConfig.contentType == 'json') {
-              contentDocuments.push(input.sdk.serialization.json.parse(docDet.Content.toString()));
+              contentDocuments.push(sdk.serialization.json.parse(docDet.Content.toString()));
             } else {
               contentDocuments.push(docDet.Content.toString());
             }
@@ -588,8 +580,8 @@ export const convertToDocumentsAction = (input: SdkFlowFunctionArgument | SdkGra
 
   return Promise.resolve(mappedDocs);
 };
-export const groupByToObjectsAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { items, groupByField } = input.configuration;
+export const groupByToObjectsAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { items, groupByField } = configuration;
   let result = [];
   if (items) {
     let registry = {};
@@ -610,8 +602,8 @@ export const groupByToObjectsAction = (input: SdkFlowFunctionArgument | SdkGraph
   }
   return Promise.resolve(result);
 };
-export const groupByAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { items, groupByFields, aggregations } = input.configuration;
+export const groupByAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { items, groupByFields, aggregations } = configuration;
 
   let aggregatedGroups = [];
 
@@ -648,8 +640,8 @@ export const groupByAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionA
 
   return Promise.resolve(aggregatedGroups);
 };
-export const mergeToItemsAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { mergeTo, mergeItems, matchFields, copyFields, levels } = input.configuration;
+export const mergeToItemsAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { mergeTo, mergeItems, matchFields, copyFields, levels } = configuration;
   for (let obj of mergeTo) {
     let matchingItem;
     for (let incoming of mergeItems) {
@@ -723,9 +715,10 @@ export const mergeToItemsAction = (input: SdkFlowFunctionArgument | SdkGraphFunc
   return mergeTo;
 };
 export const filterItemsWithPropertyMatchingAction = (
-  input: SdkFlowFunctionArgument | SdkGraphFunctionArgument,
+  sdk: AppknitSDK | AppknitGraphSDK,
+  configuration: any,
 ): Promise<any> => {
-  const { items, filterField, filterValues } = input.configuration;
+  const { items, filterField, filterValues } = configuration;
   let result = [];
   let found = false;
   const values = filterValues;
@@ -773,10 +766,8 @@ export const filterItemsWithPropertyMatchingAction = (
   }
   return Promise.resolve({ found, result });
 };
-export const flattenHierarchyToMapAction = (
-  input: SdkFlowFunctionArgument | SdkGraphFunctionArgument,
-): Promise<any> => {
-  const { items, itemName, arrayPropertyPath, arrayItemName } = input.configuration;
+export const flattenHierarchyToMapAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { items, itemName, arrayPropertyPath, arrayItemName } = configuration;
   const pathArr = arrayPropertyPath.split('/');
   const result = [];
   for (const item of items) {
@@ -808,15 +799,13 @@ export const flattenHierarchyToMapAction = (
   }
   return Promise.resolve(result);
 };
-export const combineArraysAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { items } = input.configuration;
+export const combineArraysAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { items } = configuration;
   let result = [].concat.apply([], items);
   return Promise.resolve(result.filter(n => n !== null && n !== undefined));
 };
-export const separateItemsByConditionAction = (
-  input: SdkFlowFunctionArgument | SdkGraphFunctionArgument,
-): Promise<any> => {
-  const { items, condition } = input.configuration;
+export const separateItemsByConditionAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { items, condition } = configuration;
   //***** Each condition is done in a separate loop to avoid the if/switch for comaprison operation inside the loop *****/
   //***** This may not be optimal when multiple conditions need to be specified *****/
   //* TODO : Implement all the comparisons */
@@ -913,10 +902,8 @@ export const separateItemsByConditionAction = (
   }
   return Promise.resolve({ matching, nonMatching });
 };
-export const excludeItemsByConditionAction = (
-  input: SdkFlowFunctionArgument | SdkGraphFunctionArgument,
-): Promise<any> => {
-  const { items, condition } = input.configuration;
+export const excludeItemsByConditionAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { items, condition } = configuration;
 
   let result = [];
   if (condition.comparison == '==') {
@@ -995,10 +982,8 @@ export const excludeItemsByConditionAction = (
   }
   return Promise.resolve(result);
 };
-export const filterMatchShallowCopyAction = (
-  input: SdkFlowFunctionArgument | SdkGraphFunctionArgument,
-): Promise<any> => {
-  const { items, filterFields, filterValues } = input.configuration;
+export const filterMatchShallowCopyAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { items, filterFields, filterValues } = configuration;
 
   const fields = filterFields.split(',');
   const values = filterValues.split(',');
@@ -1017,8 +1002,8 @@ export const filterMatchShallowCopyAction = (
   }
   return Promise.resolve(result);
 };
-export const filterMatchAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { items, filterFields, filterValues } = input.configuration;
+export const filterMatchAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { items, filterFields, filterValues } = configuration;
 
   const fields = filterFields.split(',');
   const values = filterValues.split(',');
@@ -1037,8 +1022,8 @@ export const filterMatchAction = (input: SdkFlowFunctionArgument | SdkGraphFunct
   }
   return Promise.resolve(result);
 };
-export const proRateTaxesAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { apSelfAssesTaxFlag, vendorBilledTax, taxedLines, apTolerances } = input.configuration;
+export const proRateTaxesAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { apSelfAssesTaxFlag, vendorBilledTax, taxedLines, apTolerances } = configuration;
 
   ////////////////////////////////////////////////////////////////////
   // Calculate proRateTaxes by ProRateTaxCalculator
@@ -1056,8 +1041,8 @@ export const proRateTaxesAction = (input: SdkFlowFunctionArgument | SdkGraphFunc
 
   return Promise.resolve(taxOverRideDtls);
 };
-export const createDetailTaxLinesAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { lineTaxAndDetail, commonValues, fieldsMapping } = input.configuration;
+export const createDetailTaxLinesAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { lineTaxAndDetail, commonValues, fieldsMapping } = configuration;
 
   const tlColMap = toMappingArray(
     fieldsMapping.taxableLineMapping,
@@ -1130,8 +1115,8 @@ export const createDetailTaxLinesAction = (input: SdkFlowFunctionArgument | SdkG
   wrapper['ns:DetailTaxLines'] = detTaxLines;
   return Promise.resolve(wrapper);
 };
-export const collectAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { argument, operation, defaultValue } = input.configuration;
+export const collectAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { argument, operation, defaultValue } = configuration;
 
   let collector = defaultValue ? defaultValue : 0;
 
@@ -1168,41 +1153,39 @@ export const collectAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionA
 
   return Promise.resolve(collector);
 };
-export const storeAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { data } = input.configuration;
+export const storeAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { data } = configuration;
 
   return Promise.resolve(data);
 };
-export const createObjectAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { data } = input.configuration;
+export const createObjectAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { data } = configuration;
   const madeObj = {};
   return Promise.resolve(madeObj);
 };
-export const createArrayAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { data } = input.configuration;
+export const createArrayAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { data } = configuration;
   const madeArray = [];
   return Promise.resolve(madeArray);
 };
-export const createNewObjectToArrayAction = (
-  input: SdkFlowFunctionArgument | SdkGraphFunctionArgument,
-): Promise<any> => {
-  const { objects } = input.configuration;
+export const createNewObjectToArrayAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { objects } = configuration;
   const addObject = {};
   objects.push(addObject);
   return Promise.resolve(objects);
 };
-export const pushObjectToArrayAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { item, objects } = input.configuration;
+export const pushObjectToArrayAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { item, objects } = configuration;
   objects.push(item);
   return Promise.resolve(objects);
 };
-export const appendAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { first, second, joiner } = input.configuration;
+export const appendAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { first, second, joiner } = configuration;
 
   return Promise.resolve(first + joiner + second);
 };
-export const sumAllAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { items, fields, separator } = input.configuration;
+export const sumAllAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { items, fields, separator } = configuration;
   const fieldsArr = fields.split(separator);
   const faLen = fieldsArr.length;
   const result = [];
@@ -1218,8 +1201,8 @@ export const sumAllAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionAr
   }
   return Promise.resolve(result);
 };
-export const matchAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { values, mapping } = input.configuration;
+export const matchAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { values, mapping } = configuration;
 
   let value: string = null;
   let max = 0;
@@ -1252,8 +1235,8 @@ export const matchAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArg
   return Promise.resolve(value);
   // return Promise.resolve(configuration);
 };
-export const matchCombinationAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { values, mapping, defVal } = input.configuration;
+export const matchCombinationAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { values, mapping, defVal } = configuration;
   const rowsStr = mapping.split('//');
   const rows = [];
   for (let row of rowsStr) {
@@ -1289,8 +1272,8 @@ export const matchCombinationAction = (input: SdkFlowFunctionArgument | SdkGraph
   }
   return Promise.resolve(value);
 };
-export const fieldValuesAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { fieldNames, item } = input.configuration;
+export const fieldValuesAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { fieldNames, item } = configuration;
   const result = [];
   const fnArray = fieldNames.split(',');
   for (const fn of fnArray) {
@@ -1299,14 +1282,14 @@ export const fieldValuesAction = (input: SdkFlowFunctionArgument | SdkGraphFunct
   return Promise.resolve(result);
   // return Promise.resolve(configuration);
 };
-export const setPropertyAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { setTo, fieldName, item } = input.configuration;
+export const setPropertyAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { setTo, fieldName, item } = configuration;
   setTo[fieldName] = item;
   return Promise.resolve(setTo);
   // return Promise.resolve(configuration);
 };
-export const setPropertiesAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { setTo, values } = input.configuration;
+export const setPropertiesAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { setTo, values } = configuration;
   for (let setVal of values) {
     let item = setTo;
     let fieldName = setVal.path;
@@ -1327,15 +1310,15 @@ export const setPropertiesAction = (input: SdkFlowFunctionArgument | SdkGraphFun
   }
   return Promise.resolve(setTo);
 };
-export const setReferenceToAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { items, propertyName, setTo } = input.configuration;
+export const setReferenceToAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { items, propertyName, setTo } = configuration;
   for (const item of items) {
     item[setTo] = item[propertyName];
   }
   return Promise.resolve(items);
 };
-export const setValuesToItemsAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { items, setValues: references } = input.configuration;
+export const setValuesToItemsAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { items, setValues: references } = configuration;
   for (const item of items) {
     for (let ref of references) {
       if (ref.setValue) {
@@ -1347,8 +1330,8 @@ export const setValuesToItemsAction = (input: SdkFlowFunctionArgument | SdkGraph
   }
   return Promise.resolve(items);
 };
-export const copyValueToNestedAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { items, propertyPath, copyValues } = input.configuration;
+export const copyValueToNestedAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { items, propertyPath, copyValues } = configuration;
   if (items) {
     if (propertyPath && propertyPath.includes('.')) {
     }
@@ -1378,10 +1361,8 @@ export const copyValueToNestedAction = (input: SdkFlowFunctionArgument | SdkGrap
   }
   return Promise.resolve(items);
 };
-export const pullUpAndSetReferenceToAction = (
-  input: SdkFlowFunctionArgument | SdkGraphFunctionArgument,
-): Promise<any> => {
-  const { items, propertyPath, setTo } = input.configuration;
+export const pullUpAndSetReferenceToAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { items, propertyPath, setTo } = configuration;
   if (items) {
     const pathArr = propertyPath.split('/');
     for (const item of items) {
@@ -1402,10 +1383,8 @@ export const pullUpAndSetReferenceToAction = (
   }
   return Promise.resolve(items);
 };
-export const cloneAndExecuteForEachAction = (
-  input: SdkFlowFunctionArgument | SdkGraphFunctionArgument,
-): Promise<any> => {
-  const { items, operations } = input.configuration;
+export const cloneAndExecuteForEachAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { items, operations } = configuration;
   let result = [];
   if (items) {
     let fn = [];
@@ -1422,8 +1401,8 @@ export const cloneAndExecuteForEachAction = (
   }
   return Promise.resolve({ found: result.length > 0, result });
 };
-export const executeForEachAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { items, operations } = input.configuration;
+export const executeForEachAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { items, operations } = configuration;
   if (items) {
     let fn = [];
     for (let index = 0; index < operations.length; index++) {
@@ -1437,10 +1416,8 @@ export const executeForEachAction = (input: SdkFlowFunctionArgument | SdkGraphFu
   }
   return Promise.resolve({ found: items && items.length > 0, result: items });
 };
-export const findItemsWithFieldValuesAction = (
-  input: SdkFlowFunctionArgument | SdkGraphFunctionArgument,
-): Promise<any> => {
-  const { items, matchFields } = input.configuration;
+export const findItemsWithFieldValuesAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { items, matchFields } = configuration;
 
   let result = [];
 
@@ -1459,9 +1436,10 @@ export const findItemsWithFieldValuesAction = (
   return Promise.resolve(result);
 };
 export const findItemsWithFieldValuesMatchingAction = (
-  input: SdkFlowFunctionArgument | SdkGraphFunctionArgument,
+  sdk: AppknitSDK | AppknitGraphSDK,
+  configuration: any,
 ): Promise<any> => {
-  const { items, matchFields } = input.configuration;
+  const { items, matchFields } = configuration;
 
   let result = [];
 
@@ -1479,8 +1457,8 @@ export const findItemsWithFieldValuesMatchingAction = (
   }
   return Promise.resolve(result);
 };
-export const findMatchAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { source, sourceFields, rawValues, checkObjects, matchFields, matchVal, noMatchVal } = input.configuration;
+export const findMatchAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { source, sourceFields, rawValues, checkObjects, matchFields, matchVal, noMatchVal } = configuration;
 
   const sfArr = sourceFields.split(',');
   let compareValues = [];
@@ -1513,8 +1491,8 @@ export const findMatchAction = (input: SdkFlowFunctionArgument | SdkGraphFunctio
   }
   return Promise.resolve(result);
 };
-export const findMatchingObjectAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { source, sourceFields, checkObjects, matchFields } = input.configuration;
+export const findMatchingObjectAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { source, sourceFields, checkObjects, matchFields } = configuration;
   let found = false;
   let result;
   if (checkObjects) {
@@ -1542,8 +1520,8 @@ export const findMatchingObjectAction = (input: SdkFlowFunctionArgument | SdkGra
   }
   return Promise.resolve({ found, result });
 };
-export const findWithPrefernceAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { fields, objects } = input.configuration;
+export const findWithPrefernceAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { fields, objects } = configuration;
 
   let result = null;
   let found = false;
@@ -1567,9 +1545,10 @@ export const findWithPrefernceAction = (input: SdkFlowFunctionArgument | SdkGrap
   return Promise.resolve({ found, result, matchingItem });
 };
 export const findWithPrefernceOrDefaultAction = (
-  input: SdkFlowFunctionArgument | SdkGraphFunctionArgument,
+  sdk: AppknitSDK | AppknitGraphSDK,
+  configuration: any,
 ): Promise<any> => {
-  const { fields, objects, defaultVal } = input.configuration;
+  const { fields, objects, defaultVal } = configuration;
   let result = null;
   let found = false;
   let matchingItem = null;
@@ -1594,8 +1573,8 @@ export const findWithPrefernceOrDefaultAction = (
   }
   return Promise.resolve({ found, result, matchingItem });
 };
-export const mapNestedAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { items, mapping } = input.configuration;
+export const mapNestedAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { items, mapping } = configuration;
   let combinedResults = [];
   let subMappings = [];
   for (let item of items) {
@@ -1632,8 +1611,8 @@ export const mapNestedAction = (input: SdkFlowFunctionArgument | SdkGraphFunctio
 
   return Promise.resolve(combinedResults);
 };
-export const mapToMapAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { addToMap, mapByField, objects, setToField, refObject, refProperty } = input.configuration;
+export const mapToMapAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { addToMap, mapByField, objects, setToField, refObject, refProperty } = configuration;
   if (addToMap && objects) {
     for (const mappingItem of addToMap) {
       const ref = mappingItem[refObject];
@@ -1652,8 +1631,8 @@ export const mapToMapAction = (input: SdkFlowFunctionArgument | SdkGraphFunction
   }
   return Promise.resolve(addToMap);
 };
-export const copyProperties1Action = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { source, destination, fieldsMapping, rowSeparator, columnSeparator } = input.configuration;
+export const copyProperties1Action = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { source, destination, fieldsMapping, rowSeparator, columnSeparator } = configuration;
 
   const rows = fieldsMapping.split(rowSeparator);
   for (const row of rows) {
@@ -1662,10 +1641,8 @@ export const copyProperties1Action = (input: SdkFlowFunctionArgument | SdkGraphF
   }
   return Promise.resolve(destination);
 };
-export const copyPropertiesToItemsAction = (
-  input: SdkFlowFunctionArgument | SdkGraphFunctionArgument,
-): Promise<any> => {
-  const { source, destination, fieldsMapping, rowSeparator, columnSeparator } = input.configuration;
+export const copyPropertiesToItemsAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { source, destination, fieldsMapping, rowSeparator, columnSeparator } = configuration;
 
   const rows = fieldsMapping.split(rowSeparator);
   for (const row of rows) {
@@ -1674,15 +1651,15 @@ export const copyPropertiesToItemsAction = (
   }
   return Promise.resolve(destination);
 };
-export const copyPropertiesAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
-  const { mapping } = input.configuration;
+export const copyPropertiesAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { mapping } = configuration;
 
   for (const fieldMap of mapping.fieldsMapping) {
     mapping.destination[fieldMap[1]] = mapping.source[fieldMap[0]];
   }
   return Promise.resolve(mapping.destination);
 };
-export const createDetailTaxLineAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
+export const createDetailTaxLineAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
   const {
     taxableLine,
     detailLinesArray,
@@ -1690,7 +1667,7 @@ export const createDetailTaxLineAction = (input: SdkFlowFunctionArgument | SdkGr
     legalEntityId,
     errorMessageTypeFlag,
     errorString,
-  } = input.configuration;
+  } = configuration;
   const detailTaxLine = {};
   detailTaxLine['ErrorMessageTypeFlag'] = errorMessageTypeFlag;
   detailTaxLine['ErrorString'] = errorString;
@@ -1714,15 +1691,10 @@ export const createDetailTaxLineAction = (input: SdkFlowFunctionArgument | SdkGr
   return Promise.resolve(detailTaxLine);
 };
 export const createDetailTaxLinesNoTaxAction = (
-  input: SdkFlowFunctionArgument | SdkGraphFunctionArgument,
+  sdk: AppknitSDK | AppknitGraphSDK,
+  configuration: any,
 ): Promise<any> => {
-  const {
-    taxableLines,
-    internalOrganizationId,
-    legalEntityId,
-    errorMessageTypeFlag,
-    errorString,
-  } = input.configuration;
+  const { taxableLines, internalOrganizationId, legalEntityId, errorMessageTypeFlag, errorString } = configuration;
   const detailTaxLines = [];
   for (const inputLine of taxableLines) {
     const detailTaxLine = {};
@@ -1746,33 +1718,33 @@ export const createDetailTaxLinesNoTaxAction = (
   }
   return Promise.resolve(detailTaxLines);
 };
-export const convertToXMLResponseAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
+export const convertToXMLResponseAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
   // @TODO: remove this if block after missing functions are added to AppknitGraphSDK
 
-  if (input.sdk instanceof AppknitGraphSDK) {
+  if (sdk instanceof AppknitGraphSDK) {
     throw new SdkExecutionError(SdkGenericErrorCodes.invalidArgument, 'Invalid SDK');
   }
-  const { data } = input.configuration;
-  const xml = input.sdk.serialization.xml.stringify(data);
+  const { data } = configuration;
+  const xml = sdk.serialization.xml.stringify(data);
   return Promise.resolve(data);
 };
-export const parseXMLAction = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
+export const parseXMLAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
   // @TODO: remove this if block after missing functions are added to AppknitGraphSDK
 
-  if (input.sdk instanceof AppknitGraphSDK) {
+  if (sdk instanceof AppknitGraphSDK) {
     throw new SdkExecutionError(SdkGenericErrorCodes.invalidArgument, 'Invalid SDK');
   }
-  const { data } = input.configuration;
-  const json = input.sdk.serialization.xml.parse(data);
+  const { data } = configuration;
+  const json = sdk.serialization.xml.parse(data);
   return Promise.resolve(json);
 };
-export const convertToXmlActions = (input: SdkFlowFunctionArgument | SdkGraphFunctionArgument): Promise<any> => {
+export const convertToXmlActions = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
   // @TODO: remove this if block after missing functions are added to AppknitGraphSDK
 
-  if (input.sdk instanceof AppknitGraphSDK) {
+  if (sdk instanceof AppknitGraphSDK) {
     throw new SdkExecutionError(SdkGenericErrorCodes.invalidArgument, 'Invalid SDK');
   }
-  const { jsonData } = input.configuration;
-  const xmlData = input.sdk.serialization.xml.stringify(jsonData);
+  const { jsonData } = configuration;
+  const xmlData = sdk.serialization.xml.stringify(jsonData);
   return Promise.resolve(xmlData);
 };

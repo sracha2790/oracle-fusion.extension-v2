@@ -91,7 +91,7 @@ export const toMappingArray = (arrayStr: string, colSeparator: string, mapSepara
 
 
 const extension: SdkExtension = {
-  name: 'oracle-fusion.extension-v2',
+  name: 'oracleFusion',
   websiteUrl: '',
   documentationUrl: '',
   iconUrl: '',
