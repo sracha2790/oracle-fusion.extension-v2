@@ -1,6 +1,11 @@
 import { DocLevelDefinition } from './../batchfile/FileProcessingConfiguration';
 import { CsvToDocumentConverter } from './../convert/CsvToDocumentConverter';
-import { AppknitSDK, SdkHttpMethod, SdkHttpRequestOptions, SdkHttpResponse } from 'appknit-platform-sdk-v2';
+import {
+  AppknitSDK,
+  SdkHttpMethod,
+  SdkHttpRequestOptions,
+  SdkHttpResponse,
+} from '@appknit-project/appknit-platform-sdk-v2';
 import * as zlib from 'zlib';
 const parser = require('fast-xml-parser');
 

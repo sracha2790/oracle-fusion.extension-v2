@@ -1,4 +1,4 @@
-import { AppknitSDK } from 'appknit-platform-sdk-v2';
+import { AppknitSDK } from '@appknit-project/appknit-platform-sdk-v2';
 import { CsvToDocumentConverter } from './../convert/CsvToDocumentConverter';
 import { FileProcessingConfiguration } from './FileProcessingConfiguration';
 import { DocumentDetails } from './DocumentDetails';

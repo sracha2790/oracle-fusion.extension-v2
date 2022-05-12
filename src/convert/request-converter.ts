@@ -1,5 +1,5 @@
 // import * as fs from "fs";
-import { AppknitSDK } from 'appknit-platform-sdk-v2';
+import { AppknitSDK } from '@appknit-project/appknit-platform-sdk-v2';
 
 export class RequestConverter {
   convertFusionRequestToJson = (request: string) => {

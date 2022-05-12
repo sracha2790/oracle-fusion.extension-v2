@@ -1,4 +1,4 @@
-import { AppknitSDK, SdkExecutionError, SdkGenericErrorCodes } from 'appknit-platform-sdk-v2';
+import { AppknitSDK, SdkExecutionError, SdkGenericErrorCodes } from '@appknit-project/appknit-platform-sdk-v2';
 import { stringify } from 'csv/lib/sync';
 import { CollectOperation, toMappingArray } from './index';
 import { DocumentDetails } from './batchfile/DocumentDetails';
@@ -7,7 +7,7 @@ import { DataMapper } from './connector/dataMapper';
 import { ProRateTaxCalculator } from './connector/proRateTaxCalculator';
 import { CsvToDocumentConverter } from './convert/CsvToDocumentConverter';
 import { DateIntervalUtil } from './utils/dateIntervalUtil';
-import { AppknitGraphSDK } from '@appknit-io/common-frameworks';
+import { AppknitGraphSDK } from '@appknit-project/common-frameworks';
 
 export const joinValuesAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
   const { values, joiner } = configuration;

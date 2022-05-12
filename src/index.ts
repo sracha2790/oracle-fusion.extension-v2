@@ -1,7 +1,7 @@
 import { ProRateTaxDetailModel } from './openapimodels/ProRateTaxDetailModel';
 import { DetailTaxLineModel } from './openapimodels/DetailTaxLineModel';
 import * as packageJson from '../package.json';
-import {  SdkExtension } from '@appknit-io/common-frameworks';
+import {  SdkExtension } from '@appknit-project/common-frameworks';
 import { 
   appendAction, 
   cloneAndExecuteForEachAction, 
@@ -98,7 +98,7 @@ const extension: SdkExtension = {
   description: 'Oracle Fusion Tax Partner API Extension - Listener for Tax Calls from Fusion',
   longDescription: 'Oracle Fusion Tax Partner API Extension - Listener for Tax Calls from Fusion',
   version: packageJson.version,
-  platformVersion: packageJson.dependencies['@appknit-io/common-frameworks'],
+  platformVersion: packageJson.dependencies['@appknit-project/common-frameworks'],
   releaseChanges: 'Created extension',
   flowFunctions: {
     joinValues: {

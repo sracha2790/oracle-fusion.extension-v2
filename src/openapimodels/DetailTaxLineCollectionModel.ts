@@ -1,5 +1,5 @@
 import { DetailTaxLineModel } from './DetailTaxLineModel';
-import { SdkOpenApiSchemaProperty } from 'appknit-platform-sdk-v2';
+import { SdkOpenApiSchemaProperty } from '@appknit-project/appknit-platform-sdk-v2';
 
 export const DetailTaxLineCollectionModel: SdkOpenApiSchemaProperty = {
   description: 'DetailTaxLineCollectionModel',

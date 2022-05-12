@@ -1,4 +1,9 @@
-import { AppknitSDK, SdkHttpMethod, SdkHttpRequestOptions, SdkHttpResponse } from 'appknit-platform-sdk-v2';
+import {
+  AppknitSDK,
+  SdkHttpMethod,
+  SdkHttpRequestOptions,
+  SdkHttpResponse,
+} from '@appknit-project/appknit-platform-sdk-v2';
 const parser = require('fast-xml-parser');
 import * as zlib from 'zlib';
 // import * as fs from 'fs'
