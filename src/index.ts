@@ -2,6 +2,7 @@ import { ProRateTaxDetailModel } from './openapimodels/ProRateTaxDetailModel';
 import { DetailTaxLineModel } from './openapimodels/DetailTaxLineModel';
 import * as packageJson from '../package.json';
 import {  SdkExtension } from '@appknit-project/common-frameworks';
+import * as expressionFunctions from './expression-functions'
 import { 
   appendAction, 
   cloneAndExecuteForEachAction, 
@@ -3500,7 +3501,7 @@ const extension: SdkExtension = {
       },
     },
   },
-  expressionFunctions:{},
+  expressionFunctions,
 };
 
 const wsdl =

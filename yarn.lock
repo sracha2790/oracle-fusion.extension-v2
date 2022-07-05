@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@appknit-project/appknit-platform-sdk-v2@^1.0.15-0":
-  version "1.0.15-0"
-  resolved "https://registry.yarnpkg.com/@appknit-project/appknit-platform-sdk-v2/-/appknit-platform-sdk-v2-1.0.15-0.tgz#84561a4be84df9e114c2ee53a649e7b0237bb7b2"
-  integrity sha512-SEZ5zt/QknrpwgOasSjsXEWYYziiskfFFLFfALHiT1WoSEatkrA7NBWMm5AJQAhkTpPCsXykaBOaadcbELI2uw==
+"@appknit-project/appknit-platform-sdk-v2@^1.0.20-0":
+  version "1.0.20-0"
+  resolved "https://registry.yarnpkg.com/@appknit-project/appknit-platform-sdk-v2/-/appknit-platform-sdk-v2-1.0.20-0.tgz#3372fcdbdf6b0a675525e47036bee41c3db275ef"
+  integrity sha512-SUEEjMYThF5+mEBeemRVj70WFvr9AHW7ub6hTdTWUqa7PBtcvkXXvIBVw6M6VNIvnG1Q7fcvmLOGbbcz8CFZdg==
   dependencies:
     appknit-platform-sdk-v2 "^1.0.11-0"
     fast-xml-parser "^3.17.4"
@@ -16,12 +16,12 @@
     short-uuid "^3.1.1"
     yaml "^1.10.0"
 
-"@appknit-project/common-frameworks@2.4.21":
-  version "2.4.21"
-  resolved "https://registry.yarnpkg.com/@appknit-project/common-frameworks/-/common-frameworks-2.4.21.tgz#4ed6a69b7e90aabb470dbb173e3fea923524bea3"
-  integrity sha512-9dpugr9DSiF+PZ6xTVNpbOE823M97OHLXOpmznN0q/+fIIiLdBwLZdffekfuFMH0R2y/BZYl98OMoAAGETNmNQ==
+"@appknit-project/common-frameworks@2.4.48":
+  version "2.4.48"
+  resolved "https://registry.yarnpkg.com/@appknit-project/common-frameworks/-/common-frameworks-2.4.48.tgz#7cfdce1b24aec4ed4d7f7c178cc4086d57b4e3bc"
+  integrity sha512-vf2FuDhwMqlvb4KJY0kQnvpRCFMjvuwICD2CL+H6NOig/sbtuX7RoqN/PjQpvKsOTj3F2nmZYgqCncE2WUbBkQ==
   dependencies:
-    "@appknit-project/appknit-platform-sdk-v2" "^1.0.15-0"
+    "@appknit-project/appknit-platform-sdk-v2" "^1.0.20-0"
     class-transformer "^0.5.1"
     fast-formula-parser "^1.0.19"
     fast-redact "^3.1.0"
