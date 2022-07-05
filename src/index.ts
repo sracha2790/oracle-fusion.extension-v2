@@ -42,6 +42,7 @@ import {
   joinMapAction, 
   joinValuesAction, 
   mapFusionSoapRequestAction, 
+  mapFusionSoapRequestActionV2, 
   mapNestedAction, 
   mapToMapAction, 
   matchAction, 
@@ -152,6 +153,22 @@ const extension: SdkExtension = {
         },
       },
       js: mapFusionSoapRequestAction,
+      outputSchema: {
+        type: 'object',
+      },
+    },
+    mapFusionSoapRequestV2: {
+      description: 'Map Fusion Soap Request values V2',
+      longDescription: 'Maps the fusion tax calculation request and create document and VBT details',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          body: {
+            type: 'object',
+          },
+        },
+      },
+      js: mapFusionSoapRequestActionV2,
       outputSchema: {
         type: 'object',
       },

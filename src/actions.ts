@@ -8,6 +8,7 @@ import { ProRateTaxCalculator } from './connector/proRateTaxCalculator';
 import { CsvToDocumentConverter } from './convert/CsvToDocumentConverter';
 import { DateIntervalUtil } from './utils/dateIntervalUtil';
 import { AppknitGraphSDK } from '@appknit-project/common-frameworks';
+import { DataMapperV2 } from './connector/dataMapperV2';
 
 export const joinValuesAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
   const { values, joiner } = configuration;
@@ -61,6 +62,15 @@ export const mapFusionSoapRequestAction = (sdk: AppknitSDK | AppknitGraphSDK, co
   let mappedData;
   if (body) {
     const mapper = new DataMapper();
+    mappedData = mapper.processIncomingSoapRequest(body);
+  }
+  return Promise.resolve(mappedData);
+};
+export const mapFusionSoapRequestActionV2 = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { body } = configuration;
+  let mappedData;
+  if (body) {
+    const mapper = new DataMapperV2();
     mappedData = mapper.processIncomingSoapRequest(body);
   }
   return Promise.resolve(mappedData);
