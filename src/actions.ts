@@ -90,14 +90,15 @@ export const checkAndProcessVBTDetailsAction = (sdk: AppknitSDK | AppknitGraphSD
 };
 
 export const mapToFusionResponse = async (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
-  const { avaTaxModel, fusionRequest, customerProfile, currentBusinessUnit, isUS2US, isCA2CA, isUS2CA, isIndia, isInternational } = configuration;
+  const { avaTaxModel, fusionRequest, customerProfile, currentBusinessUnit, vbtTaxAmtDetails,  isUS2US, isCA2CA, isUS2CA, isIndia, isInternational } = configuration;
   const responseBuilder = new ResponseBuilderService();
-  const result = await responseBuilder.createARResponse(
+  const result = await responseBuilder.createResponse(
     sdk,
     avaTaxModel,
     fusionRequest,
     customerProfile,
     currentBusinessUnit,
+    vbtTaxAmtDetails,
     isUS2US,
     isCA2CA,
     isUS2CA,

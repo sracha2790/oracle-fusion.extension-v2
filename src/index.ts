@@ -213,6 +213,9 @@ const extension: SdkExtension = {
           currentBusinessUnit: {
             type: 'object',
           },
+          vbtTaxAmtDetails : {
+            type: 'object',
+          },
           isUS2US: {
             type: 'boolean',
           },
