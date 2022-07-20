@@ -5,6 +5,7 @@ import {  SdkExtension } from '@appknit-project/common-frameworks';
 import * as expressionFunctions from './expression-functions'
 import { 
   appendAction, 
+  checkAndProcessVBTDetailsAction, 
   cloneAndExecuteForEachAction, 
   collectAction, 
   combineArraysAction, 
@@ -20,7 +21,9 @@ import {
   createDetailTaxLineAction, 
   createDetailTaxLinesAction, 
   createDetailTaxLinesNoTaxAction, 
+  createErrorResponse, 
   createNewObjectToArrayAction, 
+  createNoCalculationResponse, 
   createObjectAction, 
   excludeItemsByConditionAction, 
   executeForEachAction, 
@@ -44,6 +47,7 @@ import {
   mapFusionSoapRequestAction, 
   mapFusionSoapRequestActionV2, 
   mapNestedAction, 
+  mapToFusionResponse, 
   mapToMapAction, 
   matchAction, 
   matchCombinationAction, 
@@ -169,6 +173,96 @@ const extension: SdkExtension = {
         },
       },
       js: mapFusionSoapRequestActionV2,
+      outputSchema: {
+        type: 'object',
+      },
+    },
+
+    checkAndProcessVBTDetails: {
+      description: 'Check and Process VBT Details',
+      longDescription: 'Check and Process VBT Details',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          body: {
+            type: 'object',
+          },
+        },
+      },
+      js: checkAndProcessVBTDetailsAction,
+      outputSchema: {
+        type: 'object',
+      },
+    },
+
+    mapToFusionResponse: {
+      description: 'Map To Fusion Response',
+      longDescription: 'Map To Fusion Response.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          avaTaxModel: {
+            type: 'object',
+          },
+          fusionRequest: {
+            type: 'object',
+          },
+          customerProfile: {
+            type: 'object',
+          },
+          currentBusinessUnit: {
+            type: 'object',
+          },
+          isUS2US: {
+            type: 'boolean',
+          },
+          isUS2CA: {
+            type: 'boolean',
+          },
+          isCA2CA: {
+            type: 'boolean',
+          },
+          isIndia: {
+            type: 'boolean',
+          },
+          isInternational: {
+            type: 'boolean',
+          }, 
+        },
+      },
+      js: mapToFusionResponse,
+      outputSchema: {
+        type: 'object',
+      },
+    },
+    mapToFusionForNoCalculationResponse: {
+      description: 'Map To Fusion For No Calculation Response.',
+      longDescription: 'Map To Fusion For No Calculation Response.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+         message: {
+          type: 'string',
+         }
+        },
+      },
+      js: createNoCalculationResponse,
+      outputSchema: {
+        type: 'object',
+      },
+    },
+    mapToFusionForErrorResponse: {
+      description: 'Map To Fusion For Error Response.',
+      longDescription: 'Map To Fusion For Error Response.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+         message: {
+          type: 'string',
+         }
+        },
+      },
+      js: createErrorResponse,
       outputSchema: {
         type: 'object',
       },

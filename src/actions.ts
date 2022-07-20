@@ -9,6 +9,8 @@ import { CsvToDocumentConverter } from './convert/CsvToDocumentConverter';
 import { DateIntervalUtil } from './utils/dateIntervalUtil';
 import { AppknitGraphSDK } from '@appknit-project/common-frameworks';
 import { DataMapperV2 } from './connector/dataMapperV2';
+import { ResponseBuilderService } from './services/response-builder.service';
+import { configurationCodeRecord } from './services/configuration.service';
 
 export const joinValuesAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
   const { values, joiner } = configuration;
@@ -66,6 +68,7 @@ export const mapFusionSoapRequestAction = (sdk: AppknitSDK | AppknitGraphSDK, co
   }
   return Promise.resolve(mappedData);
 };
+
 export const mapFusionSoapRequestActionV2 = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
   const { body } = configuration;
   let mappedData;
@@ -75,6 +78,64 @@ export const mapFusionSoapRequestActionV2 = (sdk: AppknitSDK | AppknitGraphSDK, 
   }
   return Promise.resolve(mappedData);
 };
+
+export const checkAndProcessVBTDetailsAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { request, configCodes, currentBusinessUnit } = configuration;
+  let mappedData;
+
+    const mapper = new DataMapperV2();
+    mappedData = mapper.checkAndProcessVBTDetails(request, configCodes, currentBusinessUnit);
+  
+  return Promise.resolve(mappedData);
+};
+
+export const mapToFusionResponse = async (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { avaTaxModel, fusionRequest, customerProfile, currentBusinessUnit, isUS2US, isCA2CA, isUS2CA, isIndia, isInternational } = configuration;
+  const responseBuilder = new ResponseBuilderService();
+  const result = await responseBuilder.createARResponse(
+    sdk,
+    avaTaxModel,
+    fusionRequest,
+    customerProfile,
+    currentBusinessUnit,
+    isUS2US,
+    isCA2CA,
+    isUS2CA,
+    isIndia,
+    isInternational,
+  )
+
+  return result;
+};
+
+export const createNoCalculationResponse = async (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { message, fusionRequest, customerProfile, currentBusinessUnit } = configuration;
+  const responseBuilder = new ResponseBuilderService();
+  const result = await responseBuilder.createNoCalculationResponse(
+    sdk,
+    message,
+    fusionRequest,
+    customerProfile,
+    currentBusinessUnit,
+  )
+
+  return result;
+};
+
+export const createErrorResponse = async (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { message, fusionRequest, customerProfile, currentBusinessUnit } = configuration;
+  const responseBuilder = new ResponseBuilderService();
+  const result = await responseBuilder.createErrorResponse(
+    sdk,
+    message,
+    fusionRequest,
+    customerProfile,
+    currentBusinessUnit,
+  )
+
+  return result;
+};
+
 export const filterByUniqueValuesAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
   const { items, uniqueFields, selectBy } = configuration;
   const registry: { [k: string]: any } = {};
