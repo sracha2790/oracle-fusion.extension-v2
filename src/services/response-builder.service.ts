@@ -1,7 +1,7 @@
 import { AppknitSDK } from '@appknit-project/appknit-platform-sdk-v2';
 import { AppknitGraphSDK } from '@appknit-project/common-frameworks';
 import * as _ from 'lodash';
-import { Helpers } from 'src/utils/helpers';
+import { Helpers } from '../../src/utils/helpers';
 import { getConfigurationCodeValue } from '../../src/expression-functions';
 import { ConfigurationCodesService } from './configuration.service';
 import { JurisDataMapper } from './juris-mapper.service';
