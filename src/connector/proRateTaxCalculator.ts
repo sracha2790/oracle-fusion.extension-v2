@@ -109,7 +109,7 @@ export class ProRateTaxCalculator {
       } else if (balance > 0) {
         result['ReturnOnlyVbtLines'] = false;
         if (withinTolerance) {
-          taxOverrides.set(avalaraTaxLine.lineNumber, avalaraTaxLine.taxCalculated); // setting
+          taxOverrides[avalaraTaxLine.lineNumber] = avalaraTaxLine.taxCalculated; // setting
           taxDet['taxRate'] = avalaraTaxLine.rate;
           taxDet['taxAmt'] = avalaraTaxLine.tax;
           taxDet['taxAmtTaxCurr'] = avalaraTaxLine.tax;
@@ -118,14 +118,14 @@ export class ProRateTaxCalculator {
         } else {
           if (i == tlSize - 1) {
             finalProrateAmount = vendorTax - prevRunningProrateVBTTotal;
-            taxOverrides.set(avalaraTaxLine.lineNumber, finalProrateAmount);
+            taxOverrides[avalaraTaxLine.lineNumber] = finalProrateAmount;
             taxDet['override'] = finalProrateAmount;
             taxDet['taxRate'] = (finalProrateAmount / totalTaxable) * 100;
             taxDet['taxAmt'] = finalProrateAmount;
             taxDet['taxAmtTaxCurr'] = finalProrateAmount;
             taxDet['unroundedTaxAmt'] = finalProrateAmount;
           } else {
-            taxOverrides.set(avalaraTaxLine.lineNumber, prorateVBT);
+            taxOverrides[avalaraTaxLine.lineNumber] = prorateVBT;
             taxDet['override'] = prorateVBT;
             taxDet['taxRate'] = (prorateVBT / totalTaxable) * 100;
             taxDet['taxAmt'] = prorateVBT;
@@ -137,7 +137,7 @@ export class ProRateTaxCalculator {
         // vbtTaxAmtDetails.set(avalaraTaxLine.lineNumber, taxDet);
       } else {
         result['ReturnOnlyVbtLines'] = true;
-        taxOverrides.set(avalaraTaxLine.lineNumber, avalaraTaxLine.taxCalculated); // setting correct VBT
+        taxOverrides[avalaraTaxLine.lineNumber] = avalaraTaxLine.taxCalculated;
         taxDet['taxRate'] = avalaraTaxLine.rate;
         taxDet['taxAmt'] = avalaraTaxLine.taxCalculated;
         taxDet['taxAmtTaxCurr'] = avalaraTaxLine.taxCalculated;
@@ -146,7 +146,7 @@ export class ProRateTaxCalculator {
         taxDet['ReturnVbtLineOnly'] = true;
         // vbtTaxAmtDetails.set(avalaraTaxLine.lineNumber, taxDet);
       }
-      vbtTaxAmtDetails.set(avalaraTaxLine.lineNumber, taxDet);
+      vbtTaxAmtDetails[avalaraTaxLine.lineNumber] = taxDet;
       // } else {
 
       // }

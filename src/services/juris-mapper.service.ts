@@ -7,6 +7,7 @@ export class JurisDataMapper {
         private sdk: AppknitSDK | AppknitGraphSDK,
         private customerProfile: Record<string, any>,
         private currentBusinessUnit: Record<string, any>,
+        private currentLegalEntity: Record<string, any>,
         private isUS2US: boolean,
         private isCA2CA: boolean,
         private isUS2CA: boolean,
@@ -25,51 +26,51 @@ export class JurisDataMapper {
 
         if (avaTaxLineDetail.jurisType === 'STA') {
             queryResults = await this.sdk.adhocDataProvider.queryDataRecords(this.getJurisdictionQuery({
-                TAX_GEO_SOURCE: this.customerProfile.TAX_GEO_SOURCE,
-                JURIS_TYPE: 'STATE',
-                REGION: avaTaxLineDetail.region,
-                COUNTRY_CODE: avaTaxLineDetail.country,
+                ATX_GEO_SOURCE: this.customerProfile.ATX_CUSTOMER.ATX_GEO_SOURCE,
+                ATX_JURISDICTION_TYPE: 'STATE',
+                ATX_REGION: avaTaxLineDetail.region,
+                ATX_COUNTRY: avaTaxLineDetail.country,
             }));
         }
 
         if (avaTaxLineDetail.jurisType === 'CTY') {
             queryResults = await this.sdk.adhocDataProvider.queryDataRecords(this.getJurisdictionQuery({
-                TAX_GEO_SOURCE: this.customerProfile.TAX_GEO_SOURCE,
-                JURIS_TYPE: 'COUNTY',
-                REGION: avaTaxLineDetail.region,
-                COUNTRY_CODE: avaTaxLineDetail.country,
-                COUNTY: avaTaxLineDetail.jurisName
+                ATX_GEO_SOURCE: this.customerProfile.ATX_CUSTOMER.ATX_GEO_SOURCE,
+                ATX_JURISDICTION_TYPE: 'COUNTY',
+                ATX_REGION: avaTaxLineDetail.region,
+                ATX_COUNTRY: avaTaxLineDetail.country,
+                ATX_COUNTY: avaTaxLineDetail.jurisName
             }));
         }
 
         if (avaTaxLineDetail.jurisType === 'CIT') {
             queryResults = await this.sdk.adhocDataProvider.queryDataRecords(this.getJurisdictionQuery({
-                TAX_GEO_SOURCE: this.customerProfile.TAX_GEO_SOURCE,
-                JURIS_TYPE: 'CITY',
-                REGION: avaTaxLineDetail.region,
-                COUNTRY_CODE: avaTaxLineDetail.country,
-                CITY: avaTaxLineDetail.jurisName,
+                ATX_GEO_SOURCE: this.customerProfile.ATX_CUSTOMER.ATX_GEO_SOURCE,
+                ATX_JURISDICTION_TYPE: 'CITY',
+                ATX_REGION: avaTaxLineDetail.region,
+                ATX_COUNTRY: avaTaxLineDetail.country,
+                ATX_CITY: avaTaxLineDetail.jurisName,
             }));
         }
 
         if (avaTaxLineDetail.jurisType === 'STJ') {
             queryResults = await this.sdk.adhocDataProvider.queryDataRecords(this.getJurisdictionQuery({
-                TAX_GEO_SOURCE: this.customerProfile.TAX_GEO_SOURCE,
-                JURIS_TYPE: 'STJ',
-                COUNTRY_CODE: avaTaxLineDetail.country,
+                ATX_GEO_SOURCE: this.customerProfile.ATX_CUSTOMER.ATX_GEO_SOURCE,
+                ATX_JURISDICTION_TYPE: 'SPECIAL',
+                ATX_COUNTRY: avaTaxLineDetail.country,
             }));
         }
 
         if (!Array.isArray(queryResults) || queryResults[0]) {
-            detailTaxLine['ns:Tax'] = queryResults[0].TAX_CODE;
-            detailTaxLine['ns:TaxRateCode'] = queryResults[0].RATE_CODE;
-            detailTaxLine['ns:TaxStatusCode'] = queryResults[0].TAX_STATUS_CODE;
-            detailTaxLine['ns:TaxJurisdictionCode'] = this.currentBusinessUnit.JURIS_CODE_PREFIX + queryResults[0].JURIS_CODE;
-            if (queryResults[0].PROVIDER_REC_RATE > 0) {
-                detailTaxLine['ns:ProviderRecRate'] = queryResults[0].PROVIDER_REC_RATE;
+            detailTaxLine['ns:Tax'] = queryResults[0].ATX_TAX_CODE;
+            detailTaxLine['ns:TaxRateCode'] = queryResults[0].ATX_RATE_CODE;
+            detailTaxLine['ns:TaxStatusCode'] = queryResults[0].ATX_TAX_STATUS_CODE;
+            detailTaxLine['ns:TaxJurisdictionCode'] = this.currentLegalEntity.ATX_JURISDICTION_CODE_PREFIX + queryResults[0].ATX_JURISDICTION_CODE;
+            if (queryResults[0].ATX_PROVIDER_REC_RATE > 0) {
+                detailTaxLine['ns:ProviderRecRate'] = queryResults[0].ATX_PROVIDER_REC_RATE;
             };
-            if (queryResults[0].PROVIDER_REC_RATE_CODE > 0) {
-                detailTaxLine['ns:ProviderRecRateCode'] = queryResults[0].PROVIDER_REC_RATE_CODE;
+            if (queryResults[0].ATX_PROVIDER_REC_RATE_CODE > 0) {
+                detailTaxLine['ns:ProviderRecRateCode'] = queryResults[0].ATX_PROVIDER_REC_RATE_CODE;
             };
         }
     }
@@ -90,33 +91,33 @@ export class JurisDataMapper {
                 }
             });
             queryResults = await this.sdk.adhocDataProvider.queryDataRecords(this.getJurisdictionQuery({
-                TAX_GEO_SOURCE: this.customerProfile.TAX_GEO_SOURCE,
-                JURIS_TYPE: 'COUNTRY',
-                REGION: region,
-                COUNTRY_CODE: avaTaxLineDetail.country,
+                ATX_GEO_SOURCE: this.customerProfile.ATX_CUSTOMER.ATX_GEO_SOURCE,
+                ATX_JURISDICTION_TYPE: 'COUNTRY',
+                ATX_REGION: region,
+                ATX_COUNTRY: avaTaxLineDetail.country,
             }));
         }
 
         if (avaTaxLineDetail.jurisType === 'STA') {
 
             queryResults = await this.sdk.adhocDataProvider.queryDataRecords(this.getJurisdictionQuery({
-                TAX_GEO_SOURCE: this.customerProfile.TAX_GEO_SOURCE,
-                JURIS_TYPE: 'COUNTRY',
-                REGION: avaTaxLineDetail.region,
-                COUNTRY_CODE: avaTaxLineDetail.country,
+                ATX_GEO_SOURCE: this.customerProfile.ATX_CUSTOMER.ATX_GEO_SOURCE,
+                ATX_JURISDICTION_TYPE: 'COUNTRY',
+                ATX_REGION: avaTaxLineDetail.region,
+                ATX_COUNTRY: avaTaxLineDetail.country,
             }));
         }
 
         if (!Array.isArray(queryResults) || queryResults[0]) {
-            detailTaxLine['ns:Tax'] = queryResults[0].TAX_CODE;
-            detailTaxLine['ns:TaxRateCode'] = queryResults[0].RATE_CODE;
-            detailTaxLine['ns:TaxStatusCode'] = queryResults[0].TAX_STATUS_CODE;
-            detailTaxLine['ns:TaxJurisdictionCode'] = this.currentBusinessUnit.JURIS_CODE_PREFIX + queryResults[0].JURIS_CODE;
-            if (queryResults[0].PROVIDER_REC_RATE > 0) {
-                detailTaxLine['ns:ProviderRecRate'] = queryResults[0].PROVIDER_REC_RATE;
+            detailTaxLine['ns:Tax'] = queryResults[0].ATX_TAX_CODE;
+            detailTaxLine['ns:TaxRateCode'] = queryResults[0].ATX_RATE_CODE;
+            detailTaxLine['ns:TaxStatusCode'] = queryResults[0].ATX_TAX_STATUS_CODE;
+            detailTaxLine['ns:TaxJurisdictionCode'] = this.currentLegalEntity.ATX_JURISDICTION_CODE_PREFIX + queryResults[0].ATX_JURISDICTION_CODE;
+            if (queryResults[0].ATX_PROVIDER_REC_RATE > 0) {
+                detailTaxLine['ns:ProviderRecRate'] = queryResults[0].ATX_PROVIDER_REC_RATE;
             };
-            if (queryResults[0].PROVIDER_REC_RATE_CODE > 0) {
-                detailTaxLine['ns:ProviderRecRateCode'] = queryResults[0].PROVIDER_REC_RATE_CODE;
+            if (queryResults[0].ATX_PROVIDER_REC_RATE_CODE > 0) {
+                detailTaxLine['ns:ProviderRecRateCode'] = queryResults[0].ATX_PROVIDER_REC_RATE_CODE;
             };
         }
     }
@@ -130,26 +131,26 @@ export class JurisDataMapper {
         let queryResults: Record<string, any>;
 
 
-        if (avaTaxLineDetail.jurisType === 'STA') {
+        if (avaTaxLineDetail.jurisType == 'CNT') {
 
             queryResults = await this.sdk.adhocDataProvider.queryDataRecords(this.getJurisdictionQuery({
-                TAX_GEO_SOURCE: this.customerProfile.TAX_GEO_SOURCE,
-                JURIS_TYPE: 'STATE',
-                STATE: 'CANADA',
-                COUNTRY_CODE: 'US',
+                ATX_GEO_SOURCE: this.customerProfile.ATX_CUSTOMER.ATX_GEO_SOURCE,
+                ATX_JURISDICTION_TYPE: 'STATE',
+                ATX_STATE: 'CANADA',
+                ATX_COUNTRY: 'US',
             }));
         }
 
         if (!Array.isArray(queryResults) || queryResults[0]) {
-            detailTaxLine['ns:Tax'] = queryResults[0].TAX_CODE;
-            detailTaxLine['ns:TaxRateCode'] = queryResults[0].RATE_CODE;
-            detailTaxLine['ns:TaxStatusCode'] = queryResults[0].TAX_STATUS_CODE;
-            detailTaxLine['ns:TaxJurisdictionCode'] = this.currentBusinessUnit.JURIS_CODE_PREFIX + queryResults[0].JURIS_CODE;
-            if (queryResults[0].PROVIDER_REC_RATE > 0) {
-                detailTaxLine['ns:ProviderRecRate'] = queryResults[0].PROVIDER_REC_RATE;
+            detailTaxLine['ns:Tax'] = queryResults[0].ATX_TAX_CODE;
+            detailTaxLine['ns:TaxRateCode'] = queryResults[0].ATX_RATE_CODE;
+            detailTaxLine['ns:TaxStatusCode'] = queryResults[0].ATX_TAX_STATUS_CODE;
+            detailTaxLine['ns:TaxJurisdictionCode'] = this.currentLegalEntity.ATX_JURISDICTION_CODE_PREFIX + queryResults[0].ATX_JURISDICTION_CODE;
+            if (queryResults[0].ATX_PROVIDER_REC_RATE > 0) {
+                detailTaxLine['ns:ProviderRecRate'] = queryResults[0].ATX_PROVIDER_REC_RATE;
             };
-            if (queryResults[0].PROVIDER_REC_RATE_CODE > 0) {
-                detailTaxLine['ns:ProviderRecRateCode'] = queryResults[0].PROVIDER_REC_RATE_CODE;
+            if (queryResults[0].ATX_PROVIDER_REC_RATE_CODE > 0) {
+                detailTaxLine['ns:ProviderRecRateCode'] = queryResults[0].ATX_PROVIDER_REC_RATE_CODE;
             };
         }
     }
@@ -158,7 +159,7 @@ export class JurisDataMapper {
         const queryFilters = [];
         for (const key in whereClause) {
             const newClause = {};
-            newClause[`@FIELD:JURIS_DATA.${key}`] = {
+            newClause[`@FIELD:ATX_JURIS_DATA.${key}`] = {
                 '@eq': `${whereClause[key]}`,
             }
             queryFilters.push(newClause);
@@ -167,16 +168,16 @@ export class JurisDataMapper {
 
         const query: AdhocQuery = {
             fieldSets: {
-                JURIS_DATA: 'oPDTkqKHHQjUTW52GYS2qy'
+                ATX_JURIS_DATA: 'oPDTkqKHHQjUTW52GYS2qy'
             },
             joins: undefined,
             select: {
-                TAX_CODE: '@FIELD:JURIS_DATA.TAX_CODE',
-                TAX_STATUS_CODE: '@FIELD:JURIS_DATA.TAX_STATUS_CODE',
-                JURIS_CODE: '@FIELD:JURIS_DATA.JURIS_CODE',
-                RATE_CODE: '@FIELD:JURIS_DATA.RATE_CODE',
-                PROVIDER_REC_DATE: '@FIELD:JURIS_DATA.PROVIDER_REC_DATE',
-                PROVIDER_REC_RATE_CODE: '@FIELD:JURIS_DATA.PROVIDER_REC_RATE_CODE',
+                ATX_TAX_CODE: '@FIELD:ATX_JURIS_DATA.ATX_TAX_CODE',
+                ATX_TAX_STATUS_CODE: '@FIELD:ATX_JURIS_DATA.ATX_TAX_STATUS_CODE',
+                ATX_JURISDICTION_CODE: '@FIELD:ATX_JURIS_DATA.ATX_JURISDICTION_CODE',
+                ATX_RATE_CODE: '@FIELD:ATX_JURIS_DATA.ATX_RATE_CODE',
+                ATX_PROVIDER_REC_DATE: '@FIELD:ATX_JURIS_DATA.ATX_PROVIDER_REC_DATE',
+                ATX_PROVIDER_REC_RATE_CODE: '@FIELD:ATX_JURIS_DATA.ATX_PROVIDER_REC_RATE_CODE',
             },
             filter: {
                 '@and': queryFilters,

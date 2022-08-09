@@ -1,7 +1,6 @@
 import { AppknitSDK } from '@appknit-project/appknit-platform-sdk-v2';
 import { AppknitGraphSDK } from '@appknit-project/common-frameworks';
 import * as _ from 'lodash';
-import { Helpers } from 'src/utils/helpers';
 import { getConfigurationCodeValue } from '../../src/expression-functions';
 import { ConfigurationCodesService } from './configuration.service';
 import { JurisDataMapper } from './juris-mapper.service';
@@ -38,32 +37,107 @@ export class ResponseBuilderService {
     }
 
     public async createResponse(
+        // sdk: AppknitSDK | AppknitGraphSDK,
+        // avaTaxModel: Record<string, any>,
+        // fusionRequest: Record<string, any>,
+        // customerProfile: Record<string, any>,
+        // currentBusinessUnit: Record<string, any>,
         vbtTaxAmtDetails: Record<string, any>,
+        // isUS2US: boolean,
+        // isCA2CA: boolean,
+        // isUS2CA: boolean,
+        // isIndia: boolean,
+        // isIntl: boolean,
     ) {
         vbtTaxAmtDetails = vbtTaxAmtDetails ? vbtTaxAmtDetails : {};
         switch (this.fusionRequest.header['ns:ApplicationShortname']) {
             case 'AR':
             case 'ONT':
-                return await this.createO2CResponse()
+                return await this.createO2CResponse(
+                    // sdk,
+                    // avaTaxModel,
+                    // fusionRequest,
+                    // customerProfile,
+                    // currentBusinessUnit,
+                    // isUS2US, isCA2CA, isUS2CA, isIndia, isIntl,
+                )
                 break;
             case 'AP':
             case 'PO':
-                return await this.createP2PResponse(vbtTaxAmtDetails)
+                return await this.createP2PResponse(
+                    // sdk,
+                    // avaTaxModel,
+                    // fusionRequest,
+                    // customerProfile,
+                    // currentBusinessUnit,
+                    vbtTaxAmtDetails,
+                    // isUS2US, isCA2CA, isUS2CA, isIndia, isIntl,
+                )
                 break;
         }
     }
 
     async createO2CResponse(
+        // sdk: AppknitSDK | AppknitGraphSDK,
+        // avaTaxModel: Record<string, any>,
+        // fusionRequest: Record<string, any>,
+        // customerProfile: Record<string, any>,
+        // currentBusinessUnit: Record<string, any>,
+        // isUS2US: boolean,
+        // isCA2CA: boolean,
+        // isUS2CA: boolean,
+        // isIndia: boolean,
+        // isIntl: boolean,
     ) {
+
+
         const detailTaxLines = [];
         let i = 1;
         for (const avaTaxLine of this.avaTaxModel.lines) {
-            if (Helpers.isCreditMemoAdditionalLine(avaTaxLine)) {
+            if ((avaTaxLine.lineNumber as string).endsWith('.1NT')) {
                 continue;
             }
             const matchingFusionLine = this.fusionRequest.lines.find(fusionLine => fusionLine['ns:TrxLineId'] == avaTaxLine.originationDocumentId);
             for (const avaTaxLineDetail of avaTaxLine.details) {
+                // const detailTaxLine: Record<string, any> = {};
+                // detailTaxLine['ns:ErrorMessageTypeFlag'] = 'S';
+                // detailTaxLine['ns:ApplicationId'] = matchingFusionLine['ns:ApplicationId'];
+                // detailTaxLine['ns:EntityCode'] = matchingFusionLine['ns:EntityCode'];
+                // detailTaxLine['ns:EventClassCode'] = matchingFusionLine['ns:EventClassCode'];
+                // detailTaxLine['ns:LineAmt'] = matchingFusionLine['ns:LineAmt'];
+                // detailTaxLine['ns:TrxId'] = matchingFusionLine['ns:TrxId'];
 
+                // detailTaxLine['ns:TrxLineCurrencyCode'] = matchingFusionLine['ns:TrxLineCurrencyCode'];
+                // detailTaxLine['ns:TaxCurrencyCode'] = matchingFusionLine['ns:TrxLineCurrencyCode'];
+                // detailTaxLine['ns:TrxLineId'] = matchingFusionLine['ns:TrxLineId'];
+                // detailTaxLine['ns:TrxLineNumber'] = matchingFusionLine['ns:TrxLineNumber'];
+                // detailTaxLine['ns:TrxLevelType'] = matchingFusionLine['ns:TrxLevelType'];
+                // detailTaxLine['ns:InternalOrganizationId'] = this.fusionRequest.header['ns:InternalOrganizationId'];
+
+                // detailTaxLine['ns:LegalEntityId'] = this.fusionRequest.header['ns:LegalEntityId'];
+
+                // detailTaxLine['ns:SelfAssessedFlag'] = 'N';
+
+
+                // detailTaxLine['ns:TaxRate'] = _.toString(_.toNumber(avaTaxLineDetail.rate) * 100);
+                // detailTaxLine['ns:TaxAmt'] = avaTaxLineDetail.taxCalculated;
+                // detailTaxLine['ns:TaxAmtTaxCurr'] = avaTaxLineDetail.taxCalculated;
+                // detailTaxLine['ns:UnroundedTaxAmt'] = avaTaxLineDetail.taxCalculated;
+
+                // detailTaxLine['ns:TrxDate'] = matchingFusionLine['ns:TrxDate'] ? matchingFusionLine['ns:TrxDate'] : this.fusionRequest.header['ns:TrxDate'];
+                // detailTaxLine['ns:TaxDate'] = matchingFusionLine['ns:TaxDate'] ? matchingFusionLine['ns:TaxDate'] : this.fusionRequest.header['ns:TaxDate'];
+                // detailTaxLine['ns:TaxDetermineDate'] = matchingFusionLine['ns:TaxDate'] ? matchingFusionLine['ns:TaxDate'] : this.fusionRequest.header['ns:TaxDate'];
+                // detailTaxLine['ns:UnroundedTaxableAmt'] = avaTaxLineDetail.taxableAmount;
+                // detailTaxLine['ns:TaxableAmt'] = avaTaxLineDetail.taxableAmount;
+                // detailTaxLine['ns:TaxableAmtCurr'] = avaTaxLineDetail.taxableAmount;
+                // detailTaxLine['ns:ManuallyEnteredFlag'] = 'N';
+                // detailTaxLine['ns:PlaceOfSupplyTypeCode'] = 'SHIP_TO';
+                // detailTaxLine['ns:ReportingOnlyFlag'] = 'N';
+                // detailTaxLine['ns:TaxRegimeCode'] = this.currentBusinessUnit.TAX_REGIME_CODE;
+
+                // if (avaTaxLine['ns:ref2']) {
+                //     detailTaxLine['ns:LegalJustificationText3'] = avaTaxLine.ref2;
+                // }
                 const detailTaxLine = this.buildFusionDetailTaxLine(
                     matchingFusionLine,
                     avaTaxLine,
@@ -71,6 +145,7 @@ export class ResponseBuilderService {
                     undefined,
                     'N'
                 );
+
 
                 if (this.isUS2US) {
                     await this.jurisDataMapper.mapJurisdictionForUS2US(
@@ -81,6 +156,7 @@ export class ResponseBuilderService {
                     )
 
                 }
+
                 const processUS2CATaxesSameAsCA2CA = await getConfigurationCodeValue.js(
                     {
                         calculableFramework: null,
@@ -137,18 +213,39 @@ export class ResponseBuilderService {
     };
 
     async createP2PResponse(
+        // sdk: AppknitSDK | AppknitGraphSDK,
+        // avaTaxModel: Record<string, any>,
+        // fusionRequest: Record<string, any>,
+        // customerProfile: Record<string, any>,
+        // currentBusinessUnit: Record<string, any>,
         vbtTaxAmtDetails: Record<string, any>,
+        // isUS2US: boolean,
+        // isCA2CA: boolean,
+        // isUS2CA: boolean,
+        // isIndia: boolean,
+        // isIntl: boolean,
     ) {
+
+
         const detailTaxLines = [];
+        const vbtDetailTaxLines = [];
+        for (const line of this.fusionRequest.lines) {
+            for (const detailTaxLine of line.detailTaxLines ? line.detailTaxLines : []) {
+                if (detailTaxLine['ns:ManuallyEnteredFlag'] == 'Y' && detailTaxLine['ns:CancelFlag'] == 'N' && detailTaxLine['ns:DeleteFlag'] == 'N') {
+                    vbtDetailTaxLines.push(detailTaxLine)
+                }
+            }
+        }
+
         let VendorLineHandledFlag = false;
-        if (this.isUS2US && this.avaTaxModel.totalTax == 0 && this.configurationCodesService.getCodeValue('CORRECT_VBT_FOR_OC') == 'Y') {
-            VendorLineHandledFlag = true;
-            for (const line of this.fusionRequest.lines) {
-                line.detailTaxLines.filter((detailTaxLine: Record<string, any>) => Helpers.isVBTDetailtaxLine(detailTaxLine)).forEach((vbtDetailTaxLine: Record<string, any>) => {
+        if (this.isUS2US) {
+            if (this.avaTaxModel.totalTax == 0 && this.configurationCodesService.getCodeValue('CORRECT_VBT_FOR_OC') == 'Y') {
+                vbtDetailTaxLines.forEach(vbtDetailTaxLine => {
                     vbtDetailTaxLine['ns:TaxAmt'] = 0
                     vbtDetailTaxLine['ns:UnroundedTaxAmt'] = 0
                     vbtDetailTaxLine['ns:TaxAmtTaxCurr'] = 0
                     vbtDetailTaxLine['ns:TaxRate'] = 0
+                    VendorLineHandledFlag = true;
                     this.addToDetailTaxLinesCollection(detailTaxLines, vbtDetailTaxLine)
                 })
             }
@@ -156,15 +253,16 @@ export class ResponseBuilderService {
 
         let i = 1;
         for (const avaTaxLine of this.avaTaxModel.lines) {
-            if (Helpers.isCreditMemoAdditionalLine(avaTaxLine)) {
+            if ((avaTaxLine.lineNumber as string).endsWith('.1NT')) {
                 continue;
             }
+
             const matchingFusionLine = this.fusionRequest.lines.find(fusionLine => fusionLine['ns:TrxLineId'] == avaTaxLine.originationDocumentId);
 
             const vbtTaxAmtDetail: Record<string, any> = vbtTaxAmtDetails[avaTaxLine.lineNumber];
             if (!VendorLineHandledFlag) {
                 for (const detailTaxLine of matchingFusionLine.detailTaxLines ? matchingFusionLine.detailTaxLines : []) {
-                    if (Helpers.isVBTDetailtaxLine(detailTaxLine)) {
+                    if (detailTaxLine['ns:ManuallyEnteredFlag'] == 'Y' && detailTaxLine['ns:CancelFlag'] == 'N' && detailTaxLine['ns:DeleteFlag'] == 'N') {
                         detailTaxLine['ns:TaxAmt'] = vbtTaxAmtDetail['taxAmt']
                         detailTaxLine['ns:UnroundedTaxAmt'] = vbtTaxAmtDetail['unroundedTaxAmt']
                         detailTaxLine['ns:TaxAmtTaxCurr'] = vbtTaxAmtDetail['taxAmtTaxCurr']
@@ -175,10 +273,13 @@ export class ResponseBuilderService {
             }
 
             if (vbtTaxAmtDetail?.ReturnVbtLineOnly) {
-                continue; // was BREAK before ASK KRISHNA
+                break;
             }
 
-            if (await this.returnNoTaxCalculationForAvaTaxLine(avaTaxLine)) {
+            if (
+                this.configurationCodesService.getCodeValue('AP_SELF_ASSESS_TAX') == 'Y'
+                && this.configurationCodesService.getCodeValue('BLOCK_AP_SELF_ASSESS_RESP') == 'Y'
+            ) {
                 this.addToDetailTaxLinesCollection(detailTaxLines, this.getNoCalculationDetailTaxLine(matchingFusionLine))
                 continue;
             }
@@ -188,8 +289,59 @@ export class ResponseBuilderService {
                     avaTaxLine,
                     avaTaxLineDetail,
                     undefined,
-                    this.fusionRequest.header['ns:ApplicationShortname'] == 'PO' ? 'N' : 'Y',
+                    this.fusionRequest.header['ns:ApplicationShortname'] == 'PO' ? 'N' :  'Y',
                 );
+                // detailTaxLine['ns:ErrorMessageTypeFlag'] = 'S';
+                // detailTaxLine['ns:ApplicationId'] = matchingFusionLine['ns:ApplicationId'];
+                // detailTaxLine['ns:EntityCode'] = matchingFusionLine['ns:EntityCode'];
+                // detailTaxLine['ns:EventClassCode'] = matchingFusionLine['ns:EventClassCode'];
+                // detailTaxLine['ns:LineAmt'] = matchingFusionLine['ns:LineAmt'];
+                // detailTaxLine['ns:TrxId'] = matchingFusionLine['ns:TrxId'];
+
+                // detailTaxLine['ns:TrxLineCurrencyCode'] = matchingFusionLine['ns:TrxLineCurrencyCode'];
+                // detailTaxLine['ns:TaxCurrencyCode'] = matchingFusionLine['ns:TrxLineCurrencyCode'];
+                // detailTaxLine['ns:TrxLineId'] = matchingFusionLine['ns:TrxLineId'];
+                // detailTaxLine['ns:TrxLineNumber'] = matchingFusionLine['ns:TrxLineNumber'];
+                // detailTaxLine['ns:TrxLevelType'] = matchingFusionLine['ns:TrxLevelType'];
+                // detailTaxLine['ns:InternalOrganizationId'] = this.fusionRequest.header['ns:InternalOrganizationId'];
+
+                // detailTaxLine['ns:LegalEntityId'] = this.fusionRequest.header['ns:LegalEntityId'];
+
+                // detailTaxLine['ns:SelfAssessedFlag'] = 'Y';
+                // if (this.fusionRequest.header['ns:ApplicationShortname'] == 'PO') {
+                //     detailTaxLine['ns:SelfAssessedFlag'] = 'N';
+                // }
+
+
+                // detailTaxLine['ns:TrxDate'] = matchingFusionLine['ns:TrxDate'] ? matchingFusionLine['ns:TrxDate'] : this.fusionRequest.header['ns:TrxDate'];
+                // detailTaxLine['ns:TaxDate'] = matchingFusionLine['ns:TaxDate'] ? matchingFusionLine['ns:TaxDate'] : this.fusionRequest.header['ns:TaxDate'];
+                // detailTaxLine['ns:TaxDetermineDate'] = matchingFusionLine['ns:TaxDate'] ? matchingFusionLine['ns:TaxDate'] : this.fusionRequest.header['ns:TaxDate'];
+
+                // detailTaxLine['ns:TaxRate'] = _.toString(_.toNumber(avaTaxLineDetail.rate) * 100);
+
+                // detailTaxLine['ns:TaxAmt'] = avaTaxLineDetail.taxCalculated;
+                // detailTaxLine['ns:TaxAmtTaxCurr'] = avaTaxLineDetail.taxCalculated;
+                // detailTaxLine['ns:UnroundedTaxAmt'] = avaTaxLineDetail.taxCalculated;
+
+                // if (vbtTaxAmtDetail && _.toNumber(avaTaxLineDetail.taxCalculated) > _.toNumber(avaTaxLineDetail.tax)) {
+                //     detailTaxLine['ns:TaxAmt'] = _.toString(_.toNumber(avaTaxLineDetail.taxCalculated) - _.toNumber(avaTaxLineDetail.tax));
+                //     detailTaxLine['ns:TaxAmtTaxCurr'] = _.toString(_.toNumber(avaTaxLineDetail.taxCalculated) - _.toNumber(avaTaxLineDetail.tax));
+                //     detailTaxLine['ns:UnroundedTaxAmt'] = _.toString(_.toNumber(avaTaxLineDetail.taxCalculated) - _.toNumber(avaTaxLineDetail.tax));
+                // }
+
+                // detailTaxLine['ns:UnroundedTaxableAmt'] = avaTaxLineDetail.taxableAmount;
+
+                // detailTaxLine['ns:TaxableAmt'] = avaTaxLineDetail.taxableAmount;
+                // detailTaxLine['ns:TaxableAmtCurr'] = avaTaxLineDetail.taxableAmount;
+                // detailTaxLine['ns:ManuallyEnteredFlag'] = 'N';
+                // detailTaxLine['ns:PlaceOfSupplyTypeCode'] = 'SHIP_TO';
+                // detailTaxLine['ns:ReportingOnlyFlag'] = 'N';
+                // detailTaxLine['ns:TaxRegimeCode'] = this.currentBusinessUnit.TAX_REGIME_CODE;
+
+                // if (avaTaxLine['ns:ref2']) {
+                //     detailTaxLine['ns:LegalJustificationText3'] = avaTaxLine.ref2;
+                // }
+
                 if (this.isUS2US) {
                     await this.jurisDataMapper.mapJurisdictionForUS2US(
                         detailTaxLine,
@@ -198,6 +350,7 @@ export class ResponseBuilderService {
                         avaTaxLineDetail,
                     )
                 }
+
                 if (
                     this.isCA2CA
                 ) {
@@ -208,6 +361,7 @@ export class ResponseBuilderService {
                         avaTaxLineDetail,
                     )
                 }
+
                 this.addToDetailTaxLinesCollection(detailTaxLines, detailTaxLine)
             }
         }
@@ -215,12 +369,12 @@ export class ResponseBuilderService {
     }
 
     async createNoCalculationResponse(
-        // sdk: AppknitSDK | AppknitGraphSDK,
-        // message: string,
-        // fusionRequest: Record<string, any>,
+        sdk: AppknitSDK | AppknitGraphSDK,
+        message: string,
+        fusionRequest: Record<string, any>,
     ) {
         const detailTaxLines = [];
-        for (const fusionRequestLine of this.fusionRequest.lines) {
+        for (const fusionRequestLine of fusionRequest.lines) {
             detailTaxLines.push(this.getNoCalculationDetailTaxLine(fusionRequestLine))
         }
         return detailTaxLines;
@@ -239,12 +393,12 @@ export class ResponseBuilderService {
     }
 
     async createErrorResponse(
-        // sdk: AppknitSDK | AppknitGraphSDK,
+        sdk: AppknitSDK | AppknitGraphSDK,
         message: string,
-        // fusionRequest: Record<string, any>,
+        fusionRequest: Record<string, any>,
     ) {
         const detailTaxLines = [];
-        for (const fusionRequestLine of this.fusionRequest.lines) {
+        for (const fusionRequestLine of fusionRequest.lines) {
             const detailTaxLine: Record<string, any> = {};
             detailTaxLine['ns:ErrorMessageTypeFlag'] = 'E';
             detailTaxLine['ns:ErrorString'] = message;
@@ -257,8 +411,8 @@ export class ResponseBuilderService {
             detailTaxLine['ns:TrxLineId'] = fusionRequestLine['ns:TrxLineId'];
             detailTaxLine['ns:TrxLineNumber'] = fusionRequestLine['ns:TrxLineNumber'];
             detailTaxLine['ns:TrxLevelType'] = fusionRequestLine['ns:TrxLineNumber'];
-            detailTaxLine['ns:InternalOrganizationId'] = this.fusionRequest.header['ns:InternalOrganizationId'];
-            detailTaxLine['ns:LegalEntityId'] = this.fusionRequest.header['ns:LegalEntityId'];
+            detailTaxLine['ns:InternalOrganizationId'] = fusionRequest.header['ns:InternalOrganizationId'];
+            detailTaxLine['ns:LegalEntityId'] = fusionRequest.header['ns:LegalEntityId'];
 
             detailTaxLines.push(detailTaxLine)
         }
@@ -297,7 +451,7 @@ export class ResponseBuilderService {
         avaTaxLineDetail: Record<string, any>,
         vbtTaxAmtDetail: Record<string, any>,
         SelfAssessedFlag: string,
-    ): Record<string, any> {
+        ): Record<string, any> {
         const detailTaxLine: Record<string, any> = {};
         detailTaxLine['ns:ErrorMessageTypeFlag'] = 'S';
         detailTaxLine['ns:ApplicationId'] = fusionLine['ns:ApplicationId'];
@@ -314,6 +468,10 @@ export class ResponseBuilderService {
         detailTaxLine['ns:InternalOrganizationId'] = this.fusionRequest.header['ns:InternalOrganizationId'];
         detailTaxLine['ns:LegalEntityId'] = this.fusionRequest.header['ns:LegalEntityId'];
 
+        // detailTaxLine['ns:SelfAssessedFlag'] = 'Y';
+        // if (this.fusionRequest.header['ns:ApplicationShortname'] == 'PO') {
+        //     detailTaxLine['ns:SelfAssessedFlag'] = 'N';
+        // }
         detailTaxLine['ns:SelfAssessedFlag'] = SelfAssessedFlag;
 
         detailTaxLine['ns:TrxDate'] = fusionLine['ns:TrxDate'] ? fusionLine['ns:TrxDate'] : this.fusionRequest.header['ns:TrxDate'];
@@ -334,7 +492,7 @@ export class ResponseBuilderService {
         detailTaxLine['ns:PlaceOfSupplyTypeCode'] = 'SHIP_TO';
         detailTaxLine['ns:ReportingOnlyFlag'] = 'N';
 
-        detailTaxLine['ns:TaxRegimeCode'] = this.currentLegalEntity.ATX_TAX_REGIME_CODE;
+        detailTaxLine['ns:TaxRegimeCode'] = this.currentBusinessUnit.TAX_REGIME_CODE;
 
         if (avaTaxLine['ns:ref2']) {
             detailTaxLine['ns:LegalJustificationText3'] = avaTaxLine.ref2;
@@ -346,24 +504,6 @@ export class ResponseBuilderService {
             detailTaxLine['ns:UnroundedTaxAmt'] = _.toString(_.toNumber(avaTaxLineDetail.taxCalculated) - _.toNumber(avaTaxLineDetail.tax));
         }
         return detailTaxLine;
-    }
-
-    private async returnNoTaxCalculationForAvaTaxLine(avaTaxLine: Record<string, any>): Promise<boolean> {
-        if (
-            this.configurationCodesService.getCodeValue('AP_SELF_ASSESS_TAX') == 'Y'
-            && this.configurationCodesService.getCodeValue('BLOCK_AP_SELF_ASSESS_RESP') == 'Y'
-        ) {
-            return true
-        }
-        if (this.configurationCodesService.getCodeValue('CHECK_FOR_REGIME_SUBSCRIPTION') == 'Y' && ! (await this.hasRegimeSubscription())) {
-            return true
-        }
-        return false;
-    }
-
-    private async hasRegimeSubscription(): Promise<boolean> {
-
-        return true;
     }
 
 }

@@ -1,11 +1,11 @@
-import { configurationCodeRecord, ConfigurationCodesService } from "src/services/configuration.service";
+import { configurationCodeRecord, ConfigurationCodesService } from "../../src/services/configuration.service"
 
 export class DataMapperV2 {
     VENDOR_BILLED_TAX = 'VENDOR BILLED TAX';
     private configurationCodesService: ConfigurationCodesService;
     private TaxApportionmentCounter: number;
     constructor() {
-        const configurationCodesService = new ConfigurationCodesService();
+        this.configurationCodesService = new ConfigurationCodesService();
         this.TaxApportionmentCounter = 0;
     }
     public processIncomingSoapRequest(soapRequest: any): any {
@@ -67,7 +67,7 @@ export class DataMapperV2 {
                 }
                 for (const dtLine of detTxLinesArray) {
                     if (!dtLine['ns:CancelFlag'] || dtLine['ns:CancelFlag'] == 'N') {
-                        this.addDetailsIfVBT(dtLine, mappings);
+                        // this.addDetailsIfVBT(dtLine, mappings);
                         if (detTaxLineMap.hasOwnProperty(dtLine['ns:TrxLineId'])) {
                             detTaxLineMap[dtLine['ns:TrxLineId']].push(dtLine)
                         } else {
@@ -149,7 +149,7 @@ export class DataMapperV2 {
         for (var i = 0; i < lines.length; i++) {
             const line = lines[i];
             let lineAmount = 0;
-            for (var j = 0; j < line.detailTaxLines; j++) {
+            for (var j = 0; j < line.detailTaxLines?.length; j++) {
                 const detailTaxLine = line.detailTaxLines[j];
                 if (this.isVBTDetail(detailTaxLine)) {
                     const vbtTaxAmt = parseFloat(detailTaxLine['ns:TaxAmt']);
@@ -160,7 +160,9 @@ export class DataMapperV2 {
                     }
                 }
             }
-            vendorTaxes['ns:TrxLineId'] = lineAmount;
+            if (lineAmount) {
+                vendorTaxes[line['ns:TrxLineId']] = lineAmount;
+            }
         }
         if (!vendorTaxed && this.configurationCodesService.getCodeValue('AP_SELF_ASSESS_TAX') != 'Y'){
             vendorTaxed = true;
@@ -175,7 +177,7 @@ export class DataMapperV2 {
     private makeTaxZeroOnVBTDetails(lines: Array<Record<string, any>>) {
         for (var i = 0; i < lines.length; i++) {
             const line = lines[i];
-            for (var j = 0; j < line.detailTaxLines; j++) {
+            for (var j = 0; j < line.detailTaxLines?.length; j++) {
                 const detailTaxLine = line.detailTaxLines[j];
                 if (this.isVBTDetail(detailTaxLine)) {
                     detailTaxLine['ns:TaxAmt'] = 0;
@@ -255,7 +257,7 @@ export class DataMapperV2 {
     }
 
     private hasVBTDetails(line: Record<string, any>): boolean {
-        for (var i = 0; i < line.detailTaxLines.length; i++) {
+        for (var i = 0; i < line.detailTaxLines?.length; i++) {
             if (this.isVBTDetail(line.detailTaxLines[i])) {
                 return true
             }
@@ -264,7 +266,7 @@ export class DataMapperV2 {
     }
 
     private getVBTDetail(line: Record<string, any>): boolean {
-        for (var i = 0; i < line.detailTaxLines.length; i++) {
+        for (var i = 0; i < line.detailTaxLines?.length; i++) {
             if (this.isVBTDetail(line.detailTaxLines[i])) {
                 return line.detailTaxLines[i]
             }
@@ -330,7 +332,7 @@ export class DataMapperV2 {
                     'ns:TaxCurrencyConversionRate': request.header['ns:TaxCurrencyConversionRate'],
                     'ns:TaxDate': request.header['ns:TaxDate'],
                     'ns:TaxDetermineDate': request.header['ns:TaxDetermineDate'],
-                    'ns:TaxJurisdictionCode': currentBusinessUnit.JURIS_CODE_PREFIX + 'DEFAULT',
+                    'ns:TaxJurisdictionCode': currentBusinessUnit.JURIS_CODE_PREFIX + '-DEFAULT',
                     'ns:TaxLineId': line['ns:TaxLineId'],
                     'ns:TaxLineNumber': line['ns:TaxLineNumber'],
                     'ns:TaxOnlyLineFlag': 'N',

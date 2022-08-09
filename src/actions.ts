@@ -90,49 +90,73 @@ export const checkAndProcessVBTDetailsAction = (sdk: AppknitSDK | AppknitGraphSD
 };
 
 export const mapToFusionResponse = async (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
-  const { avaTaxModel, fusionRequest, customerProfile, currentBusinessUnit, vbtTaxAmtDetails,  isUS2US, isCA2CA, isUS2CA, isIndia, isInternational } = configuration;
-  const responseBuilder = new ResponseBuilderService();
-  const result = await responseBuilder.createResponse(
+  const { avaTaxModel, fusionRequest, customerProfile, currentBusinessUnit, currentLegalEntity, vbtTaxAmtDetails,  isUS2US, isCA2CA, isUS2CA, isIndia, isInternational } = configuration;
+  // private sdk: AppknitSDK | AppknitGraphSDK,
+  //       private avaTaxModel: Record<string, any>,
+  //       private fusionRequest: Record<string, any>,
+  //       private customerProfile: Record<string, any>,
+  //       private currentBusinessUnit: Record<string, any>,
+  //       private isUS2US: boolean,
+  //       private isCA2CA: boolean,
+  //       private isUS2CA: boolean,
+  //       private isIndia: boolean,
+  //       private isIntl: boolean,
+  const responseBuilder = new ResponseBuilderService(
     sdk,
     avaTaxModel,
     fusionRequest,
     customerProfile,
     currentBusinessUnit,
-    vbtTaxAmtDetails,
+    currentLegalEntity,
     isUS2US,
     isCA2CA,
     isUS2CA,
     isIndia,
     isInternational,
+  );
+  const result = await responseBuilder.createResponse(
+    vbtTaxAmtDetails,
   )
 
   return result;
 };
 
 export const createNoCalculationResponse = async (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
-  const { message, fusionRequest, customerProfile, currentBusinessUnit } = configuration;
-  const responseBuilder = new ResponseBuilderService();
-  const result = await responseBuilder.createNoCalculationResponse(
+  const { message, fusionRequest } = configuration;
+  const responseBuilder = new ResponseBuilderService(
     sdk,
-    message,
+    undefined,
     fusionRequest,
-    customerProfile,
-    currentBusinessUnit,
-  )
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+  );
+  const result = await responseBuilder.createNoCalculationResponse()
 
   return result;
 };
 
 export const createErrorResponse = async (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
-  const { message, fusionRequest, customerProfile, currentBusinessUnit } = configuration;
-  const responseBuilder = new ResponseBuilderService();
-  const result = await responseBuilder.createErrorResponse(
+  const { message, fusionRequest } = configuration;
+  const responseBuilder = new ResponseBuilderService(
     sdk,
-    message,
+    undefined,
     fusionRequest,
-    customerProfile,
-    currentBusinessUnit,
-  )
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+  );
+  const result = await responseBuilder.createErrorResponse(message)
 
   return result;
 };

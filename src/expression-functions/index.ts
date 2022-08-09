@@ -1,5 +1,5 @@
 import { nodeSettingsForObject, SdkExpressionFunctionArgument, SdkExpressionFunctionEntry } from "@appknit-project/common-frameworks";
-import { ConfigurationCodesService } from "src/services/configuration.service";
+import { ConfigurationCodesService } from "../../src/services/configuration.service";
 
 export const getConfigurationCodeValue: SdkExpressionFunctionEntry = {
     description: 'Appknit custom expression funtion to fetch config code values',
@@ -18,8 +18,8 @@ export const getConfigurationCodeValue: SdkExpressionFunctionEntry = {
       const configurationCodesService = new ConfigurationCodesService(configCodes);
       return configurationCodesService.getCodeValue(codeName);
       for (const configCode of configCodes) {
-        if ((configCode.CONFIG_CODE as string).trim() == codeName && configCode.CONFIG_CODE_STRING_VALUE) {
-            return configCode.CONFIG_CODE_STRING_VALUE
+        if ((configCode.ATX_CONFIG_CODE as string).trim() == codeName && configCode.ATX_CONFIG_CODE_STRING_VALUE) {
+            return configCode.ATX_CONFIG_CODE_STRING_VALUE
         }
       }
     },
