@@ -6,7 +6,6 @@ export class JurisDataMapper {
     constructor(
         private sdk: AppknitSDK | AppknitGraphSDK,
         private customerProfile: Record<string, any>,
-        private currentBusinessUnit: Record<string, any>,
         private currentLegalEntity: Record<string, any>,
         private isUS2US: boolean,
         private isCA2CA: boolean,
@@ -26,7 +25,7 @@ export class JurisDataMapper {
 
         if (avaTaxLineDetail.jurisType === 'STA') {
             queryResults = await this.sdk.adhocDataProvider.queryDataRecords(this.getJurisdictionQuery({
-                ATX_GEO_SOURCE: this.customerProfile.ATX_CUSTOMER.ATX_GEO_SOURCE,
+                ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
                 ATX_JURISDICTION_TYPE: 'STATE',
                 ATX_REGION: avaTaxLineDetail.region,
                 ATX_COUNTRY: avaTaxLineDetail.country,
@@ -35,7 +34,7 @@ export class JurisDataMapper {
 
         if (avaTaxLineDetail.jurisType === 'CTY') {
             queryResults = await this.sdk.adhocDataProvider.queryDataRecords(this.getJurisdictionQuery({
-                ATX_GEO_SOURCE: this.customerProfile.ATX_CUSTOMER.ATX_GEO_SOURCE,
+                ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
                 ATX_JURISDICTION_TYPE: 'COUNTY',
                 ATX_REGION: avaTaxLineDetail.region,
                 ATX_COUNTRY: avaTaxLineDetail.country,
@@ -45,7 +44,7 @@ export class JurisDataMapper {
 
         if (avaTaxLineDetail.jurisType === 'CIT') {
             queryResults = await this.sdk.adhocDataProvider.queryDataRecords(this.getJurisdictionQuery({
-                ATX_GEO_SOURCE: this.customerProfile.ATX_CUSTOMER.ATX_GEO_SOURCE,
+                ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
                 ATX_JURISDICTION_TYPE: 'CITY',
                 ATX_REGION: avaTaxLineDetail.region,
                 ATX_COUNTRY: avaTaxLineDetail.country,
@@ -55,13 +54,14 @@ export class JurisDataMapper {
 
         if (avaTaxLineDetail.jurisType === 'STJ') {
             queryResults = await this.sdk.adhocDataProvider.queryDataRecords(this.getJurisdictionQuery({
-                ATX_GEO_SOURCE: this.customerProfile.ATX_CUSTOMER.ATX_GEO_SOURCE,
+                ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
                 ATX_JURISDICTION_TYPE: 'SPECIAL',
                 ATX_COUNTRY: avaTaxLineDetail.country,
             }));
         }
 
         if (!Array.isArray(queryResults) || queryResults[0]) {
+            console.log('Juris Data Query Results', JSON.stringify(queryResults, null, 2))
             detailTaxLine['ns:Tax'] = queryResults[0].ATX_TAX_CODE;
             detailTaxLine['ns:TaxRateCode'] = queryResults[0].ATX_RATE_CODE;
             detailTaxLine['ns:TaxStatusCode'] = queryResults[0].ATX_TAX_STATUS_CODE;
@@ -91,7 +91,7 @@ export class JurisDataMapper {
                 }
             });
             queryResults = await this.sdk.adhocDataProvider.queryDataRecords(this.getJurisdictionQuery({
-                ATX_GEO_SOURCE: this.customerProfile.ATX_CUSTOMER.ATX_GEO_SOURCE,
+                ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
                 ATX_JURISDICTION_TYPE: 'COUNTRY',
                 ATX_REGION: region,
                 ATX_COUNTRY: avaTaxLineDetail.country,
@@ -101,7 +101,7 @@ export class JurisDataMapper {
         if (avaTaxLineDetail.jurisType === 'STA') {
 
             queryResults = await this.sdk.adhocDataProvider.queryDataRecords(this.getJurisdictionQuery({
-                ATX_GEO_SOURCE: this.customerProfile.ATX_CUSTOMER.ATX_GEO_SOURCE,
+                ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
                 ATX_JURISDICTION_TYPE: 'COUNTRY',
                 ATX_REGION: avaTaxLineDetail.region,
                 ATX_COUNTRY: avaTaxLineDetail.country,
@@ -134,7 +134,7 @@ export class JurisDataMapper {
         if (avaTaxLineDetail.jurisType == 'CNT') {
 
             queryResults = await this.sdk.adhocDataProvider.queryDataRecords(this.getJurisdictionQuery({
-                ATX_GEO_SOURCE: this.customerProfile.ATX_CUSTOMER.ATX_GEO_SOURCE,
+                ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
                 ATX_JURISDICTION_TYPE: 'STATE',
                 ATX_STATE: 'CANADA',
                 ATX_COUNTRY: 'US',
@@ -168,7 +168,7 @@ export class JurisDataMapper {
 
         const query: AdhocQuery = {
             fieldSets: {
-                ATX_JURIS_DATA: 'oPDTkqKHHQjUTW52GYS2qy'
+                ATX_JURIS_DATA: '3oZt8K4pbDtFtBJSovmEpL'
             },
             joins: undefined,
             select: {
@@ -183,6 +183,7 @@ export class JurisDataMapper {
                 '@and': queryFilters,
             }
         }
+        console.log('Juris Data Query', JSON.stringify(query, null, 2));
         return query;
     }
 }

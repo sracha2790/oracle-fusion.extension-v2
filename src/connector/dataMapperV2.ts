@@ -108,7 +108,7 @@ export class DataMapperV2 {
             lines: Array<Record<string, any>>,
         },
         configCodes: Array<configurationCodeRecord>,
-        currentBusinessUnit: Record<string, any>,
+        currentLegalEntity: Record<string, any>,
     ): {
         header: Record<string, any>,
         lines: Record<string, any>
@@ -119,7 +119,7 @@ export class DataMapperV2 {
         this.configurationCodesService.setConfigCodes(configCodes);
         if (this.configurationCodesService.getCodeValue('AP_SELF_ASSESS_TAX') == 'Y') {
             if (request.header['ns:CtrlTotalHdrTxAmt'] && request.header['ns:CtrlTotalHdrTxAmt'] > 0) {
-                this.addDetailTaxLinesWithAmount(request, currentBusinessUnit, request.header['ns:CtrlTotalHdrTxAmt'])
+                this.addDetailTaxLinesWithAmount(request, currentLegalEntity, request.header['ns:CtrlTotalHdrTxAmt'])
             } else {
                 this.addMissingDetailTaxLineIfAtLestOneVBTLineAvailable(request);
             }
@@ -127,7 +127,7 @@ export class DataMapperV2 {
             if (this.atLeastOneLineHasVBTDetail(request.lines)) {
                 this.makeTaxZeroOnVBTDetails(request.lines)
             } else {
-                this.addDetailTaxLinesWithAmount(request, currentBusinessUnit, 0);
+                this.addDetailTaxLinesWithAmount(request, currentLegalEntity, 0);
             }
         }
 
@@ -286,7 +286,7 @@ export class DataMapperV2 {
             header: Record<string, any>,
             lines: Array<Record<string, any>>
         },
-        currentBusinessUnit: Record<string, any>,
+        currentLegalEntity: Record<string, any>,
         amountForFirstLine: number,
     ) {
         for (var i = 0; i < request.lines.length; i++) {
@@ -332,14 +332,14 @@ export class DataMapperV2 {
                     'ns:TaxCurrencyConversionRate': request.header['ns:TaxCurrencyConversionRate'],
                     'ns:TaxDate': request.header['ns:TaxDate'],
                     'ns:TaxDetermineDate': request.header['ns:TaxDetermineDate'],
-                    'ns:TaxJurisdictionCode': currentBusinessUnit.JURIS_CODE_PREFIX + '-DEFAULT',
+                    'ns:TaxJurisdictionCode': currentLegalEntity.ATX_JURISDICTION_CODE_PREFIX + '-DEFAULT',
                     'ns:TaxLineId': line['ns:TaxLineId'],
                     'ns:TaxLineNumber': line['ns:TaxLineNumber'],
                     'ns:TaxOnlyLineFlag': 'N',
                     'ns:TaxPointBasis': 'INVOICE',
                     'ns:TaxRateCode': this.configurationCodesService.getCodeValue('VBT_RATE_CODE'),
                     'ns:TaxStatusCode': this.configurationCodesService.getCodeValue('VBT_STATUS_CODE'),
-                    'ns:TaxRegimeCode': currentBusinessUnit.TAX_REGIME_CODE,
+                    'ns:TaxRegimeCode': currentLegalEntity.ATX_TAX_REGIME_CODE,
                     'ns:TaxRateType': 'PERCENTAGE',
                     'ns:TaxableAmt': line['ns:LineAmt'],
                     'ns:TaxableAmtTaxCurr': line['ns:LineAmt'],

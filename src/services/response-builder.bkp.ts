@@ -24,7 +24,6 @@ export class ResponseBuilderService {
         this.jurisDataMapper = new JurisDataMapper(
             sdk,
             customerProfile,
-            currentBusinessUnit,
             currentLegalEntity,
             isUS2US,
             isCA2CA,
@@ -32,7 +31,7 @@ export class ResponseBuilderService {
             isIndia,
             isIntl,
         );
-        this.configurationCodesService = new ConfigurationCodesService(customerProfile.CONFIG_CODES);
+        this.configurationCodesService = new ConfigurationCodesService(customerProfile.ATX_CONFIG_CODES);
         this.taxApportionmentLineNumber = 0;
     }
 
@@ -162,7 +161,7 @@ export class ResponseBuilderService {
                         calculableFramework: null,
                         calculableContext: null,
                         runningContext: null,
-                        functionArguments: ['PROCESS_US_TO_CA_TAXES', this.customerProfile.CONFIG_CODES],
+                        functionArguments: ['PROCESS_US_TO_CA_TAXES', this.customerProfile.ATX_CONFIG_CODES],
                     }
                 )
 
@@ -187,7 +186,7 @@ export class ResponseBuilderService {
                         calculableFramework: null,
                         calculableContext: null,
                         runningContext: null,
-                        functionArguments: ['CUSTOM_DUTY_TAX', this.customerProfile.CONFIG_CODES],
+                        functionArguments: ['CUSTOM_DUTY_TAX', this.customerProfile.ATX_CONFIG_CODES],
                     }
                 )
 

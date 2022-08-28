@@ -184,7 +184,16 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-          body: {
+          request: {
+            type: 'object',
+          },
+          configCodes: {
+            type: 'array',
+            items: {
+              type: 'object'
+            }
+          },
+          currentLegalEntity: {
             type: 'object',
           },
         },
@@ -210,7 +219,7 @@ const extension: SdkExtension = {
           customerProfile: {
             type: 'object',
           },
-          currentBusinessUnit: {
+          currentLegalEntity: {
             type: 'object',
           },
           vbtTaxAmtDetails : {

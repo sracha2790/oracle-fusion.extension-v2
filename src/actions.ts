@@ -80,17 +80,17 @@ export const mapFusionSoapRequestActionV2 = (sdk: AppknitSDK | AppknitGraphSDK, 
 };
 
 export const checkAndProcessVBTDetailsAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
-  const { request, configCodes, currentBusinessUnit } = configuration;
+  const { request, configCodes, currentLegalEntity } = configuration;
   let mappedData;
 
     const mapper = new DataMapperV2();
-    mappedData = mapper.checkAndProcessVBTDetails(request, configCodes, currentBusinessUnit);
+    mappedData = mapper.checkAndProcessVBTDetails(request, configCodes, currentLegalEntity);
   
   return Promise.resolve(mappedData);
 };
 
 export const mapToFusionResponse = async (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
-  const { avaTaxModel, fusionRequest, customerProfile, currentBusinessUnit, currentLegalEntity, vbtTaxAmtDetails,  isUS2US, isCA2CA, isUS2CA, isIndia, isInternational } = configuration;
+  const { avaTaxModel, fusionRequest, customerProfile, currentLegalEntity, vbtTaxAmtDetails,  isUS2US, isCA2CA, isUS2CA, isIndia, isInternational } = configuration;
   // private sdk: AppknitSDK | AppknitGraphSDK,
   //       private avaTaxModel: Record<string, any>,
   //       private fusionRequest: Record<string, any>,
@@ -106,7 +106,6 @@ export const mapToFusionResponse = async (sdk: AppknitSDK | AppknitGraphSDK, con
     avaTaxModel,
     fusionRequest,
     customerProfile,
-    currentBusinessUnit,
     currentLegalEntity,
     isUS2US,
     isCA2CA,
@@ -134,7 +133,6 @@ export const createNoCalculationResponse = async (sdk: AppknitSDK | AppknitGraph
     undefined,
     undefined,
     undefined,
-    undefined,
   );
   const result = await responseBuilder.createNoCalculationResponse()
 
@@ -147,7 +145,6 @@ export const createErrorResponse = async (sdk: AppknitSDK | AppknitGraphSDK, con
     sdk,
     undefined,
     fusionRequest,
-    undefined,
     undefined,
     undefined,
     undefined,
