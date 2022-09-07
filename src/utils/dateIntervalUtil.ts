@@ -84,12 +84,3 @@ export class DateIntervalUtil {
     return dateSuffixes;
   }
 }
-
-// async function test() {
-//     let diu = new DateIntervalUtil();
-//     let res = await diu.getIntervalTimes("2021-05-21T07:45:05.350Z", "yyyyMMdd", 1, "day", 1, 1, true);
-//     console.log('Getting');
-//     console.log(res);
-// }
-
-// test();

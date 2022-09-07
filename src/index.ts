@@ -1,73 +1,79 @@
 import { ProRateTaxDetailModel } from './openapimodels/ProRateTaxDetailModel';
 import { DetailTaxLineModel } from './openapimodels/DetailTaxLineModel';
 import * as packageJson from '../package.json';
-import {  SdkExtension } from '@appknit-project/common-frameworks';
+import { SdkExtension } from '@appknit-project/common-frameworks';
 import * as expressionFunctions from './expression-functions'
-import { 
-  appendAction, 
-  cloneAndExecuteForEachAction, 
-  collectAction, 
-  combineArraysAction, 
-  convertToDocumentAction, 
-  convertToDocumentsAction, 
-  convertToXmlActions, 
-  convertToXMLResponseAction, 
-  copyProperties1Action, 
-  copyPropertiesAction, 
-  copyPropertiesToItemsAction, 
-  copyValueToNestedAction, 
-  createArrayAction, 
-  createDetailTaxLineAction, 
-  createDetailTaxLinesAction, 
-  createDetailTaxLinesNoTaxAction, 
-  createNewObjectToArrayAction, 
-  createObjectAction, 
-  excludeItemsByConditionAction, 
-  executeForEachAction, 
-  fieldValuesAction, 
-  filterByUniqueValuesAction, 
-  filterItemsWithPropertyMatchingAction, 
-  filterMatchAction, 
-  filterMatchShallowCopyAction, 
-  findItemsWithFieldValuesAction, 
-  findItemsWithFieldValuesMatchingAction, 
-  findMatchAction, 
-  findMatchingObjectAction, 
-  findWithPrefernceAction, 
-  findWithPrefernceOrDefaultAction, 
-  flattenHierarchyToMapAction, 
-  getIntervalTimesAction, 
-  groupByAction, 
-  groupByToObjectsAction, 
-  joinMapAction, 
-  joinValuesAction, 
-  mapFusionSoapRequestAction, 
-  mapFusionSoapRequestActionV2, 
-  mapNestedAction, 
-  mapToMapAction, 
-  matchAction, 
-  matchCombinationAction, 
-  mergeToItemsAction, 
-  parseXMLAction, 
-  proRateTaxesAction, 
-  pullUpAndSetReferenceToAction, 
-  pushObjectToArrayAction, 
-  replaceByLookupAction, 
-  separateItemsByConditionAction, 
-  setCombinedFieldValuesAction, 
-  setPropertiesAction, 
-  setPropertyAction, 
-  setReferenceToAction, 
-  setValuesToItemsAction, 
-  splitAction, 
-  splitAllAction, 
-  storeAction, 
-  sumAllAction, 
-  toCsvAction, 
-  toSeparateCsvsByFieldAction, 
-  toURLAction, 
+import {
+  addCreditMemoLines,
+  addProratedTaxesAsTaxOverrides,
+  appendAction,
+  checkAndProcessVBTDetailsAction,
+  cloneAndExecuteForEachAction,
+  collectAction,
+  combineArraysAction,
+  convertToDocumentAction,
+  convertToDocumentsAction,
+  convertToXmlActions,
+  convertToXMLResponseAction,
+  copyProperties1Action,
+  copyPropertiesAction,
+  copyPropertiesToItemsAction,
+  copyValueToNestedAction,
+  createArrayAction,
+  createDetailTaxLineAction,
+  createDetailTaxLinesAction,
+  createDetailTaxLinesNoTaxAction,
+  createErrorResponse,
+  createNewObjectToArrayAction,
+  createNoCalculationResponse,
+  createObjectAction,
+  excludeItemsByConditionAction,
+  executeForEachAction,
+  fieldValuesAction,
+  filterByUniqueValuesAction,
+  filterItemsWithPropertyMatchingAction,
+  filterMatchAction,
+  filterMatchShallowCopyAction,
+  findItemsWithFieldValuesAction,
+  findItemsWithFieldValuesMatchingAction,
+  findMatchAction,
+  findMatchingObjectAction,
+  findWithPrefernceAction,
+  findWithPrefernceOrDefaultAction,
+  flattenHierarchyToMapAction,
+  getIntervalTimesAction,
+  groupByAction,
+  groupByToObjectsAction,
+  joinMapAction,
+  joinValuesAction,
+  mapFusionSoapRequestAction,
+  mapFusionSoapRequestActionV2,
+  mapNestedAction,
+  mapToFusionResponse,
+  mapToMapAction,
+  matchAction,
+  matchCombinationAction,
+  mergeToItemsAction,
+  parseXMLAction,
+  proRateTaxesAction,
+  pullUpAndSetReferenceToAction,
+  pushObjectToArrayAction,
+  replaceByLookupAction,
+  separateItemsByConditionAction,
+  setCombinedFieldValuesAction,
+  setPropertiesAction,
+  setPropertyAction,
+  setReferenceToAction,
+  setValuesToItemsAction,
+  splitAction,
+  splitAllAction,
+  storeAction,
+  sumAllAction,
+  toCsvAction,
+  toSeparateCsvsByFieldAction,
+  toURLAction,
   uniqueValuesFromFieldsAction
- } from './actions';
+} from './actions';
 
 const httpMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'TRACE', 'OPTIONS', 'CONNECT'];
 export enum CollectOperation {
@@ -173,6 +179,149 @@ const extension: SdkExtension = {
         type: 'object',
       },
     },
+
+    checkAndProcessVBTDetails: {
+      description: 'Check and Process VBT Details',
+      longDescription: 'Check and Process VBT Details',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          request: {
+            type: 'object',
+          },
+          configCodes: {
+            type: 'array',
+            items: {
+              type: 'object'
+            }
+          },
+          currentLegalEntity: {
+            type: 'object',
+          },
+        },
+      },
+      js: checkAndProcessVBTDetailsAction,
+      outputSchema: {
+        type: 'object',
+      },
+    },
+
+    mapToFusionResponse: {
+      description: 'Map To Fusion Response',
+      longDescription: 'Map To Fusion Response.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          avaTaxModel: {
+            type: 'object',
+          },
+          fusionRequest: {
+            type: 'object',
+          },
+          customerProfile: {
+            type: 'object',
+          },
+          currentLegalEntity: {
+            type: 'object',
+          },
+          vbtTaxAmtDetails: {
+            type: 'object',
+          },
+          isUS2US: {
+            type: 'boolean',
+          },
+          isUS2CA: {
+            type: 'boolean',
+          },
+          isCA2CA: {
+            type: 'boolean',
+          },
+          isIndia: {
+            type: 'boolean',
+          },
+          isInternational: {
+            type: 'boolean',
+          },
+        },
+      },
+      js: mapToFusionResponse,
+      outputSchema: {
+        type: 'object',
+      },
+    },
+    addProratedTaxesAsTaxOverrides: {
+      description: 'Add Pro Rated Taxes on Avalara Document',
+      longDescription: 'Add Pro Rated Taxes on Avalara Document',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          taxOverrides: {
+            type: 'object',
+          },
+          avalaraDocument: {
+            type: 'object',
+          },
+          glDate: {
+            type: 'object',
+          },
+        },
+      },
+      js: addProratedTaxesAsTaxOverrides,
+      outputSchema: {
+        type: 'object',
+      },
+    },
+    addCreditMemoLines: {
+      description: 'Add Credit Memo Lines',
+      longDescription: 'Add Credit Memo Lines',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          avalaraDocumentLines: {
+            type: 'array',
+            items: {
+              type: 'object'
+            }
+          },
+        },
+      },
+      js: addCreditMemoLines,
+      outputSchema: {
+        type: 'object',
+      },
+    },
+    mapToFusionForNoCalculationResponse: {
+      description: 'Map To Fusion For No Calculation Response.',
+      longDescription: 'Map To Fusion For No Calculation Response.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          message: {
+            type: 'string',
+          }
+        },
+      },
+      js: createNoCalculationResponse,
+      outputSchema: {
+        type: 'object',
+      },
+    },
+    mapToFusionForErrorResponse: {
+      description: 'Map To Fusion For Error Response.',
+      longDescription: 'Map To Fusion For Error Response.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          message: {
+            type: 'string',
+          }
+        },
+      },
+      js: createErrorResponse,
+      outputSchema: {
+        type: 'object',
+      },
+    },
     filterByUniqueValues: {
       description: 'Filter items by unique field values',
       longDescription: '',
@@ -1715,7 +1864,7 @@ const extension: SdkExtension = {
           },
         },
       },
-      js:createDetailTaxLineAction,
+      js: createDetailTaxLineAction,
 
       outputSchema: {
         type: 'array',
@@ -1818,7 +1967,7 @@ const extension: SdkExtension = {
       },
     },
   },
-  graphFunctions:{
+  graphFunctions: {
     joinValues: {
       description: 'Join the string values together with joiner',
       longDescription: '',
@@ -3415,7 +3564,7 @@ const extension: SdkExtension = {
           },
         },
       },
-      js:createDetailTaxLineAction,
+      js: createDetailTaxLineAction,
 
       outputSchema: {
         type: 'array',

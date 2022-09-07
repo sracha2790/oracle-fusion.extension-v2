@@ -9,6 +9,9 @@ import { CsvToDocumentConverter } from './convert/CsvToDocumentConverter';
 import { DateIntervalUtil } from './utils/dateIntervalUtil';
 import { AppknitGraphSDK } from '@appknit-project/common-frameworks';
 import { DataMapperV2 } from './connector/dataMapperV2';
+import { ResponseBuilderService } from './services/response-builder.service';
+import { configurationCodeRecord } from './services/configuration.service';
+import { ExtendedFunctionsService } from './services/extended-functions.service';
 
 export const joinValuesAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
   const { values, joiner } = configuration;
@@ -66,6 +69,7 @@ export const mapFusionSoapRequestAction = (sdk: AppknitSDK | AppknitGraphSDK, co
   }
   return Promise.resolve(mappedData);
 };
+
 export const mapFusionSoapRequestActionV2 = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
   const { body } = configuration;
   let mappedData;
@@ -75,6 +79,96 @@ export const mapFusionSoapRequestActionV2 = (sdk: AppknitSDK | AppknitGraphSDK, 
   }
   return Promise.resolve(mappedData);
 };
+
+export const checkAndProcessVBTDetailsAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { request, configCodes, currentLegalEntity } = configuration;
+  let mappedData;
+
+  const mapper = new DataMapperV2();
+  mappedData = mapper.checkAndProcessVBTDetails(request, configCodes, currentLegalEntity);
+
+  return Promise.resolve(mappedData);
+};
+
+export const mapToFusionResponse = async (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { avaTaxModel, fusionRequest, customerProfile, currentLegalEntity, vbtTaxAmtDetails, isUS2US, isCA2CA, isUS2CA, isIndia, isInternational } = configuration;
+  const responseBuilder = new ResponseBuilderService(
+    sdk,
+    avaTaxModel,
+    fusionRequest,
+    customerProfile,
+    currentLegalEntity,
+    isUS2US,
+    isCA2CA,
+    isUS2CA,
+    isIndia,
+    isInternational,
+  );
+  const result = await responseBuilder.createResponse(
+    vbtTaxAmtDetails,
+  )
+
+  return result;
+};
+
+export const addProratedTaxesAsTaxOverrides = async (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { taxOverrides, avalaraDocument, glDate } = configuration;
+  const responseBuilder = new ExtendedFunctionsService();
+  const result = responseBuilder.addProratedTaxesAsTaxOverrides(
+    taxOverrides,
+    avalaraDocument,
+    glDate,
+  );
+  return result;
+};
+
+export const addCreditMemoLines = async (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { avalaraDocumentLines } = configuration;
+  const responseBuilder = new ExtendedFunctionsService();
+  const result = responseBuilder.addCreditMemoLines(
+    avalaraDocumentLines,
+  );
+  return result;
+};
+
+export const createNoCalculationResponse = async (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { message, fusionRequest } = configuration;
+  const responseBuilder = new ResponseBuilderService(
+    sdk,
+    undefined,
+    fusionRequest,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+  );
+  const result = await responseBuilder.createNoCalculationResponse()
+
+  return result;
+};
+
+export const createErrorResponse = async (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { message, fusionRequest } = configuration;
+  const responseBuilder = new ResponseBuilderService(
+    sdk,
+    undefined,
+    fusionRequest,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+  );
+  const result = await responseBuilder.createErrorResponse(message)
+
+  return result;
+};
+
 export const filterByUniqueValuesAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
   const { items, uniqueFields, selectBy } = configuration;
   const registry: { [k: string]: any } = {};
