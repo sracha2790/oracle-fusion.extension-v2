@@ -11,6 +11,7 @@ import { AppknitGraphSDK } from '@appknit-project/common-frameworks';
 import { DataMapperV2 } from './connector/dataMapperV2';
 import { ResponseBuilderService } from './services/response-builder.service';
 import { configurationCodeRecord } from './services/configuration.service';
+import { ExtendedFunctionsService } from './services/extended-functions.service';
 
 export const joinValuesAction = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
   const { values, joiner } = configuration;
@@ -83,24 +84,14 @@ export const checkAndProcessVBTDetailsAction = (sdk: AppknitSDK | AppknitGraphSD
   const { request, configCodes, currentLegalEntity } = configuration;
   let mappedData;
 
-    const mapper = new DataMapperV2();
-    mappedData = mapper.checkAndProcessVBTDetails(request, configCodes, currentLegalEntity);
-  
+  const mapper = new DataMapperV2();
+  mappedData = mapper.checkAndProcessVBTDetails(request, configCodes, currentLegalEntity);
+
   return Promise.resolve(mappedData);
 };
 
 export const mapToFusionResponse = async (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
-  const { avaTaxModel, fusionRequest, customerProfile, currentLegalEntity, vbtTaxAmtDetails,  isUS2US, isCA2CA, isUS2CA, isIndia, isInternational } = configuration;
-  // private sdk: AppknitSDK | AppknitGraphSDK,
-  //       private avaTaxModel: Record<string, any>,
-  //       private fusionRequest: Record<string, any>,
-  //       private customerProfile: Record<string, any>,
-  //       private currentBusinessUnit: Record<string, any>,
-  //       private isUS2US: boolean,
-  //       private isCA2CA: boolean,
-  //       private isUS2CA: boolean,
-  //       private isIndia: boolean,
-  //       private isIntl: boolean,
+  const { avaTaxModel, fusionRequest, customerProfile, currentLegalEntity, vbtTaxAmtDetails, isUS2US, isCA2CA, isUS2CA, isIndia, isInternational } = configuration;
   const responseBuilder = new ResponseBuilderService(
     sdk,
     avaTaxModel,
@@ -117,6 +108,26 @@ export const mapToFusionResponse = async (sdk: AppknitSDK | AppknitGraphSDK, con
     vbtTaxAmtDetails,
   )
 
+  return result;
+};
+
+export const addProratedTaxesAsTaxOverrides = async (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { taxOverrides, avalaraDocument, glDate } = configuration;
+  const responseBuilder = new ExtendedFunctionsService();
+  const result = responseBuilder.addProratedTaxesAsTaxOverrides(
+    taxOverrides,
+    avalaraDocument,
+    glDate,
+  );
+  return result;
+};
+
+export const addCreditMemoLines = async (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+  const { avalaraDocumentLines } = configuration;
+  const responseBuilder = new ExtendedFunctionsService();
+  const result = responseBuilder.addCreditMemoLines(
+    avalaraDocumentLines,
+  );
   return result;
 };
 

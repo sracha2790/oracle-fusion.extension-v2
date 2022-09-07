@@ -14,15 +14,10 @@ export const getConfigurationCodeValue: SdkExpressionFunctionEntry = {
     },
   },
   js: async (context: SdkExpressionFunctionArgument): Promise<any> => {
-    const [codeName, configCodes] = context.functionArguments;
+    const [codeName, configCodes, defaultValue] = context.functionArguments;
 
     const configurationCodesService = new ConfigurationCodesService(configCodes);
-    return configurationCodesService.getCodeValue(codeName);
-    for (const configCode of configCodes) {
-      if ((configCode.ATX_CONFIG_CODE as string).trim() == codeName && configCode.ATX_CONFIG_CODE_STRING_VALUE) {
-        return configCode.ATX_CONFIG_CODE_STRING_VALUE
-      }
-    }
+    return configurationCodesService.getCodeValue(codeName, defaultValue);
   },
   outputSchema: {
     title: 'Result',
@@ -141,7 +136,11 @@ export const resolveUserDefinedFieldValues: SdkExpressionFunctionEntry = {
 
       }
     }
-    return returnValue;
+    if (returnValue.length > 0) {
+      return returnValue;
+    } else {
+      return undefined
+    }
   },
   outputSchema: {
     title: 'Result',
@@ -185,7 +184,11 @@ export const resolveAvalaraParametersMapping: SdkExpressionFunctionEntry = {
 
       }
     }
-    return returnValue;
+    if (returnValue.length > 0) {
+      return returnValue;
+    } else {
+      return undefined
+    }
   },
   outputSchema: {
     title: 'Result',

@@ -54,6 +54,9 @@ export class ProRateTaxCalculator {
       totalTaxCalculated = totalTaxCalculated + tl.taxCalculated;
       totalTaxable = totalTaxable + tl.taxableAmount;
     }
+    if (totalTaxable == 0) {
+      totalTaxable = 1;
+    }
 
     exactVBT = vendorTax == totalTaxCalculated;
 
@@ -75,6 +78,8 @@ export class ProRateTaxCalculator {
       taxDet['lineNumber'] = avalaraTaxLine.lineNumber;
       // taxOverrideDetails.push(taxDet);
       // if (tl.rate > 0) {
+      // let taxRate = 0;
+      const taxRate = _.sumBy(avalaraTaxLine.details, function(detail:Record<string, any>) { return detail.rate; })
 
       if (exactVBT) {
         //need not do the prorate calculation
@@ -92,7 +97,7 @@ export class ProRateTaxCalculator {
       // console.log('Balance : ' + parseFloat(balance))
       if (balance < 0) {
         taxOverrides[avalaraTaxLine.lineNumber] = avalaraTaxLine.taxCalculated; //set VBT -- correct one
-        taxDet['taxRate'] = avalaraTaxLine.rate;
+        taxDet['taxRate'] = taxRate * 100;
         taxDet['taxDetails'] = avalaraTaxLine.taxDetails;
         taxDet['ReturnVbtLineOnly'] = true; // will return vbt lines only
         let taxToSet = 0;
@@ -110,7 +115,7 @@ export class ProRateTaxCalculator {
         result['ReturnOnlyVbtLines'] = false;
         if (withinTolerance) {
           taxOverrides[avalaraTaxLine.lineNumber] = avalaraTaxLine.taxCalculated; // setting
-          taxDet['taxRate'] = avalaraTaxLine.rate;
+          taxDet['taxRate'] =  taxRate * 100;
           taxDet['taxAmt'] = avalaraTaxLine.tax;
           taxDet['taxAmtTaxCurr'] = avalaraTaxLine.tax;
           taxDet['unroundedTaxAmt'] = avalaraTaxLine.tax;
@@ -120,14 +125,14 @@ export class ProRateTaxCalculator {
             finalProrateAmount = vendorTax - prevRunningProrateVBTTotal;
             taxOverrides[avalaraTaxLine.lineNumber] = finalProrateAmount;
             taxDet['override'] = finalProrateAmount;
-            taxDet['taxRate'] = (finalProrateAmount / totalTaxable) * 100;
+            taxDet['taxRate'] =  taxRate * 100;
             taxDet['taxAmt'] = finalProrateAmount;
             taxDet['taxAmtTaxCurr'] = finalProrateAmount;
             taxDet['unroundedTaxAmt'] = finalProrateAmount;
           } else {
             taxOverrides[avalaraTaxLine.lineNumber] = prorateVBT;
             taxDet['override'] = prorateVBT;
-            taxDet['taxRate'] = (prorateVBT / totalTaxable) * 100;
+            taxDet['taxRate'] =  taxRate * 100;
             taxDet['taxAmt'] = prorateVBT;
             taxDet['taxAmtTaxCurr'] = prorateVBT;
             taxDet['unroundedTaxAmt'] = prorateVBT;
@@ -138,7 +143,7 @@ export class ProRateTaxCalculator {
       } else {
         result['ReturnOnlyVbtLines'] = true;
         taxOverrides[avalaraTaxLine.lineNumber] = avalaraTaxLine.taxCalculated;
-        taxDet['taxRate'] = avalaraTaxLine.rate;
+        taxDet['taxRate'] =  taxRate * 100;
         taxDet['taxAmt'] = avalaraTaxLine.taxCalculated;
         taxDet['taxAmtTaxCurr'] = avalaraTaxLine.taxCalculated;
         taxDet['unroundedTaxAmt'] = avalaraTaxLine.taxCalculated;

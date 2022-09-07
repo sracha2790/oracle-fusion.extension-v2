@@ -39,11 +39,11 @@ export class DataMapperV2 {
             soapReqBody = env['soapenv:Body']['ns:SynchronizationRequest'];
         } else if (action === 'Notification') {
             soapReqBody = env['soapenv:Body']['ns:NotificationRequest'];
-            mappings['documentId'] = soapReqBody['ns:documentId'];
-            mappings['extractType'] = soapReqBody['ns:extractType'];
+            // mappings['documentId'] = soapReqBody['ns:documentId'];
+            // mappings['extractType'] = soapReqBody['ns:extractType'];
         } else if (action === 'BatchRejection') {
             soapReqBody = env['soapenv:Body']['ns:BatchRejectionRequest'];
-            mappings['documentId'] = soapReqBody['ns:documentId'];
+            // mappings['documentId'] = soapReqBody['ns:documentId'];
         }
 
         const requestBody = soapReqBody;
@@ -51,7 +51,7 @@ export class DataMapperV2 {
         const txHeaders = requestBody['ns:taxableHeaders'];
         if (txHeaders) {
             mappings.header = txHeaders;
-            const trxNum = txHeaders['ns:TrxNumber'];
+            mappings.header.lines = []
         }
 
         let detTaxLineMap: Record<string, Array<any>> = {};
@@ -67,7 +67,6 @@ export class DataMapperV2 {
                 }
                 for (const dtLine of detTxLinesArray) {
                     if (!dtLine['ns:CancelFlag'] || dtLine['ns:CancelFlag'] == 'N') {
-                        // this.addDetailsIfVBT(dtLine, mappings);
                         if (detTaxLineMap.hasOwnProperty(dtLine['ns:TrxLineId'])) {
                             detTaxLineMap[dtLine['ns:TrxLineId']].push(dtLine)
                         } else {
@@ -93,7 +92,7 @@ export class DataMapperV2 {
                     if (detTaxLineMap.hasOwnProperty(line['ns:TrxLineId'])) {
                         line.detailTaxLines = detTaxLineMap[line['ns:TrxLineId']]
                     }
-                    mappings.lines.push(line);
+                    mappings.header.lines.push(line);
                 }
             }
         }
@@ -105,13 +104,11 @@ export class DataMapperV2 {
     public checkAndProcessVBTDetails(
         request: {
             header: Record<string, any>,
-            lines: Array<Record<string, any>>,
         },
         configCodes: Array<configurationCodeRecord>,
         currentLegalEntity: Record<string, any>,
     ): {
         header: Record<string, any>,
-        lines: Record<string, any>
         vendorTaxed: boolean,
         totalVBT: number,
         vendorTaxes: Record<string, number>
@@ -124,18 +121,17 @@ export class DataMapperV2 {
                 this.addMissingDetailTaxLineIfAtLestOneVBTLineAvailable(request);
             }
         } else {
-            if (this.atLeastOneLineHasVBTDetail(request.lines)) {
-                this.makeTaxZeroOnVBTDetails(request.lines)
+            if (this.atLeastOneLineHasVBTDetail(request.header.lines)) {
+                this.makeTaxZeroOnVBTDetails(request.header.lines)
             } else {
                 this.addDetailTaxLinesWithAmount(request, currentLegalEntity, 0);
             }
         }
 
-        const { vendorTaxed, totalVBT, vendorTaxes } = this.checkAndGetTotalVendorTax(request.lines)
+        const { vendorTaxed, totalVBT, vendorTaxes } = this.checkAndGetTotalVendorTax(request.header.lines)
 
         return {
             header: request.header,
-            lines: request.lines,
             vendorTaxed,
             totalVBT,
             vendorTaxes,
@@ -201,12 +197,11 @@ export class DataMapperV2 {
 
     private addMissingDetailTaxLineIfAtLestOneVBTLineAvailable(request: {
         header: Record<string, any>,
-        lines: Array<Record<string, any>>,
     }) {
         let hasAtleastOneLineWithVBTDetail = false;
         let masterVBTDetails = {};
-        for (var i = 0; i < request.lines.length; i++) {
-            const line = request.lines[i];
+        for (var i = 0; i < request.header.lines.length; i++) {
+            const line = request.header.lines[i];
             if (line['ns:LineLevelAction'] == 'DISCARD') {
                 continue;
             }
@@ -218,8 +213,8 @@ export class DataMapperV2 {
         }
 
         if (hasAtleastOneLineWithVBTDetail) {
-            for (var i = 0; i < request.lines.length; i++) {
-                const line = request.lines[i];
+            for (var i = 0; i < request.header.lines.length; i++) {
+                const line = request.header.lines[i];
                 if (line['ns:LineLevelAction'] == 'DISCARD') {
                     continue;
                 }
@@ -284,13 +279,12 @@ export class DataMapperV2 {
     private addDetailTaxLinesWithAmount(
         request: {
             header: Record<string, any>,
-            lines: Array<Record<string, any>>
         },
         currentLegalEntity: Record<string, any>,
         amountForFirstLine: number,
     ) {
-        for (var i = 0; i < request.lines.length; i++) {
-            const line = request.lines[i];
+        for (var i = 0; i < request.header.lines.length; i++) {
+            const line = request.header.lines[i];
             if (line['ns:LineLevelAction'] == 'DISCARD') {
                 continue;
             }
@@ -356,23 +350,14 @@ export class DataMapperV2 {
 
     private makeMappingsObj(): {
         header: Record<string, any>,
-        lines: Array<Record<string, any>>,
-        // vendorTaxes: Map<any, any>,
-        // totalVBT: number,
-        // vendorTaxed: boolean,
         wsAction: string,
     } {
-        const header = [];
-        const lines = [];
+        const header = {};
         const vendorTaxes = new Map();
         let totalVBT = 0;
         let vendorTaxed = false;
         return {
             header,
-            lines,
-            // vendorTaxes,
-            // vendorTaxed,
-            // totalVBT,
             wsAction: '',
         };
     }

@@ -1,7 +1,8 @@
-import { AppknitSDK, AdhocQuery } from '@appknit-project/appknit-platform-sdk-v2';
+import { AppknitSDK, AdhocQueryUnion, AdhocQuery } from '@appknit-project/appknit-platform-sdk-v2';
 import { AppknitGraphSDK } from '@appknit-project/common-frameworks';
+import _ = require('lodash');
 export class JurisDataMapper {
-
+    private jurisData: Array<Record<string, any>>;
 
     constructor(
         private sdk: AppknitSDK | AppknitGraphSDK,
@@ -12,146 +13,136 @@ export class JurisDataMapper {
         private isUS2CA: boolean,
         private isIndia: boolean,
         private isIntl: boolean,
-    ){
-        
+    ) {
+        this.jurisData = []
     }
-    async mapJurisdictionForUS2US(
+    async addJurisDataForUS2US(
         detailTaxLine: Record<string, any>,
         matchingFusionLine: Record<string, any>,
         avaTaxLine: Record<string, any>,
         avaTaxLineDetail: Record<string, any>,
     ) {
         let queryResults: Record<string, any>;
-
+        let whereClause: Record<string, any>;
         if (avaTaxLineDetail.jurisType === 'STA') {
-            queryResults = await this.sdk.adhocDataProvider.queryDataRecords(this.getJurisdictionQuery({
+            whereClause = {
                 ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
                 ATX_JURISDICTION_TYPE: 'STATE',
                 ATX_REGION: avaTaxLineDetail.region,
                 ATX_COUNTRY: avaTaxLineDetail.country,
-            }));
+            };
         }
 
         if (avaTaxLineDetail.jurisType === 'CTY') {
-            queryResults = await this.sdk.adhocDataProvider.queryDataRecords(this.getJurisdictionQuery({
+            whereClause = {
                 ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
                 ATX_JURISDICTION_TYPE: 'COUNTY',
                 ATX_REGION: avaTaxLineDetail.region,
                 ATX_COUNTRY: avaTaxLineDetail.country,
                 ATX_COUNTY: avaTaxLineDetail.jurisName
-            }));
+            };
         }
 
         if (avaTaxLineDetail.jurisType === 'CIT') {
-            queryResults = await this.sdk.adhocDataProvider.queryDataRecords(this.getJurisdictionQuery({
+            whereClause = {
                 ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
                 ATX_JURISDICTION_TYPE: 'CITY',
                 ATX_REGION: avaTaxLineDetail.region,
                 ATX_COUNTRY: avaTaxLineDetail.country,
                 ATX_CITY: avaTaxLineDetail.jurisName,
-            }));
+            };
         }
 
         if (avaTaxLineDetail.jurisType === 'STJ') {
-            queryResults = await this.sdk.adhocDataProvider.queryDataRecords(this.getJurisdictionQuery({
+            whereClause = {
                 ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
                 ATX_JURISDICTION_TYPE: 'SPECIAL',
                 ATX_COUNTRY: avaTaxLineDetail.country,
-            }));
+            };
         }
 
-        if (!Array.isArray(queryResults) || queryResults[0]) {
-            console.log('Juris Data Query Results', JSON.stringify(queryResults, null, 2))
-            detailTaxLine['ns:Tax'] = queryResults[0].ATX_TAX_CODE;
-            detailTaxLine['ns:TaxRateCode'] = queryResults[0].ATX_RATE_CODE;
-            detailTaxLine['ns:TaxStatusCode'] = queryResults[0].ATX_TAX_STATUS_CODE;
-            detailTaxLine['ns:TaxJurisdictionCode'] = this.currentLegalEntity.ATX_JURISDICTION_CODE_PREFIX + queryResults[0].ATX_JURISDICTION_CODE;
-            if (queryResults[0].ATX_PROVIDER_REC_RATE > 0) {
-                detailTaxLine['ns:ProviderRecRate'] = queryResults[0].ATX_PROVIDER_REC_RATE;
-            };
-            if (queryResults[0].ATX_PROVIDER_REC_RATE_CODE > 0) {
-                detailTaxLine['ns:ProviderRecRateCode'] = queryResults[0].ATX_PROVIDER_REC_RATE_CODE;
-            };
-        }
+        await this.findAndAddJurisDataOnDetailsTaxLine(whereClause, detailTaxLine);
     }
 
-    async mapJurisdictionForCA2CA(
+    async addJurisDataForCA2CA(
         detailTaxLine: Record<string, any>,
         matchingFusionLine: Record<string, any>,
         avaTaxLine: Record<string, any>,
         avaTaxLineDetail: Record<string, any>,
     ) {
-        let queryResults: Record<string, any>;
-
+        let whereClause: Record<string, any>;
         if (avaTaxLineDetail.jurisType === 'CNT') {
             let region = avaTaxLineDetail.country;
-            (avaTaxLine.details as Array<Record<string, any>>).forEach(detail=> {
+            (avaTaxLine.details as Array<Record<string, any>>).forEach(detail => {
                 if (detail.id != avaTaxLineDetail.id && detail.jurisType == 'STA') {
                     region = detail.region;
                 }
             });
-            queryResults = await this.sdk.adhocDataProvider.queryDataRecords(this.getJurisdictionQuery({
+            whereClause = {
                 ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
                 ATX_JURISDICTION_TYPE: 'COUNTRY',
                 ATX_REGION: region,
                 ATX_COUNTRY: avaTaxLineDetail.country,
-            }));
+            }
         }
 
         if (avaTaxLineDetail.jurisType === 'STA') {
-
-            queryResults = await this.sdk.adhocDataProvider.queryDataRecords(this.getJurisdictionQuery({
+            whereClause = {
                 ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
                 ATX_JURISDICTION_TYPE: 'COUNTRY',
                 ATX_REGION: avaTaxLineDetail.region,
                 ATX_COUNTRY: avaTaxLineDetail.country,
-            }));
+            };
         }
 
-        if (!Array.isArray(queryResults) || queryResults[0]) {
-            detailTaxLine['ns:Tax'] = queryResults[0].ATX_TAX_CODE;
-            detailTaxLine['ns:TaxRateCode'] = queryResults[0].ATX_RATE_CODE;
-            detailTaxLine['ns:TaxStatusCode'] = queryResults[0].ATX_TAX_STATUS_CODE;
-            detailTaxLine['ns:TaxJurisdictionCode'] = this.currentLegalEntity.ATX_JURISDICTION_CODE_PREFIX + queryResults[0].ATX_JURISDICTION_CODE;
-            if (queryResults[0].ATX_PROVIDER_REC_RATE > 0) {
-                detailTaxLine['ns:ProviderRecRate'] = queryResults[0].ATX_PROVIDER_REC_RATE;
-            };
-            if (queryResults[0].ATX_PROVIDER_REC_RATE_CODE > 0) {
-                detailTaxLine['ns:ProviderRecRateCode'] = queryResults[0].ATX_PROVIDER_REC_RATE_CODE;
-            };
-        }
+        await this.findAndAddJurisDataOnDetailsTaxLine(whereClause, detailTaxLine);
     }
 
-    async mapJurisdictionForUS2CA(
+    async addJurisDataForUS2CA(
         detailTaxLine: Record<string, any>,
         matchingFusionLine: Record<string, any>,
         avaTaxLine: Record<string, any>,
         avaTaxLineDetail: Record<string, any>,
     ) {
-        let queryResults: Record<string, any>;
-
-
+        let whereClause: Record<string, any>;
         if (avaTaxLineDetail.jurisType == 'CNT') {
-
-            queryResults = await this.sdk.adhocDataProvider.queryDataRecords(this.getJurisdictionQuery({
+            const whereClause = {
                 ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
                 ATX_JURISDICTION_TYPE: 'STATE',
                 ATX_STATE: 'CANADA',
                 ATX_COUNTRY: 'US',
-            }));
+            };
         }
 
-        if (!Array.isArray(queryResults) || queryResults[0]) {
-            detailTaxLine['ns:Tax'] = queryResults[0].ATX_TAX_CODE;
-            detailTaxLine['ns:TaxRateCode'] = queryResults[0].ATX_RATE_CODE;
-            detailTaxLine['ns:TaxStatusCode'] = queryResults[0].ATX_TAX_STATUS_CODE;
-            detailTaxLine['ns:TaxJurisdictionCode'] = this.currentLegalEntity.ATX_JURISDICTION_CODE_PREFIX + queryResults[0].ATX_JURISDICTION_CODE;
-            if (queryResults[0].ATX_PROVIDER_REC_RATE > 0) {
-                detailTaxLine['ns:ProviderRecRate'] = queryResults[0].ATX_PROVIDER_REC_RATE;
-            };
-            if (queryResults[0].ATX_PROVIDER_REC_RATE_CODE > 0) {
-                detailTaxLine['ns:ProviderRecRateCode'] = queryResults[0].ATX_PROVIDER_REC_RATE_CODE;
-            };
+        await this.findAndAddJurisDataOnDetailsTaxLine(whereClause, detailTaxLine);
+    }
+
+    private async findAndAddJurisDataOnDetailsTaxLine(whereClause: Record<string, any>, detailTaxLine: Record<string, any>) {
+        let jurisDataResult = _.find(this.jurisData, whereClause);
+        if (!jurisDataResult) {
+            const jurisDataResultFromDB = await this.sdk.adhocDataProvider.queryDataRecords(this.getJurisdictionQuery(whereClause));
+            if (jurisDataResultFromDB && Array.isArray(jurisDataResultFromDB) && jurisDataResultFromDB[0]) {
+                jurisDataResult = jurisDataResultFromDB[0];
+                this.jurisData.push(jurisDataResult)
+            }
+        }
+        if (jurisDataResult) {
+            if (jurisDataResult) {
+                detailTaxLine['ns:Tax'] = jurisDataResult.ATX_TAX_CODE;
+                if (jurisDataResult.ATX_TAX_CODE == 'SPECIAL' || jurisDataResult.ATX_JURISDICTION_TYPE == 'SPECIAL') {
+                    detailTaxLine['ns:TaxRateCode'] = this.currentLegalEntity.ATX_JURISDICTION_CODE_PREFIX + jurisDataResult.ATX_RATE_CODE;
+                } else {
+                    detailTaxLine['ns:TaxRateCode'] = jurisDataResult.ATX_RATE_CODE;
+                }
+                detailTaxLine['ns:TaxStatusCode'] = jurisDataResult.ATX_TAX_STATUS_CODE;
+                detailTaxLine['ns:TaxJurisdictionCode'] = this.currentLegalEntity.ATX_JURISDICTION_CODE_PREFIX + jurisDataResult.ATX_JURISDICTION_CODE;
+                if (jurisDataResult.ATX_PROVIDER_REC_RATE > 0) {
+                    detailTaxLine['ns:ProviderRecRate'] = jurisDataResult.ATX_PROVIDER_REC_RATE;
+                };
+                if (jurisDataResult.ATX_PROVIDER_REC_RATE_CODE > 0) {
+                    detailTaxLine['ns:ProviderRecRateCode'] = jurisDataResult.ATX_PROVIDER_REC_RATE_CODE;
+                };
+            }
         }
     }
 
@@ -172,6 +163,13 @@ export class JurisDataMapper {
             },
             joins: undefined,
             select: {
+                ATX_GEO_SOURCE: '@FIELD:ATX_JURIS_DATA.ATX_GEO_SOURCE',
+                ATX_JURISDICTION_TYPE: '@FIELD:ATX_JURIS_DATA.ATX_JURISDICTION_TYPE',
+                ATX_REGION: '@FIELD:ATX_JURIS_DATA.ATX_REGION',
+                ATX_COUNTRY: '@FIELD:ATX_JURIS_DATA.ATX_COUNTRY',
+                ATX_COUNTY: '@FIELD:ATX_JURIS_DATA.ATX_COUNTY',
+                ATX_CITY: '@FIELD:ATX_JURIS_DATA.ATX_CITY',
+
                 ATX_TAX_CODE: '@FIELD:ATX_JURIS_DATA.ATX_TAX_CODE',
                 ATX_TAX_STATUS_CODE: '@FIELD:ATX_JURIS_DATA.ATX_TAX_STATUS_CODE',
                 ATX_JURISDICTION_CODE: '@FIELD:ATX_JURIS_DATA.ATX_JURISDICTION_CODE',
@@ -183,7 +181,6 @@ export class JurisDataMapper {
                 '@and': queryFilters,
             }
         }
-        console.log('Juris Data Query', JSON.stringify(query, null, 2));
         return query;
     }
 }

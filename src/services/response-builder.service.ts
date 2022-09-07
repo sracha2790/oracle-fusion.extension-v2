@@ -43,11 +43,9 @@ export class ResponseBuilderService {
             case 'AR':
             case 'ONT':
                 return await this.createO2CResponse()
-                break;
             case 'AP':
             case 'PO':
                 return await this.createP2PResponse(vbtTaxAmtDetails)
-                break;
         }
     }
 
@@ -59,7 +57,7 @@ export class ResponseBuilderService {
             if (Helpers.isCreditMemoAdditionalLine(avaTaxLine)) {
                 continue;
             }
-            const matchingFusionLine = this.fusionRequest.lines.find(fusionLine => fusionLine['ns:TrxLineId'] == avaTaxLine.originationDocumentId);
+            const matchingFusionLine = Helpers.findMatchingFusionLineForAvataxResponseLine(avaTaxLine, this.fusionRequest.header.lines);
             for (const avaTaxLineDetail of avaTaxLine.details) {
 
                 const detailTaxLine = this.buildFusionDetailTaxLine(
@@ -71,7 +69,7 @@ export class ResponseBuilderService {
                 );
 
                 if (this.isUS2US) {
-                    await this.jurisDataMapper.mapJurisdictionForUS2US(
+                    await this.jurisDataMapper.addJurisDataForUS2US(
                         detailTaxLine,
                         matchingFusionLine,
                         avaTaxLine,
@@ -95,7 +93,7 @@ export class ResponseBuilderService {
                         && processUS2CATaxesSameAsCA2CA == 'Y'
                     )
                 ) {
-                    await this.jurisDataMapper.mapJurisdictionForCA2CA(
+                    await this.jurisDataMapper.addJurisDataForCA2CA(
                         detailTaxLine,
                         matchingFusionLine,
                         avaTaxLine,
@@ -121,7 +119,7 @@ export class ResponseBuilderService {
                     if (avaTaxLineDetail.jurisType != 'CNT') {
                         continue;
                     }
-                    await this.jurisDataMapper.mapJurisdictionForUS2CA(
+                    await this.jurisDataMapper.addJurisDataForUS2CA(
                         detailTaxLine,
                         matchingFusionLine,
                         avaTaxLine,
@@ -141,13 +139,13 @@ export class ResponseBuilderService {
         let VendorLineHandledFlag = false;
         if (this.isUS2US && this.avaTaxModel.totalTax == 0 && this.configurationCodesService.getCodeValue('CORRECT_VBT_FOR_OC') == 'Y') {
             VendorLineHandledFlag = true;
-            for (const line of this.fusionRequest.lines) {
-                line.detailTaxLines.filter((detailTaxLine: Record<string, any>) => Helpers.isVBTDetailtaxLine(detailTaxLine)).forEach((vbtDetailTaxLine: Record<string, any>) => {
+            for (const line of this.fusionRequest.header.lines) {
+                line.detailTaxLines?.filter((detailTaxLine: Record<string, any>) => Helpers.isVBTDetailtaxLine(detailTaxLine)).forEach((vbtDetailTaxLine: Record<string, any>) => {
                     vbtDetailTaxLine['ns:TaxAmt'] = 0
                     vbtDetailTaxLine['ns:UnroundedTaxAmt'] = 0
                     vbtDetailTaxLine['ns:TaxAmtTaxCurr'] = 0
                     vbtDetailTaxLine['ns:TaxRate'] = 0
-                    this.addToDetailTaxLinesCollection(detailTaxLines, vbtDetailTaxLine)
+                    this.addToDetailTaxLinesCollection(detailTaxLines, vbtDetailTaxLine);
                 })
             }
         }
@@ -157,8 +155,7 @@ export class ResponseBuilderService {
             if (Helpers.isCreditMemoAdditionalLine(avaTaxLine)) {
                 continue;
             }
-            const matchingFusionLine = this.fusionRequest.lines.find(fusionLine => fusionLine['ns:TrxLineId'] == avaTaxLine.originationDocumentId);
-
+            const matchingFusionLine = Helpers.findMatchingFusionLineForAvataxResponseLine(avaTaxLine, this.fusionRequest.header.lines);
             const vbtTaxAmtDetail: Record<string, any> = vbtTaxAmtDetails[avaTaxLine.lineNumber];
             if (!VendorLineHandledFlag) {
                 for (const detailTaxLine of matchingFusionLine.detailTaxLines ? matchingFusionLine.detailTaxLines : []) {
@@ -185,11 +182,11 @@ export class ResponseBuilderService {
                     matchingFusionLine,
                     avaTaxLine,
                     avaTaxLineDetail,
-                    undefined,
+                    vbtTaxAmtDetail,
                     this.fusionRequest.header['ns:ApplicationShortname'] == 'PO' ? 'N' : 'Y',
                 );
                 if (this.isUS2US) {
-                    await this.jurisDataMapper.mapJurisdictionForUS2US(
+                    await this.jurisDataMapper.addJurisDataForUS2US(
                         detailTaxLine,
                         matchingFusionLine,
                         avaTaxLine,
@@ -199,7 +196,7 @@ export class ResponseBuilderService {
                 if (
                     this.isCA2CA
                 ) {
-                    await this.jurisDataMapper.mapJurisdictionForCA2CA(
+                    await this.jurisDataMapper.addJurisDataForCA2CA(
                         detailTaxLine,
                         matchingFusionLine,
                         avaTaxLine,
@@ -218,7 +215,7 @@ export class ResponseBuilderService {
         // fusionRequest: Record<string, any>,
     ) {
         const detailTaxLines = [];
-        for (const fusionRequestLine of this.fusionRequest.lines) {
+        for (const fusionRequestLine of this.fusionRequest.header.lines) {
             detailTaxLines.push(this.getNoCalculationDetailTaxLine(fusionRequestLine))
         }
         return detailTaxLines;
@@ -242,7 +239,7 @@ export class ResponseBuilderService {
         // fusionRequest: Record<string, any>,
     ) {
         const detailTaxLines = [];
-        for (const fusionRequestLine of this.fusionRequest.lines) {
+        for (const fusionRequestLine of this.fusionRequest.header.lines) {
             const detailTaxLine: Record<string, any> = {};
             detailTaxLine['ns:ErrorMessageTypeFlag'] = 'E';
             detailTaxLine['ns:ErrorString'] = message;

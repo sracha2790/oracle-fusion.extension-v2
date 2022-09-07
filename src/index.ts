@@ -1,77 +1,79 @@
 import { ProRateTaxDetailModel } from './openapimodels/ProRateTaxDetailModel';
 import { DetailTaxLineModel } from './openapimodels/DetailTaxLineModel';
 import * as packageJson from '../package.json';
-import {  SdkExtension } from '@appknit-project/common-frameworks';
+import { SdkExtension } from '@appknit-project/common-frameworks';
 import * as expressionFunctions from './expression-functions'
-import { 
-  appendAction, 
-  checkAndProcessVBTDetailsAction, 
-  cloneAndExecuteForEachAction, 
-  collectAction, 
-  combineArraysAction, 
-  convertToDocumentAction, 
-  convertToDocumentsAction, 
-  convertToXmlActions, 
-  convertToXMLResponseAction, 
-  copyProperties1Action, 
-  copyPropertiesAction, 
-  copyPropertiesToItemsAction, 
-  copyValueToNestedAction, 
-  createArrayAction, 
-  createDetailTaxLineAction, 
-  createDetailTaxLinesAction, 
-  createDetailTaxLinesNoTaxAction, 
-  createErrorResponse, 
-  createNewObjectToArrayAction, 
-  createNoCalculationResponse, 
-  createObjectAction, 
-  excludeItemsByConditionAction, 
-  executeForEachAction, 
-  fieldValuesAction, 
-  filterByUniqueValuesAction, 
-  filterItemsWithPropertyMatchingAction, 
-  filterMatchAction, 
-  filterMatchShallowCopyAction, 
-  findItemsWithFieldValuesAction, 
-  findItemsWithFieldValuesMatchingAction, 
-  findMatchAction, 
-  findMatchingObjectAction, 
-  findWithPrefernceAction, 
-  findWithPrefernceOrDefaultAction, 
-  flattenHierarchyToMapAction, 
-  getIntervalTimesAction, 
-  groupByAction, 
-  groupByToObjectsAction, 
-  joinMapAction, 
-  joinValuesAction, 
-  mapFusionSoapRequestAction, 
-  mapFusionSoapRequestActionV2, 
-  mapNestedAction, 
-  mapToFusionResponse, 
-  mapToMapAction, 
-  matchAction, 
-  matchCombinationAction, 
-  mergeToItemsAction, 
-  parseXMLAction, 
-  proRateTaxesAction, 
-  pullUpAndSetReferenceToAction, 
-  pushObjectToArrayAction, 
-  replaceByLookupAction, 
-  separateItemsByConditionAction, 
-  setCombinedFieldValuesAction, 
-  setPropertiesAction, 
-  setPropertyAction, 
-  setReferenceToAction, 
-  setValuesToItemsAction, 
-  splitAction, 
-  splitAllAction, 
-  storeAction, 
-  sumAllAction, 
-  toCsvAction, 
-  toSeparateCsvsByFieldAction, 
-  toURLAction, 
+import {
+  addCreditMemoLines,
+  addProratedTaxesAsTaxOverrides,
+  appendAction,
+  checkAndProcessVBTDetailsAction,
+  cloneAndExecuteForEachAction,
+  collectAction,
+  combineArraysAction,
+  convertToDocumentAction,
+  convertToDocumentsAction,
+  convertToXmlActions,
+  convertToXMLResponseAction,
+  copyProperties1Action,
+  copyPropertiesAction,
+  copyPropertiesToItemsAction,
+  copyValueToNestedAction,
+  createArrayAction,
+  createDetailTaxLineAction,
+  createDetailTaxLinesAction,
+  createDetailTaxLinesNoTaxAction,
+  createErrorResponse,
+  createNewObjectToArrayAction,
+  createNoCalculationResponse,
+  createObjectAction,
+  excludeItemsByConditionAction,
+  executeForEachAction,
+  fieldValuesAction,
+  filterByUniqueValuesAction,
+  filterItemsWithPropertyMatchingAction,
+  filterMatchAction,
+  filterMatchShallowCopyAction,
+  findItemsWithFieldValuesAction,
+  findItemsWithFieldValuesMatchingAction,
+  findMatchAction,
+  findMatchingObjectAction,
+  findWithPrefernceAction,
+  findWithPrefernceOrDefaultAction,
+  flattenHierarchyToMapAction,
+  getIntervalTimesAction,
+  groupByAction,
+  groupByToObjectsAction,
+  joinMapAction,
+  joinValuesAction,
+  mapFusionSoapRequestAction,
+  mapFusionSoapRequestActionV2,
+  mapNestedAction,
+  mapToFusionResponse,
+  mapToMapAction,
+  matchAction,
+  matchCombinationAction,
+  mergeToItemsAction,
+  parseXMLAction,
+  proRateTaxesAction,
+  pullUpAndSetReferenceToAction,
+  pushObjectToArrayAction,
+  replaceByLookupAction,
+  separateItemsByConditionAction,
+  setCombinedFieldValuesAction,
+  setPropertiesAction,
+  setPropertyAction,
+  setReferenceToAction,
+  setValuesToItemsAction,
+  splitAction,
+  splitAllAction,
+  storeAction,
+  sumAllAction,
+  toCsvAction,
+  toSeparateCsvsByFieldAction,
+  toURLAction,
   uniqueValuesFromFieldsAction
- } from './actions';
+} from './actions';
 
 const httpMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'TRACE', 'OPTIONS', 'CONNECT'];
 export enum CollectOperation {
@@ -222,7 +224,7 @@ const extension: SdkExtension = {
           currentLegalEntity: {
             type: 'object',
           },
-          vbtTaxAmtDetails : {
+          vbtTaxAmtDetails: {
             type: 'object',
           },
           isUS2US: {
@@ -239,10 +241,51 @@ const extension: SdkExtension = {
           },
           isInternational: {
             type: 'boolean',
-          }, 
+          },
         },
       },
       js: mapToFusionResponse,
+      outputSchema: {
+        type: 'object',
+      },
+    },
+    addProratedTaxesAsTaxOverrides: {
+      description: 'Add Pro Rated Taxes on Avalara Document',
+      longDescription: 'Add Pro Rated Taxes on Avalara Document',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          taxOverrides: {
+            type: 'object',
+          },
+          avalaraDocument: {
+            type: 'object',
+          },
+          glDate: {
+            type: 'object',
+          },
+        },
+      },
+      js: addProratedTaxesAsTaxOverrides,
+      outputSchema: {
+        type: 'object',
+      },
+    },
+    addCreditMemoLines: {
+      description: 'Add Credit Memo Lines',
+      longDescription: 'Add Credit Memo Lines',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          avalaraDocumentLines: {
+            type: 'array',
+            items: {
+              type: 'object'
+            }
+          },
+        },
+      },
+      js: addCreditMemoLines,
       outputSchema: {
         type: 'object',
       },
@@ -253,9 +296,9 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-         message: {
-          type: 'string',
-         }
+          message: {
+            type: 'string',
+          }
         },
       },
       js: createNoCalculationResponse,
@@ -269,9 +312,9 @@ const extension: SdkExtension = {
       inputSchema: {
         type: 'object',
         properties: {
-         message: {
-          type: 'string',
-         }
+          message: {
+            type: 'string',
+          }
         },
       },
       js: createErrorResponse,
@@ -1821,7 +1864,7 @@ const extension: SdkExtension = {
           },
         },
       },
-      js:createDetailTaxLineAction,
+      js: createDetailTaxLineAction,
 
       outputSchema: {
         type: 'array',
@@ -1924,7 +1967,7 @@ const extension: SdkExtension = {
       },
     },
   },
-  graphFunctions:{
+  graphFunctions: {
     joinValues: {
       description: 'Join the string values together with joiner',
       longDescription: '',
@@ -3521,7 +3564,7 @@ const extension: SdkExtension = {
           },
         },
       },
-      js:createDetailTaxLineAction,
+      js: createDetailTaxLineAction,
 
       outputSchema: {
         type: 'array',
