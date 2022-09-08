@@ -9,37 +9,37 @@ export const getConfigurationCodeValueJS = async (context: SdkExpressionFunction
 }
 
 export const resolveFieldValueByFieldMappingJS = async (context: SdkExpressionFunctionArgument): Promise<any> => {
-    const [fieldName, application, fieldMapping, fusionHeader, fusionLine, additionalData, defaultValue] = context.functionArguments;
+    const [fieldName, application, fieldMapping, fusionRequestTaxableHeader, fusionRequestTaxableLines, additionalData, defaultValue] = context.functionArguments;
     const fieldMappingService = new FieldMappingService()
     return fieldMappingService.resolveFieldValueByFieldMapping(fieldName,
         application,
         fieldMapping,
-        fusionHeader,
-        fusionLine,
+        fusionRequestTaxableHeader,
+        fusionRequestTaxableLines,
         additionalData,
         defaultValue,
     );
 };
 
 export const resolveUserDefinedFieldValuesJS = async (context: SdkExpressionFunctionArgument): Promise<any> => {
-    const [application, UDFMapping, fusionHeader, fusionLine, additionalData] = context.functionArguments;
+    const [application, UDFMapping, fusionRequestTaxableHeader, fusionRequestTaxableLines, additionalData] = context.functionArguments;
     const fieldMappingService = new FieldMappingService()
     return fieldMappingService.resolveUserDefinedFieldValues(
       application,
       UDFMapping,
-      fusionHeader,
-      fusionLine,
+      fusionRequestTaxableHeader,
+      fusionRequestTaxableLines,
       additionalData,
     );
   };
 
   export const resolveAvalaraParametersMappingJS = async (context: SdkExpressionFunctionArgument): Promise<any> => {
-    const [application, paramMapping, fusionHeader, additionalData] = context.functionArguments;
+    const [application, paramMapping, fusionRequestTaxableHeader, additionalData] = context.functionArguments;
     const fieldMappingService = new FieldMappingService();
     fieldMappingService.resolveAvalaraParametersMapping(
       application,
       paramMapping,
-      fusionHeader,
+      fusionRequestTaxableHeader,
       additionalData,
     )
   };

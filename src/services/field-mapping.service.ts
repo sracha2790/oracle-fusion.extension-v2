@@ -3,10 +3,10 @@ import _ = require("lodash");
 export class FieldMappingService {
 
     public resolveFieldValueByFieldMapping = (
-        fieldName, application, fieldMapping, fusionHeader, fusionLine, additionalData, defaultValue
+        fieldName, application, fieldMapping, fusionRequestTaxableHeader, fusionRequestTaxableLine, additionalData, defaultValue
     ): any => {
         let additionalDataLine = (additionalData as Array<Record<string, any>>).find(item => {
-            return (item.TRX_ID == fusionLine['ns:TrxId'] && item.TRX_LINE_ID == fusionLine['ns:TrxLineId'])
+            return (item.TRX_ID == fusionRequestTaxableLine['ns:TrxId'] && item.TRX_LINE_ID == fusionRequestTaxableLine['ns:TrxLineId'])
         })
         if (!additionalDataLine) {
             additionalDataLine = {};
@@ -19,13 +19,13 @@ export class FieldMappingService {
 
                     if (fieldMappingPriorityItem.ATX_FUSION_FIELD_TYPE == 'FFLD') {
                         if (fieldMappingPriorityItem.ATX_FUSION_FIELD_LEVEL == 'HDR') {
-                            if (fusionHeader[fieldMappingPriorityItem.ATX_FUSION_PROP_COLUMN_NAME]) {
-                                returnValue = fusionHeader[fieldMappingPriorityItem.ATX_FUSION_PROP_COLUMN_NAME]
+                            if (fusionRequestTaxableHeader[fieldMappingPriorityItem.ATX_FUSION_PROP_COLUMN_NAME]) {
+                                returnValue = fusionRequestTaxableHeader[fieldMappingPriorityItem.ATX_FUSION_PROP_COLUMN_NAME]
                                 break;
                             }
                         } else {
-                            if (fusionLine[fieldMappingPriorityItem.ATX_FUSION_PROP_COLUMN_NAME]) {
-                                returnValue = fusionLine[fieldMappingPriorityItem.ATX_FUSION_PROP_COLUMN_NAME]
+                            if (fusionRequestTaxableLine[fieldMappingPriorityItem.ATX_FUSION_PROP_COLUMN_NAME]) {
+                                returnValue = fusionRequestTaxableLine[fieldMappingPriorityItem.ATX_FUSION_PROP_COLUMN_NAME]
                                 break;
                             }
                         }
@@ -43,9 +43,9 @@ export class FieldMappingService {
         return returnValue;
     }
 
-    public resolveUserDefinedFieldValues = (application, UDFMapping, fusionHeader, fusionLine, additionalData) => {
+    public resolveUserDefinedFieldValues = (application, UDFMapping, fusionRequestTaxableHeader, fusionRequestTaxableLine, additionalData) => {
         let additionalDataLine = (additionalData as Array<Record<string, any>>).find(item => {
-            return (item.TRX_ID == fusionLine['ns:TrxId'] && item.TRX_LINE_ID == fusionLine['ns:TrxLineId'])
+            return (item.TRX_ID == fusionRequestTaxableLine['ns:TrxId'] && item.TRX_LINE_ID == fusionRequestTaxableLine['ns:TrxLineId'])
         })
         if (!additionalDataLine) {
             additionalDataLine = {};
@@ -58,14 +58,14 @@ export class FieldMappingService {
                 let value = UDFMappingItem.ATX_DEFAULT_VALUE;
                 if (UDFMappingItem.ATX_FUSION_FIELD_TYPE == 'FFLD') {
                     if (UDFMappingItem.ATX_FUSION_FIELD_LEVEL == 'HDR') {
-                        if (fusionHeader[UDFMappingItem.ATX_FUSION_PROP_COLUMN_NAME]) {
-                            value = fusionHeader[UDFMappingItem.ATX_FUSION_PROP_COLUMN_NAME]
-                            break;
+                        if (fusionRequestTaxableHeader[UDFMappingItem.ATX_FUSION_PROP_COLUMN_NAME]) {
+                            value = fusionRequestTaxableHeader[UDFMappingItem.ATX_FUSION_PROP_COLUMN_NAME]
+                            continue;
                         }
                     } else {
-                        if (fusionLine[UDFMappingItem.ATX_FUSION_PROP_COLUMN_NAME]) {
-                            value = fusionLine[UDFMappingItem.ATX_FUSION_PROP_COLUMN_NAME]
-                            break;
+                        if (fusionRequestTaxableLine[UDFMappingItem.ATX_FUSION_PROP_COLUMN_NAME]) {
+                            value = fusionRequestTaxableLine[UDFMappingItem.ATX_FUSION_PROP_COLUMN_NAME]
+                            continue;
                         }
                     }
                 }
@@ -73,7 +73,7 @@ export class FieldMappingService {
                 if (UDFMappingItem.ATX_FUSION_FIELD_TYPE == 'FADD') {
                     if (additionalData[UDFMappingItem.ATX_FUSION_PROP_COLUMN_NAME]) {
                         value = additionalDataLine[UDFMappingItem.ATX_FUSION_PROP_COLUMN_NAME]
-                        break;
+                        continue;
                     }
                 }
 
@@ -93,7 +93,7 @@ export class FieldMappingService {
         }
     }
 
-    public resolveAvalaraParametersMapping = (application, paramMapping, fusionHeader, additionalData) => {
+    public resolveAvalaraParametersMapping = (application, paramMapping, fusionRequestTaxableHeader, additionalData) => {
         const returnValue = [];
         for (const paramMappingItem of paramMapping) {
             if (paramMappingItem.ATX_APPLICATION == application) {
@@ -101,9 +101,9 @@ export class FieldMappingService {
                 const key = paramMappingItem.ATX_FIELD;
                 let value = paramMappingItem.ATX_DEFAULT_VALUE;
                 if (paramMappingItem.ATX_FUSION_FIELD_TYPE == 'FFLD') {
-                    if (fusionHeader[paramMappingItem.ATX_FUSION_PROP_COLUMN_NAME]) {
-                        value = fusionHeader[paramMappingItem.ATX_FUSION_PROP_COLUMN_NAME]
-                        break;
+                    if (fusionRequestTaxableHeader[paramMappingItem.ATX_FUSION_PROP_COLUMN_NAME]) {
+                        value = fusionRequestTaxableHeader[paramMappingItem.ATX_FUSION_PROP_COLUMN_NAME]
+                        continue;
                     }
                 }
 

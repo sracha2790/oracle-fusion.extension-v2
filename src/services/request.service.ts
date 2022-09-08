@@ -49,8 +49,8 @@ export class RequestService {
 
         const txHeaders = requestBody['ns:taxableHeaders'];
         if (txHeaders) {
-            mappings.header = txHeaders;
-            mappings.header.lines = []
+            mappings.taxableHeader = txHeaders;
+            mappings.taxableHeader.taxableLines = []
         }
 
         let detTaxLineMap: Record<string, Array<any>> = {};
@@ -91,7 +91,7 @@ export class RequestService {
                     if (detTaxLineMap.hasOwnProperty(line['ns:TrxLineId'])) {
                         line.detailTaxLines = detTaxLineMap[line['ns:TrxLineId']]
                     }
-                    mappings.header.lines.push(line);
+                    mappings.taxableHeader.taxableLines.push(line);
                 }
             }
         }
@@ -102,7 +102,7 @@ export class RequestService {
 
     public checkAndProcessVBTDetails(
         fusionRequest: {
-            header: Record<string, any>,
+            taxableHeader: Record<string, any>,
         },
         configCodes: Array<configurationCodeRecord>,
         currentLegalEntity: Record<string, any>,
@@ -114,38 +114,38 @@ export class RequestService {
     } {
         this.configurationCodesService.setConfigCodes(configCodes);
         if (this.configurationCodesService.getCodeValue('AP_SELF_ASSESS_TAX') == 'Y') {
-            if (fusionRequest.header['ns:CtrlTotalHdrTxAmt'] && fusionRequest.header['ns:CtrlTotalHdrTxAmt'] > 0) {
-                this.addDetailTaxLinesWithAmount(fusionRequest, currentLegalEntity, fusionRequest.header['ns:CtrlTotalHdrTxAmt'])
+            if (fusionRequest.taxableHeader['ns:CtrlTotalHdrTxAmt'] && fusionRequest.taxableHeader['ns:CtrlTotalHdrTxAmt'] > 0) {
+                this.addDetailTaxLinesWithAmount(fusionRequest, currentLegalEntity, fusionRequest.taxableHeader['ns:CtrlTotalHdrTxAmt'])
             } else {
                 this.addMissingDetailTaxLineIfAtLestOneVBTLineAvailable(fusionRequest);
             }
         } else {
-            if (this.atLeastOneLineHasVBTDetail(fusionRequest.header.lines)) {
-                this.makeTaxZeroOnVBTDetails(fusionRequest.header.lines)
+            if (this.atLeastOneLineHasVBTDetail(fusionRequest.taxableHeader.taxableLines)) {
+                this.makeTaxZeroOnVBTDetails(fusionRequest.taxableHeader.taxableLines)
             } else {
                 this.addDetailTaxLinesWithAmount(fusionRequest, currentLegalEntity, 0);
             }
         }
 
-        const { vendorTaxed, totalVBT, vendorTaxes } = this.checkAndGetTotalVendorTax(fusionRequest.header.lines)
+        const { vendorTaxed, totalVBT, vendorTaxes } = this.checkAndGetTotalVendorTax(fusionRequest.taxableHeader.taxableLines)
 
         return {
-            header: fusionRequest.header,
+            header: fusionRequest.taxableHeader,
             vendorTaxed,
             totalVBT,
             vendorTaxes,
         };
     }
 
-    private checkAndGetTotalVendorTax(lines: Record<string, any>): { vendorTaxed: boolean, totalVBT: number, vendorTaxes: Record<string, number> } {
+    private checkAndGetTotalVendorTax(taxableLines: Record<string, any>): { vendorTaxed: boolean, totalVBT: number, vendorTaxes: Record<string, number> } {
         let totalVBT = 0;
         let vendorTaxed = false;
         let vendorTaxes = {}
-        for (var i = 0; i < lines.length; i++) {
-            const line = lines[i];
+        for (var i = 0; i < taxableLines.length; i++) {
+            const taxableLine = taxableLines[i];
             let lineAmount = 0;
-            for (var j = 0; j < line.detailTaxLines?.length; j++) {
-                const detailTaxLine = line.detailTaxLines[j];
+            for (var j = 0; j < taxableLine.detailTaxLines?.length; j++) {
+                const detailTaxLine = taxableLine.detailTaxLines[j];
                 if (this.isVBTDetail(detailTaxLine)) {
                     const vbtTaxAmt = parseFloat(detailTaxLine['ns:TaxAmt']);
                     if (vbtTaxAmt) {
@@ -156,7 +156,7 @@ export class RequestService {
                 }
             }
             if (lineAmount) {
-                vendorTaxes[line['ns:TrxLineId']] = lineAmount;
+                vendorTaxes[taxableLine['ns:TrxLineId']] = lineAmount;
             }
         }
         if (!vendorTaxed && this.configurationCodesService.getCodeValue('AP_SELF_ASSESS_TAX') != 'Y'){
@@ -169,11 +169,11 @@ export class RequestService {
         }
     }
 
-    private makeTaxZeroOnVBTDetails(lines: Array<Record<string, any>>) {
-        for (var i = 0; i < lines.length; i++) {
-            const line = lines[i];
-            for (var j = 0; j < line.detailTaxLines?.length; j++) {
-                const detailTaxLine = line.detailTaxLines[j];
+    private makeTaxZeroOnVBTDetails(taxableLines: Array<Record<string, any>>) {
+        for (var i = 0; i < taxableLines.length; i++) {
+            const taxableLine = taxableLines[i];
+            for (var j = 0; j < taxableLine.detailTaxLines?.length; j++) {
+                const detailTaxLine = taxableLine.detailTaxLines[j];
                 if (this.isVBTDetail(detailTaxLine)) {
                     detailTaxLine['ns:TaxAmt'] = 0;
                     detailTaxLine['ns:TaxAmtTaxCurr'] = 0;
@@ -184,10 +184,10 @@ export class RequestService {
         }
     }
 
-    private atLeastOneLineHasVBTDetail(lines: Array<Record<string, any>>): boolean {
-        for (var i = 0; i < lines.length; i++) {
-            const line = lines[i];
-            if (this.hasVBTDetails(line)) {
+    private atLeastOneLineHasVBTDetail(taxableLines: Array<Record<string, any>>): boolean {
+        for (var i = 0; i < taxableLines.length; i++) {
+            const taxableLine = taxableLines[i];
+            if (this.hasVBTDetails(taxableLine)) {
                 return true;
             }
         }
@@ -195,81 +195,81 @@ export class RequestService {
     }
 
     private addMissingDetailTaxLineIfAtLestOneVBTLineAvailable(fusionRequest: {
-        header: Record<string, any>,
+        taxableHeader: Record<string, any>,
     }) {
         let hasAtleastOneLineWithVBTDetail = false;
         let masterVBTDetails = {};
-        for (var i = 0; i < fusionRequest.header.lines.length; i++) {
-            const line = fusionRequest.header.lines[i];
-            if (line['ns:LineLevelAction'] == 'DISCARD') {
+        for (var i = 0; i < fusionRequest.taxableHeader.taxableLines.length; i++) {
+            const taxableLine = fusionRequest.taxableHeader.taxableLines[i];
+            if (taxableLine['ns:LineLevelAction'] == 'DISCARD') {
                 continue;
             }
-            if (this.hasVBTDetails(line)) {
-                masterVBTDetails = this.getVBTDetail(line);
+            if (this.hasVBTDetails(taxableLine)) {
+                masterVBTDetails = this.getVBTDetail(taxableLine);
                 hasAtleastOneLineWithVBTDetail = true;
                 break;
             }
         }
 
         if (hasAtleastOneLineWithVBTDetail) {
-            for (var i = 0; i < fusionRequest.header.lines.length; i++) {
-                const line = fusionRequest.header.lines[i];
-                if (line['ns:LineLevelAction'] == 'DISCARD') {
+            for (var i = 0; i < fusionRequest.taxableHeader.taxableLines.length; i++) {
+                const taxableLine = fusionRequest.taxableHeader.taxableLines[i];
+                if (taxableLine['ns:LineLevelAction'] == 'DISCARD') {
                     continue;
                 }
-                if (!this.hasVBTDetails(line)) {
-                    this.addMissingVBTDetailFromMasterVBTDetail(line, masterVBTDetails)
+                if (!this.hasVBTDetails(taxableLine)) {
+                    this.addMissingVBTDetailFromMasterVBTDetail(taxableLine, masterVBTDetails)
                 }
             }
         }
     }
 
-    private addMissingVBTDetailFromMasterVBTDetail(line: Record<string, any>, masterVBTDetail: Record<string, any>) {
-        if (!line.detailTaxLines || !Array.isArray(line.detailTaxLines)) {
-            line.detailTaxLines = []
+    private addMissingVBTDetailFromMasterVBTDetail(taxableLine: Record<string, any>, masterVBTDetail: Record<string, any>) {
+        if (!taxableLine.detailTaxLines || !Array.isArray(taxableLine.detailTaxLines)) {
+            taxableLine.detailTaxLines = []
         }
-        line.detailTaxLines.push({
+        taxableLine.detailTaxLines.push({
             ...masterVBTDetail,
-            'ns:AdditionalInformation': `Detail Tax Line copied - ${line['ns:TrxLineId']}`,
-            'ns:LineAmt': line['ns:LineAmt'],
-            'ns:LineAssessableValue': line['ns:LineAssessableValue'],
-            'ns:MinimumAccountableUnit': line['ns:MinimumAccountableUnit'],
-            'ns:Precision': line['ns:Precision'],
+            'ns:AdditionalInformation': `Detail Tax Line copied - ${taxableLine['ns:TrxLineId']}`,
+            'ns:LineAmt': taxableLine['ns:LineAmt'],
+            'ns:LineAssessableValue': taxableLine['ns:LineAssessableValue'],
+            'ns:MinimumAccountableUnit': taxableLine['ns:MinimumAccountableUnit'],
+            'ns:Precision': taxableLine['ns:Precision'],
             'ns:TaxAmt': 0,
             'ns:TaxAmtTaxCurr': 0,
             'ns:UnroundedTaxAmt': 0,
             'ns:TaxApportionmentLineNumber': this.TaxApportionmentCounter++,
-            'ns:UnroundedTaxableAmt': line['ns:LineAmt'],
-            'ns:TaxLineId': line['ns:TaxLineId'],
-            'ns:TaxLineNumber': line['ns:TaxLineNumber'],
-            'ns:TaxableAmt': line['ns:LineAmt'],
-            'ns:TaxableAmtTaxCurr': line['ns:LineAmt'],
-            'ns:TrxLevelType': line['ns:TrxLevelType'],
-            'ns:TrxLineId': line['ns:TrxLineId'],
-            'ns:TrxLineNumber': line['ns:TrxLineNumber'],
+            'ns:UnroundedTaxableAmt': taxableLine['ns:LineAmt'],
+            'ns:TaxLineId': taxableLine['ns:TaxLineId'],
+            'ns:TaxLineNumber': taxableLine['ns:TaxLineNumber'],
+            'ns:TaxableAmt': taxableLine['ns:LineAmt'],
+            'ns:TaxableAmtTaxCurr': taxableLine['ns:LineAmt'],
+            'ns:TrxLevelType': taxableLine['ns:TrxLevelType'],
+            'ns:TrxLineId': taxableLine['ns:TrxLineId'],
+            'ns:TrxLineNumber': taxableLine['ns:TrxLineNumber'],
         });
     }
 
-    private hasVBTDetails(line: Record<string, any>): boolean {
-        for (var i = 0; i < line.detailTaxLines?.length; i++) {
-            if (this.isVBTDetail(line.detailTaxLines[i])) {
+    private hasVBTDetails(taxableLine: Record<string, any>): boolean {
+        for (var i = 0; i < taxableLine.detailTaxLines?.length; i++) {
+            if (this.isVBTDetail(taxableLine.detailTaxLines[i])) {
                 return true
             }
         }
         return false;
     }
 
-    private getVBTDetail(line: Record<string, any>): boolean {
-        for (var i = 0; i < line.detailTaxLines?.length; i++) {
-            if (this.isVBTDetail(line.detailTaxLines[i])) {
-                return line.detailTaxLines[i]
+    private getVBTDetail(taxableLine: Record<string, any>): boolean {
+        for (var i = 0; i < taxableLine.detailTaxLines?.length; i++) {
+            if (this.isVBTDetail(taxableLine.detailTaxLines[i])) {
+                return taxableLine.detailTaxLines[i]
             }
         }
         return;
     }
 
-    private isVBTDetail(detail: Record<string, any>): boolean {
-        if (detail['ns:ManuallyEnteredFlag'] == 'Y' && detail['ns:CancelFlag'] == 'N' && detail['ns:DeleteFlag'] == 'N') {
+    private isVBTDetail(detailTaxLine: Record<string, any>): boolean {
+        if (detailTaxLine['ns:ManuallyEnteredFlag'] == 'Y' && detailTaxLine['ns:CancelFlag'] == 'N' && detailTaxLine['ns:DeleteFlag'] == 'N') {
             return true
         }
         return false;
@@ -277,36 +277,36 @@ export class RequestService {
 
     private addDetailTaxLinesWithAmount(
         fusionRequest: {
-            header: Record<string, any>,
+            taxableHeader: Record<string, any>,
         },
         currentLegalEntity: Record<string, any>,
         amountForFirstLine: number,
     ) {
-        for (var i = 0; i < fusionRequest.header.lines.length; i++) {
-            const line = fusionRequest.header.lines[i];
-            if (line['ns:LineLevelAction'] == 'DISCARD') {
+        for (var i = 0; i < fusionRequest.taxableHeader.taxableLines.length; i++) {
+            const taxableLine = fusionRequest.taxableHeader.taxableLines[i];
+            if (taxableLine['ns:LineLevelAction'] == 'DISCARD') {
                 continue;
             }
-            line.detailTaxLines = [
+            taxableLine.detailTaxLines = [
                 {
-                    'ns:AdditionalInformation': `Detail Tax Line added - ${line['ns:TrxLineId']}`,
-                    'ns:ApplicationId': line['ns:ApplicationId'],
+                    'ns:AdditionalInformation': `Detail Tax Line added - ${taxableLine['ns:TrxLineId']}`,
+                    'ns:ApplicationId': taxableLine['ns:ApplicationId'],
                     'ns:CancelFlag': 'N',
                     'ns:CompoundingTaxFlag': 'N',
                     'ns:CopiedFromOtherDocFlag': 'N',
                     'ns:DeleteFlag': 'N',
-                    'ns:EntityCode': fusionRequest.header['ns:EntityCode'],
-                    'ns:EventClassCode': fusionRequest.header['ns:EventClassCode'],
-                    'ns:InternalOrganizationId': fusionRequest.header['ns:InternalOrganizationId'],
-                    'ns:LedgerId': fusionRequest.header['ns:LedgerId'],
-                    'ns:LegalEntityId': fusionRequest.header['ns:LegalEntityId'],
-                    'ns:LineAmt': line['ns:LineAmt'],
-                    'ns:LineAssessableValue': line['ns:LineAssessableValue'],
+                    'ns:EntityCode': fusionRequest.taxableHeader['ns:EntityCode'],
+                    'ns:EventClassCode': fusionRequest.taxableHeader['ns:EventClassCode'],
+                    'ns:InternalOrganizationId': fusionRequest.taxableHeader['ns:InternalOrganizationId'],
+                    'ns:LedgerId': fusionRequest.taxableHeader['ns:LedgerId'],
+                    'ns:LegalEntityId': fusionRequest.taxableHeader['ns:LegalEntityId'],
+                    'ns:LineAmt': taxableLine['ns:LineAmt'],
+                    'ns:LineAssessableValue': taxableLine['ns:LineAssessableValue'],
                     'ns:ManuallyEnteredFlag': 'Y',
-                    'ns:MinimumAccountableUnit': line['ns:MinimumAccountableUnit'],
+                    'ns:MinimumAccountableUnit': taxableLine['ns:MinimumAccountableUnit'],
                     'ns:OffsetFlag': 'N',
                     'ns:OverriddenFlag': 'Y',
-                    'ns:Precision': line['ns:Precision'],
+                    'ns:Precision': taxableLine['ns:Precision'],
                     'ns:ReportableFlag': 'Y',
                     'ns:ReportingOnlyFlag': 'N',
                     'ns:RoundingLevelCode': 'HEADER',
@@ -316,47 +316,47 @@ export class RequestService {
                     'ns:TaxAmt': i === 0 ? amountForFirstLine : 0,
                     'ns:TaxAmtTaxCurr': i === 0 ? amountForFirstLine : 0,
                     'ns:UnroundedTaxAmt': i === 0 ? amountForFirstLine : 0,
-                    'ns:UnroundedTaxableAmt': line['ns:LineAmt'],
+                    'ns:UnroundedTaxableAmt': taxableLine['ns:LineAmt'],
                     'ns:TaxRate': i === 0 ? 0 : 0,
                     'ns:TaxAmtIncludedFlag': 'N',
                     'ns:TaxApportionmentLineNumber': this.TaxApportionmentCounter++,
-                    'ns:TaxCurrencyCode': fusionRequest.header['ns:TaxCurrencyCode'],
-                    'ns:TaxCurrencyConversionDate': fusionRequest.header['ns:TaxCurrencyConversionDate'],
-                    'ns:TaxCurrencyConversionRate': fusionRequest.header['ns:TaxCurrencyConversionRate'],
-                    'ns:TaxDate': fusionRequest.header['ns:TaxDate'],
-                    'ns:TaxDetermineDate': fusionRequest.header['ns:TaxDetermineDate'],
+                    'ns:TaxCurrencyCode': fusionRequest.taxableHeader['ns:TaxCurrencyCode'],
+                    'ns:TaxCurrencyConversionDate': fusionRequest.taxableHeader['ns:TaxCurrencyConversionDate'],
+                    'ns:TaxCurrencyConversionRate': fusionRequest.taxableHeader['ns:TaxCurrencyConversionRate'],
+                    'ns:TaxDate': fusionRequest.taxableHeader['ns:TaxDate'],
+                    'ns:TaxDetermineDate': fusionRequest.taxableHeader['ns:TaxDetermineDate'],
                     'ns:TaxJurisdictionCode': currentLegalEntity.ATX_JURISDICTION_CODE_PREFIX + '-DEFAULT',
-                    'ns:TaxLineId': line['ns:TaxLineId'],
-                    'ns:TaxLineNumber': line['ns:TaxLineNumber'],
+                    'ns:TaxLineId': taxableLine['ns:TaxLineId'],
+                    'ns:TaxLineNumber': taxableLine['ns:TaxLineNumber'],
                     'ns:TaxOnlyLineFlag': 'N',
                     'ns:TaxPointBasis': 'INVOICE',
                     'ns:TaxRateCode': this.configurationCodesService.getCodeValue('VBT_RATE_CODE'),
                     'ns:TaxStatusCode': this.configurationCodesService.getCodeValue('VBT_STATUS_CODE'),
                     'ns:TaxRegimeCode': currentLegalEntity.ATX_TAX_REGIME_CODE,
                     'ns:TaxRateType': 'PERCENTAGE',
-                    'ns:TaxableAmt': line['ns:LineAmt'],
-                    'ns:TaxableAmtTaxCurr': line['ns:LineAmt'],
-                    'ns:TrxCurrencyCode': fusionRequest.header['ns:TrxCurrencyCode'],
-                    'ns:TrxDate': fusionRequest.header['ns:TrxDate'],
-                    'ns:TrxId': fusionRequest.header['ns:TrxId'],
-                    'ns:TrxLevelType': line['ns:TrxLevelType'],
-                    'ns:TrxLineId': line['ns:TrxLineId'],
-                    'ns:TrxLineNumber': line['ns:TrxLineNumber'],
+                    'ns:TaxableAmt': taxableLine['ns:LineAmt'],
+                    'ns:TaxableAmtTaxCurr': taxableLine['ns:LineAmt'],
+                    'ns:TrxCurrencyCode': fusionRequest.taxableHeader['ns:TrxCurrencyCode'],
+                    'ns:TrxDate': fusionRequest.taxableHeader['ns:TrxDate'],
+                    'ns:TrxId': fusionRequest.taxableHeader['ns:TrxId'],
+                    'ns:TrxLevelType': taxableLine['ns:TrxLevelType'],
+                    'ns:TrxLineId': taxableLine['ns:TrxLineId'],
+                    'ns:TrxLineNumber': taxableLine['ns:TrxLineNumber'],
                 },
             ];
         }
     }
 
     private makeMappingsObj(): {
-        header: Record<string, any>,
+        taxableHeader: Record<string, any>,
         wsAction: string,
     } {
-        const header = {};
+        const taxableHeader = {};
         const vendorTaxes = new Map();
         let totalVBT = 0;
         let vendorTaxed = false;
         return {
-            header,
+            taxableHeader,
             wsAction: '',
         };
     }

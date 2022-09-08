@@ -18,46 +18,46 @@ export class JurisDataMapper {
     }
     async addJurisDataForUS2US(
         detailTaxLine: Record<string, any>,
-        matchingFusionLine: Record<string, any>,
-        avaTaxLine: Record<string, any>,
-        avaTaxLineDetail: Record<string, any>,
+        matchingFusionTaxableLine: Record<string, any>,
+        avalaraTransactionLine: Record<string, any>,
+        avalaraTransactionLineDetail: Record<string, any>,
     ) {
         let queryResults: Record<string, any>;
         let whereClause: Record<string, any>;
-        if (avaTaxLineDetail.jurisType === 'STA') {
+        if (avalaraTransactionLineDetail.jurisType === 'STA') {
             whereClause = {
                 ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
                 ATX_JURISDICTION_TYPE: 'STATE',
-                ATX_REGION: avaTaxLineDetail.region,
-                ATX_COUNTRY: avaTaxLineDetail.country,
+                ATX_REGION: avalaraTransactionLineDetail.region,
+                ATX_COUNTRY: avalaraTransactionLineDetail.country,
             };
         }
 
-        if (avaTaxLineDetail.jurisType === 'CTY') {
+        if (avalaraTransactionLineDetail.jurisType === 'CTY') {
             whereClause = {
                 ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
                 ATX_JURISDICTION_TYPE: 'COUNTY',
-                ATX_REGION: avaTaxLineDetail.region,
-                ATX_COUNTRY: avaTaxLineDetail.country,
-                ATX_COUNTY: avaTaxLineDetail.jurisName
+                ATX_REGION: avalaraTransactionLineDetail.region,
+                ATX_COUNTRY: avalaraTransactionLineDetail.country,
+                ATX_COUNTY: avalaraTransactionLineDetail.jurisName
             };
         }
 
-        if (avaTaxLineDetail.jurisType === 'CIT') {
+        if (avalaraTransactionLineDetail.jurisType === 'CIT') {
             whereClause = {
                 ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
                 ATX_JURISDICTION_TYPE: 'CITY',
-                ATX_REGION: avaTaxLineDetail.region,
-                ATX_COUNTRY: avaTaxLineDetail.country,
-                ATX_CITY: avaTaxLineDetail.jurisName,
+                ATX_REGION: avalaraTransactionLineDetail.region,
+                ATX_COUNTRY: avalaraTransactionLineDetail.country,
+                ATX_CITY: avalaraTransactionLineDetail.jurisName,
             };
         }
 
-        if (avaTaxLineDetail.jurisType === 'STJ') {
+        if (avalaraTransactionLineDetail.jurisType === 'STJ') {
             whereClause = {
                 ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
                 ATX_JURISDICTION_TYPE: 'SPECIAL',
-                ATX_COUNTRY: avaTaxLineDetail.country,
+                ATX_COUNTRY: avalaraTransactionLineDetail.country,
             };
         }
 
@@ -66,15 +66,15 @@ export class JurisDataMapper {
 
     async addJurisDataForCA2CA(
         detailTaxLine: Record<string, any>,
-        matchingFusionLine: Record<string, any>,
-        avaTaxLine: Record<string, any>,
-        avaTaxLineDetail: Record<string, any>,
+        matchingFusionTaxableLine: Record<string, any>,
+        avalaraTransactionLine: Record<string, any>,
+        avalaraTransactionLineDetail: Record<string, any>,
     ) {
         let whereClause: Record<string, any>;
-        if (avaTaxLineDetail.jurisType === 'CNT') {
-            let region = avaTaxLineDetail.country;
-            (avaTaxLine.details as Array<Record<string, any>>).forEach(detail => {
-                if (detail.id != avaTaxLineDetail.id && detail.jurisType == 'STA') {
+        if (avalaraTransactionLineDetail.jurisType === 'CNT') {
+            let region = avalaraTransactionLineDetail.country;
+            (avalaraTransactionLine.details as Array<Record<string, any>>).forEach(detail => {
+                if (detail.id != avalaraTransactionLineDetail.id && detail.jurisType == 'STA') {
                     region = detail.region;
                 }
             });
@@ -82,16 +82,16 @@ export class JurisDataMapper {
                 ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
                 ATX_JURISDICTION_TYPE: 'COUNTRY',
                 ATX_REGION: region,
-                ATX_COUNTRY: avaTaxLineDetail.country,
+                ATX_COUNTRY: avalaraTransactionLineDetail.country,
             }
         }
 
-        if (avaTaxLineDetail.jurisType === 'STA') {
+        if (avalaraTransactionLineDetail.jurisType === 'STA') {
             whereClause = {
                 ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
                 ATX_JURISDICTION_TYPE: 'COUNTRY',
-                ATX_REGION: avaTaxLineDetail.region,
-                ATX_COUNTRY: avaTaxLineDetail.country,
+                ATX_REGION: avalaraTransactionLineDetail.region,
+                ATX_COUNTRY: avalaraTransactionLineDetail.country,
             };
         }
 
@@ -100,12 +100,12 @@ export class JurisDataMapper {
 
     async addJurisDataForUS2CA(
         detailTaxLine: Record<string, any>,
-        matchingFusionLine: Record<string, any>,
-        avaTaxLine: Record<string, any>,
-        avaTaxLineDetail: Record<string, any>,
+        matchingFusionTaxableLine: Record<string, any>,
+        avalaraTransactionLine: Record<string, any>,
+        avalaraTransactionLineDetail: Record<string, any>,
     ) {
         let whereClause: Record<string, any>;
-        if (avaTaxLineDetail.jurisType == 'CNT') {
+        if (avalaraTransactionLineDetail.jurisType == 'CNT') {
             const whereClause = {
                 ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
                 ATX_JURISDICTION_TYPE: 'STATE',

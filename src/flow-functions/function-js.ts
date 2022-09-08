@@ -1,9 +1,9 @@
 
 import { AppknitSDK, SdkExecutionError, SdkGenericErrorCodes } from '@appknit-project/appknit-platform-sdk-v2';
 import { AppknitGraphSDK } from '@appknit-project/common-frameworks';
-import { ResponseBuilderService } from 'src/services';
-import { ExtendedFunctionsService } from 'src/services/extended-functions.service';
-import { TaxProrationService } from 'src/services/tax-proration.service';
+import { ResponseBuilderService } from '../../src/services';
+import { ExtendedFunctionsService } from '../../src/services/extended-functions.service';
+import { TaxProrationService } from '../../src/services/tax-proration.service';
 import { RequestService } from '../../src/services/request.service';
 
 export const convertFusionRequestIntoHierarchyJS = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
@@ -27,22 +27,22 @@ export const checkAndProcessVBTDetailsJS = (sdk: AppknitSDK | AppknitGraphSDK, c
 };
 
 export const addCreditMemoLinesJS = async (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
-    const { avalaraRequestLines } = configuration;
+    const { avalaraRequestLineItems } = configuration;
     const responseBuilder = new ExtendedFunctionsService();
     const result = responseBuilder.addCreditMemoLines(
-        avalaraRequestLines,
+        avalaraRequestLineItems,
     );
     return result;
 };
 
 export const proRateTaxesJS = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
-    const { apSelfAssesTaxFlag, vendorBilledTax, avalaraResponseLines, apTolerances } = configuration;
+    const { apSelfAssesTaxFlag, vendorBilledTax, avalaraTransactionLines, apTolerances } = configuration;
 
     const taxProrationService = new TaxProrationService();
     let taxOverRideDtls = taxProrationService.prorateTaxes(
         apSelfAssesTaxFlag,
         vendorBilledTax,
-        avalaraResponseLines,
+        avalaraTransactionLines,
         apTolerances.tolerancePct,
         apTolerances.toleranceAmt,
     );
@@ -100,10 +100,10 @@ export const mapToFusionForErrorResponseJS = async (sdk: AppknitSDK | AppknitGra
 };
 
 export const mapToFusionResponseJS = async (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
-    const { avalaraResponse, fusionRequest, customerProfile, currentLegalEntity, vbtTaxAmtDetails, isUS2US, isCA2CA, isUS2CA, isIndia, isInternational } = configuration;
+    const { avalaraTransaction, fusionRequest, customerProfile, currentLegalEntity, vbtTaxAmtDetails, isUS2US, isCA2CA, isUS2CA, isIndia, isInternational } = configuration;
     const responseBuilder = new ResponseBuilderService(
         sdk,
-        avalaraResponse,
+        avalaraTransaction,
         fusionRequest,
         customerProfile,
         currentLegalEntity,

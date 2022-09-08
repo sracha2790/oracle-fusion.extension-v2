@@ -1,5 +1,5 @@
 import { SdkFlowFunctionEntry } from "@appknit-project/common-frameworks";
-import { ProRateTaxDetailModel } from "src/openapimodels/ProRateTaxDetailModel";
+import { ProRateTaxDetailModel } from "../../src/openapimodels/ProRateTaxDetailModel";
 import {
     addCreditMemoLinesJS,
     addProratedTaxesAsTaxOverridesJS,
@@ -60,7 +60,7 @@ export const addCreditMemoLines: SdkFlowFunctionEntry = {
     inputSchema: {
         type: 'object',
         properties: {
-            avalaraDocumentLines: {
+            avalaraRequestLineItems: {
                 type: 'array',
                 items: {
                     type: 'object'
@@ -88,7 +88,7 @@ export const proRateTaxes: SdkFlowFunctionEntry = {
                 title: 'Self Assess Tax Flag',
                 type: 'number',
             },
-            taxedLines: {
+            avalaraTransactionLines: {
                 title: 'Tolerance pct and amt',
                 type: 'array',
                 items: {
