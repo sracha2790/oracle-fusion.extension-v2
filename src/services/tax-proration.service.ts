@@ -1,7 +1,7 @@
 import _ = require("lodash");
 
-export class ProRateTaxCalculator {
-  calculateProRateTax(apSelfAssesTaxFlag: string, vendorBilledTax, avalaraTaxLines, tolerancePct, toleranceAmt) {
+export class TaxProrationService {
+  public prorateTaxes(apSelfAssesTaxFlag: string, vendorBilledTax, avalaraTaxLines, tolerancePct, toleranceAmt) {
     let result = {};
 
     let taxOverrides: Record<string, any> = {};
@@ -186,33 +186,4 @@ export class ProRateTaxCalculator {
 
     return within;
   }
-
-  proRateTest() {
-    let ZERO = 0;
-    let HUNDRED = 100;
-    // const fs = require("fs");
-    console.log('Test - proRateTest');
-    // const file = '../docs/PRLMBDATST224005-res.json';
-    // const file = '../docs/PRLMBDATST227044-res.json'
-    const file = '/media/prajeesh/WORKSPACE/CLIENT/SMARTERP/AWS/TESTFILES/avaresp222_INVOICE_275004-2.json';
-
-    let vbt = 5000;
-    // let avaTaxResponse = JSON.parse(fs.readFileSync(file, "utf-8"));
-    let avaTaxResponse;
-    let proRateDetails = this.calculateProRateTax('Y', vbt, avaTaxResponse.lines, 0.5, 0.5);
-
-    console.log(JSON.stringify(proRateDetails, null, 2));
-    console.log('--- Details ---');
-    for (let [key, val] of proRateDetails['overRides']) {
-      console.log('Key : ' + key);
-      console.log(JSON.stringify(val, null, 2));
-    }
-    console.log('--- OverRidesTaxDetails ---');
-    for (let [key, val] of proRateDetails['vbtTaxAmtDetails']) {
-      console.log('Key : ' + key);
-      console.log(JSON.stringify(val, null, 2));
-    }
-  }
-}
-
-// new ProRateTaxCalculator().proRateTest();
+};

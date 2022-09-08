@@ -1,14 +1,13 @@
-import { configurationCodeRecord, ConfigurationCodesService } from "../../src/services/configuration.service"
+import { configurationCodeRecord, ConfigurationCodesService } from "../services/configuration.service"
 
-export class DataMapperV2 {
-    VENDOR_BILLED_TAX = 'VENDOR BILLED TAX';
+export class RequestService {
     private configurationCodesService: ConfigurationCodesService;
     private TaxApportionmentCounter: number;
     constructor() {
         this.configurationCodesService = new ConfigurationCodesService();
         this.TaxApportionmentCounter = 0;
     }
-    public processIncomingSoapRequest(soapRequest: any): any {
+    public convertIntoHierarchy(soapRequest: any): any {
         const env = soapRequest['soapenv:Envelope'];
         let action = '';
         const header = env['soapenv:Header'];
