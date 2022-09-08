@@ -11,7 +11,7 @@ export class ResponseBuilderService {
     private taxApportionmentLineNumber: number;
     constructor(
         private sdk: AppknitSDK | AppknitGraphSDK,
-        private avaTaxModel: Record<string, any>,
+        private avalaraResponse: Record<string, any>,
         private fusionRequest: Record<string, any>,
         private customerProfile: Record<string, any>,
         private currentLegalEntity: Record<string, any>,
@@ -53,7 +53,7 @@ export class ResponseBuilderService {
     ) {
         const detailTaxLines = [];
         let i = 1;
-        for (const avaTaxLine of this.avaTaxModel.lines) {
+        for (const avaTaxLine of this.avalaraResponse.lines) {
             if (Helpers.isCreditMemoAdditionalLine(avaTaxLine)) {
                 continue;
             }
@@ -137,7 +137,7 @@ export class ResponseBuilderService {
     ) {
         const detailTaxLines = [];
         let VendorLineHandledFlag = false;
-        if (this.isUS2US && this.avaTaxModel.totalTax == 0 && this.configurationCodesService.getCodeValue('CORRECT_VBT_FOR_OC') == 'Y') {
+        if (this.isUS2US && this.avalaraResponse.totalTax == 0 && this.configurationCodesService.getCodeValue('CORRECT_VBT_FOR_OC') == 'Y') {
             VendorLineHandledFlag = true;
             for (const line of this.fusionRequest.header.lines) {
                 line.detailTaxLines?.filter((detailTaxLine: Record<string, any>) => Helpers.isVBTDetailtaxLine(detailTaxLine)).forEach((vbtDetailTaxLine: Record<string, any>) => {
@@ -151,7 +151,7 @@ export class ResponseBuilderService {
         }
 
         let i = 1;
-        for (const avaTaxLine of this.avaTaxModel.lines) {
+        for (const avaTaxLine of this.avalaraResponse.lines) {
             if (Helpers.isCreditMemoAdditionalLine(avaTaxLine)) {
                 continue;
             }

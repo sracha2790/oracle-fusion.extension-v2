@@ -17,32 +17,32 @@ export const convertFusionRequestIntoHierarchyJS = (sdk: AppknitSDK | AppknitGra
 };
 
 export const checkAndProcessVBTDetailsJS = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
-    const { request, configCodes, currentLegalEntity } = configuration;
+    const { fusionRequest, configCodes, currentLegalEntity } = configuration;
     let mappedData;
 
     const requestService = new RequestService();
-    mappedData = requestService.checkAndProcessVBTDetails(request, configCodes, currentLegalEntity);
+    mappedData = requestService.checkAndProcessVBTDetails(fusionRequest, configCodes, currentLegalEntity);
 
     return Promise.resolve(mappedData);
 };
 
 export const addCreditMemoLinesJS = async (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
-    const { avalaraDocumentLines } = configuration;
+    const { avalaraRequestLines } = configuration;
     const responseBuilder = new ExtendedFunctionsService();
     const result = responseBuilder.addCreditMemoLines(
-        avalaraDocumentLines,
+        avalaraRequestLines,
     );
     return result;
 };
 
 export const proRateTaxesJS = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
-    const { apSelfAssesTaxFlag, vendorBilledTax, taxedLines, apTolerances } = configuration;
+    const { apSelfAssesTaxFlag, vendorBilledTax, avalaraResponseLines, apTolerances } = configuration;
 
     const taxProrationService = new TaxProrationService();
     let taxOverRideDtls = taxProrationService.prorateTaxes(
         apSelfAssesTaxFlag,
         vendorBilledTax,
-        taxedLines,
+        avalaraResponseLines,
         apTolerances.tolerancePct,
         apTolerances.toleranceAmt,
     );
@@ -51,11 +51,11 @@ export const proRateTaxesJS = (sdk: AppknitSDK | AppknitGraphSDK, configuration:
 };
 
 export const addProratedTaxesAsTaxOverridesJS = async (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
-    const { taxOverrides, avalaraDocument, glDate } = configuration;
+    const { taxOverrides, avalaraRequest, glDate } = configuration;
     const responseBuilder = new ExtendedFunctionsService();
     const result = responseBuilder.addProratedTaxesAsTaxOverrides(
         taxOverrides,
-        avalaraDocument,
+        avalaraRequest,
         glDate,
     );
     return result;
@@ -100,10 +100,10 @@ export const mapToFusionForErrorResponseJS = async (sdk: AppknitSDK | AppknitGra
 };
 
 export const mapToFusionResponseJS = async (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
-    const { avaTaxModel, fusionRequest, customerProfile, currentLegalEntity, vbtTaxAmtDetails, isUS2US, isCA2CA, isUS2CA, isIndia, isInternational } = configuration;
+    const { avalaraResponse, fusionRequest, customerProfile, currentLegalEntity, vbtTaxAmtDetails, isUS2US, isCA2CA, isUS2CA, isIndia, isInternational } = configuration;
     const responseBuilder = new ResponseBuilderService(
         sdk,
-        avaTaxModel,
+        avalaraResponse,
         fusionRequest,
         customerProfile,
         currentLegalEntity,

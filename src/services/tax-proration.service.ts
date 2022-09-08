@@ -1,7 +1,7 @@
 import _ = require("lodash");
 
 export class TaxProrationService {
-  public prorateTaxes(apSelfAssesTaxFlag: string, vendorBilledTax, avalaraTaxLines, tolerancePct, toleranceAmt) {
+  public prorateTaxes(apSelfAssesTaxFlag: string, vendorBilledTax, avalaraResponseLines, tolerancePct, toleranceAmt) {
     let result = {};
 
     let taxOverrides: Record<string, any> = {};
@@ -15,22 +15,22 @@ export class TaxProrationService {
 
     if (apSelfAssesTaxFlag != 'Y') {
       result['ReturnOnlyVbtLines'] = true;
-      for (const avalaraTaxLine of avalaraTaxLines) {
-        taxOverrides[avalaraTaxLine.lineNumber] = avalaraTaxLine.taxCalculated;
+      for (const avalaraResponseLine of avalaraResponseLines) {
+        taxOverrides[avalaraResponseLine.lineNumber] = avalaraResponseLine.taxCalculated;
         let taxDet = {};
-        taxDet['lineNumber'] = avalaraTaxLine.lineNumber;
-        taxDet['override'] = avalaraTaxLine.taxCalculated;
-        taxDet['taxRate'] = _.sumBy(avalaraTaxLine.details, function(detail:Record<string, any>) { return detail.rate; }) * 100;
-        taxDet['taxDetails'] = avalaraTaxLine.taxDetails;
-        taxDet['taxAmtTaxCurr'] = avalaraTaxLine.tax;
-        taxDet['unroundedTaxAmt'] = avalaraTaxLine.tax;
+        taxDet['lineNumber'] = avalaraResponseLine.lineNumber;
+        taxDet['override'] = avalaraResponseLine.taxCalculated;
+        taxDet['taxRate'] = _.sumBy(avalaraResponseLine.details, function(detail:Record<string, any>) { return detail.rate; }) * 100;
+        taxDet['taxDetails'] = avalaraResponseLine.taxDetails;
+        taxDet['taxAmtTaxCurr'] = avalaraResponseLine.tax;
+        taxDet['unroundedTaxAmt'] = avalaraResponseLine.tax;
         taxDet['ReturnVbtLineOnly'] = true; // will return vbt lines only
-        vbtTaxAmtDetails[avalaraTaxLine.lineNumber] = taxDet;
+        vbtTaxAmtDetails[avalaraResponseLine.lineNumber] = taxDet;
       }
       return result;
     }
 
-    let tlSize = avalaraTaxLines.length;
+    let tlSize = avalaraResponseLines.length;
 
     // console.log('TaxLines size : ' + tlSize)
 
@@ -49,7 +49,7 @@ export class TaxProrationService {
     let vendorTax = vendorBilledTax;
     // Can remove this and pass total taxable and totalTaxCalculated from doc level
     for (let idx = 0; idx < tlSize; idx++) {
-      let tl = avalaraTaxLines[idx];
+      let tl = avalaraResponseLines[idx];
       // totalTaxPercent = totalTaxPercent.add(tl.rate());
       totalTaxCalculated = totalTaxCalculated + tl.taxCalculated;
       totalTaxable = totalTaxable + tl.taxableAmount;
@@ -70,41 +70,41 @@ export class TaxProrationService {
     // check whether the vendortax was exact
     // super.getAvtxLog().addDebugMessage("D", this.className, "Total tax percent " + totalTaxPercent.toString());
     for (let i = 0; i < tlSize; i++) {
-      let avalaraTaxLine = avalaraTaxLines[i];
+      let avalaraResponseLine = avalaraResponseLines[i];
       // console.log('Line : ' + tl.lineNumber + ', Rate : ' + tl.rate)
       let taxDet = {};
       // Most scenarios will need taxCalculated to be set as override, so set it here and reset it when differ
-      taxDet['override'] = avalaraTaxLine.taxCalculated;
-      taxDet['lineNumber'] = avalaraTaxLine.lineNumber;
+      taxDet['override'] = avalaraResponseLine.taxCalculated;
+      taxDet['lineNumber'] = avalaraResponseLine.lineNumber;
       // taxOverrideDetails.push(taxDet);
       // if (tl.rate > 0) {
       // let taxRate = 0;
-      const taxRate = _.sumBy(avalaraTaxLine.details, function(detail:Record<string, any>) { return detail.rate; })
+      const taxRate = _.sumBy(avalaraResponseLine.details, function(detail:Record<string, any>) { return detail.rate; })
 
       if (exactVBT) {
         //need not do the prorate calculation
         // balance will be 0 here in this if block
       } else {
         prevRunningProrateVBTTotal = runningProrateVBTTotal;
-        prorateVBT = (vendorTax * avalaraTaxLine.taxCalculated) / totalTaxCalculated;
+        prorateVBT = (vendorTax * avalaraResponseLine.taxCalculated) / totalTaxCalculated;
         // prorateVBT = prorateVBTNotRounded.setScale(2, BigDecimal.ROUND_HALF_UP);
         runningProrateVBTTotal = runningProrateVBTTotal + prorateVBT;
         if (runningProrateVBTTotal - vendorTax > 0) {
           prorateVBT = prorateVBT - runningProrateVBTTotal - vendorTax;
         }
-        balance = avalaraTaxLine.taxCalculated - prorateVBT;
+        balance = avalaraResponseLine.taxCalculated - prorateVBT;
       }
       // console.log('Balance : ' + parseFloat(balance))
       if (balance < 0) {
-        taxOverrides[avalaraTaxLine.lineNumber] = avalaraTaxLine.taxCalculated; //set VBT -- correct one
+        taxOverrides[avalaraResponseLine.lineNumber] = avalaraResponseLine.taxCalculated; //set VBT -- correct one
         taxDet['taxRate'] = taxRate * 100;
-        taxDet['taxDetails'] = avalaraTaxLine.taxDetails;
+        taxDet['taxDetails'] = avalaraResponseLine.taxDetails;
         taxDet['ReturnVbtLineOnly'] = true; // will return vbt lines only
         let taxToSet = 0;
         if (withinTolerance) {
-          taxToSet = avalaraTaxLine.tax;
+          taxToSet = avalaraResponseLine.tax;
         } else {
-          taxToSet = avalaraTaxLine.taxCalculated;
+          taxToSet = avalaraResponseLine.taxCalculated;
         }
         taxDet['taxAmt'] = taxToSet;
         taxDet['taxAmtTaxCurr'] = taxToSet;
@@ -114,23 +114,23 @@ export class TaxProrationService {
       } else if (balance > 0) {
         result['ReturnOnlyVbtLines'] = false;
         if (withinTolerance) {
-          taxOverrides[avalaraTaxLine.lineNumber] = avalaraTaxLine.taxCalculated; // setting
+          taxOverrides[avalaraResponseLine.lineNumber] = avalaraResponseLine.taxCalculated; // setting
           taxDet['taxRate'] =  taxRate * 100;
-          taxDet['taxAmt'] = avalaraTaxLine.tax;
-          taxDet['taxAmtTaxCurr'] = avalaraTaxLine.tax;
-          taxDet['unroundedTaxAmt'] = avalaraTaxLine.tax;
+          taxDet['taxAmt'] = avalaraResponseLine.tax;
+          taxDet['taxAmtTaxCurr'] = avalaraResponseLine.tax;
+          taxDet['unroundedTaxAmt'] = avalaraResponseLine.tax;
           taxDet['ReturnVbtLineOnly'] = true;
         } else {
           if (i == tlSize - 1) {
             finalProrateAmount = vendorTax - prevRunningProrateVBTTotal;
-            taxOverrides[avalaraTaxLine.lineNumber] = finalProrateAmount;
+            taxOverrides[avalaraResponseLine.lineNumber] = finalProrateAmount;
             taxDet['override'] = finalProrateAmount;
             taxDet['taxRate'] =  taxRate * 100;
             taxDet['taxAmt'] = finalProrateAmount;
             taxDet['taxAmtTaxCurr'] = finalProrateAmount;
             taxDet['unroundedTaxAmt'] = finalProrateAmount;
           } else {
-            taxOverrides[avalaraTaxLine.lineNumber] = prorateVBT;
+            taxOverrides[avalaraResponseLine.lineNumber] = prorateVBT;
             taxDet['override'] = prorateVBT;
             taxDet['taxRate'] =  taxRate * 100;
             taxDet['taxAmt'] = prorateVBT;
@@ -142,16 +142,16 @@ export class TaxProrationService {
         // vbtTaxAmtDetails.set(avalaraTaxLine.lineNumber, taxDet);
       } else {
         result['ReturnOnlyVbtLines'] = true;
-        taxOverrides[avalaraTaxLine.lineNumber] = avalaraTaxLine.taxCalculated;
+        taxOverrides[avalaraResponseLine.lineNumber] = avalaraResponseLine.taxCalculated;
         taxDet['taxRate'] =  taxRate * 100;
-        taxDet['taxAmt'] = avalaraTaxLine.taxCalculated;
-        taxDet['taxAmtTaxCurr'] = avalaraTaxLine.taxCalculated;
-        taxDet['unroundedTaxAmt'] = avalaraTaxLine.taxCalculated;
+        taxDet['taxAmt'] = avalaraResponseLine.taxCalculated;
+        taxDet['taxAmtTaxCurr'] = avalaraResponseLine.taxCalculated;
+        taxDet['unroundedTaxAmt'] = avalaraResponseLine.taxCalculated;
         // taxDet['taxDetails']=tl.getTaxDetails();
         taxDet['ReturnVbtLineOnly'] = true;
         // vbtTaxAmtDetails.set(avalaraTaxLine.lineNumber, taxDet);
       }
-      vbtTaxAmtDetails[avalaraTaxLine.lineNumber] = taxDet;
+      vbtTaxAmtDetails[avalaraResponseLine.lineNumber] = taxDet;
       // } else {
 
       // }

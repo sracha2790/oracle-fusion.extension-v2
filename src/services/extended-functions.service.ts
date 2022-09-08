@@ -6,10 +6,10 @@ export class ExtendedFunctionsService {
 
     public addProratedTaxesAsTaxOverrides(
         taxOverrides: Record<string, any>,
-        avalaraDocument: Record<string, any>,
+        avalaraRequest: Record<string, any>,
         glDate: Date,
     ) {
-        for (const line of avalaraDocument.lines) {
+        for (const line of avalaraRequest.lines) {
             const lineOverrideItem = taxOverrides[line.number];
             if (!lineOverrideItem) {
                 line.taxOverride = null;
@@ -18,7 +18,7 @@ export class ExtendedFunctionsService {
             if (glDate) {
                 line.taxOverride = {
                     type: 'TaxAmount',
-                    taxDate: avalaraDocument.date,
+                    taxDate: avalaraRequest.date,
                     taxAmount: lineOverrideItem,
                     reason: 'Tax Amount and Tax Date override'
                 }
@@ -30,14 +30,14 @@ export class ExtendedFunctionsService {
                 }
             }
         }
-        avalaraDocument.commitFlag = true;
-        return avalaraDocument;
+        avalaraRequest.commitFlag = true;
+        return avalaraRequest;
     }
 
     public addCreditMemoLines(
-        avalaraDocumentLines: Array<Record<string, any>>,
+        avalaraRequestLines: Array<Record<string, any>>,
     ) {
-        const inputLines = avalaraDocumentLines;
+        const inputLines = avalaraRequestLines;
         const outputLines = [];
         for (const inputLine of inputLines) {
             if (

@@ -101,7 +101,7 @@ export class RequestService {
     }
 
     public checkAndProcessVBTDetails(
-        request: {
+        fusionRequest: {
             header: Record<string, any>,
         },
         configCodes: Array<configurationCodeRecord>,
@@ -114,23 +114,23 @@ export class RequestService {
     } {
         this.configurationCodesService.setConfigCodes(configCodes);
         if (this.configurationCodesService.getCodeValue('AP_SELF_ASSESS_TAX') == 'Y') {
-            if (request.header['ns:CtrlTotalHdrTxAmt'] && request.header['ns:CtrlTotalHdrTxAmt'] > 0) {
-                this.addDetailTaxLinesWithAmount(request, currentLegalEntity, request.header['ns:CtrlTotalHdrTxAmt'])
+            if (fusionRequest.header['ns:CtrlTotalHdrTxAmt'] && fusionRequest.header['ns:CtrlTotalHdrTxAmt'] > 0) {
+                this.addDetailTaxLinesWithAmount(fusionRequest, currentLegalEntity, fusionRequest.header['ns:CtrlTotalHdrTxAmt'])
             } else {
-                this.addMissingDetailTaxLineIfAtLestOneVBTLineAvailable(request);
+                this.addMissingDetailTaxLineIfAtLestOneVBTLineAvailable(fusionRequest);
             }
         } else {
-            if (this.atLeastOneLineHasVBTDetail(request.header.lines)) {
-                this.makeTaxZeroOnVBTDetails(request.header.lines)
+            if (this.atLeastOneLineHasVBTDetail(fusionRequest.header.lines)) {
+                this.makeTaxZeroOnVBTDetails(fusionRequest.header.lines)
             } else {
-                this.addDetailTaxLinesWithAmount(request, currentLegalEntity, 0);
+                this.addDetailTaxLinesWithAmount(fusionRequest, currentLegalEntity, 0);
             }
         }
 
-        const { vendorTaxed, totalVBT, vendorTaxes } = this.checkAndGetTotalVendorTax(request.header.lines)
+        const { vendorTaxed, totalVBT, vendorTaxes } = this.checkAndGetTotalVendorTax(fusionRequest.header.lines)
 
         return {
-            header: request.header,
+            header: fusionRequest.header,
             vendorTaxed,
             totalVBT,
             vendorTaxes,
@@ -194,13 +194,13 @@ export class RequestService {
         return false;
     }
 
-    private addMissingDetailTaxLineIfAtLestOneVBTLineAvailable(request: {
+    private addMissingDetailTaxLineIfAtLestOneVBTLineAvailable(fusionRequest: {
         header: Record<string, any>,
     }) {
         let hasAtleastOneLineWithVBTDetail = false;
         let masterVBTDetails = {};
-        for (var i = 0; i < request.header.lines.length; i++) {
-            const line = request.header.lines[i];
+        for (var i = 0; i < fusionRequest.header.lines.length; i++) {
+            const line = fusionRequest.header.lines[i];
             if (line['ns:LineLevelAction'] == 'DISCARD') {
                 continue;
             }
@@ -212,8 +212,8 @@ export class RequestService {
         }
 
         if (hasAtleastOneLineWithVBTDetail) {
-            for (var i = 0; i < request.header.lines.length; i++) {
-                const line = request.header.lines[i];
+            for (var i = 0; i < fusionRequest.header.lines.length; i++) {
+                const line = fusionRequest.header.lines[i];
                 if (line['ns:LineLevelAction'] == 'DISCARD') {
                     continue;
                 }
@@ -276,14 +276,14 @@ export class RequestService {
     }
 
     private addDetailTaxLinesWithAmount(
-        request: {
+        fusionRequest: {
             header: Record<string, any>,
         },
         currentLegalEntity: Record<string, any>,
         amountForFirstLine: number,
     ) {
-        for (var i = 0; i < request.header.lines.length; i++) {
-            const line = request.header.lines[i];
+        for (var i = 0; i < fusionRequest.header.lines.length; i++) {
+            const line = fusionRequest.header.lines[i];
             if (line['ns:LineLevelAction'] == 'DISCARD') {
                 continue;
             }
@@ -295,11 +295,11 @@ export class RequestService {
                     'ns:CompoundingTaxFlag': 'N',
                     'ns:CopiedFromOtherDocFlag': 'N',
                     'ns:DeleteFlag': 'N',
-                    'ns:EntityCode': request.header['ns:EntityCode'],
-                    'ns:EventClassCode': request.header['ns:EventClassCode'],
-                    'ns:InternalOrganizationId': request.header['ns:InternalOrganizationId'],
-                    'ns:LedgerId': request.header['ns:LedgerId'],
-                    'ns:LegalEntityId': request.header['ns:LegalEntityId'],
+                    'ns:EntityCode': fusionRequest.header['ns:EntityCode'],
+                    'ns:EventClassCode': fusionRequest.header['ns:EventClassCode'],
+                    'ns:InternalOrganizationId': fusionRequest.header['ns:InternalOrganizationId'],
+                    'ns:LedgerId': fusionRequest.header['ns:LedgerId'],
+                    'ns:LegalEntityId': fusionRequest.header['ns:LegalEntityId'],
                     'ns:LineAmt': line['ns:LineAmt'],
                     'ns:LineAssessableValue': line['ns:LineAssessableValue'],
                     'ns:ManuallyEnteredFlag': 'Y',
@@ -320,11 +320,11 @@ export class RequestService {
                     'ns:TaxRate': i === 0 ? 0 : 0,
                     'ns:TaxAmtIncludedFlag': 'N',
                     'ns:TaxApportionmentLineNumber': this.TaxApportionmentCounter++,
-                    'ns:TaxCurrencyCode': request.header['ns:TaxCurrencyCode'],
-                    'ns:TaxCurrencyConversionDate': request.header['ns:TaxCurrencyConversionDate'],
-                    'ns:TaxCurrencyConversionRate': request.header['ns:TaxCurrencyConversionRate'],
-                    'ns:TaxDate': request.header['ns:TaxDate'],
-                    'ns:TaxDetermineDate': request.header['ns:TaxDetermineDate'],
+                    'ns:TaxCurrencyCode': fusionRequest.header['ns:TaxCurrencyCode'],
+                    'ns:TaxCurrencyConversionDate': fusionRequest.header['ns:TaxCurrencyConversionDate'],
+                    'ns:TaxCurrencyConversionRate': fusionRequest.header['ns:TaxCurrencyConversionRate'],
+                    'ns:TaxDate': fusionRequest.header['ns:TaxDate'],
+                    'ns:TaxDetermineDate': fusionRequest.header['ns:TaxDetermineDate'],
                     'ns:TaxJurisdictionCode': currentLegalEntity.ATX_JURISDICTION_CODE_PREFIX + '-DEFAULT',
                     'ns:TaxLineId': line['ns:TaxLineId'],
                     'ns:TaxLineNumber': line['ns:TaxLineNumber'],
@@ -336,9 +336,9 @@ export class RequestService {
                     'ns:TaxRateType': 'PERCENTAGE',
                     'ns:TaxableAmt': line['ns:LineAmt'],
                     'ns:TaxableAmtTaxCurr': line['ns:LineAmt'],
-                    'ns:TrxCurrencyCode': request.header['ns:TrxCurrencyCode'],
-                    'ns:TrxDate': request.header['ns:TrxDate'],
-                    'ns:TrxId': request.header['ns:TrxId'],
+                    'ns:TrxCurrencyCode': fusionRequest.header['ns:TrxCurrencyCode'],
+                    'ns:TrxDate': fusionRequest.header['ns:TrxDate'],
+                    'ns:TrxId': fusionRequest.header['ns:TrxId'],
                     'ns:TrxLevelType': line['ns:TrxLevelType'],
                     'ns:TrxLineId': line['ns:TrxLineId'],
                     'ns:TrxLineNumber': line['ns:TrxLineNumber'],
