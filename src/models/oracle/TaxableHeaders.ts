@@ -1,4 +1,4 @@
-export class TaxableHeader {
+export class TaxableHeaders {
   'ns:ApplicationId': number;
   'ns:ApplicationShortname': string;
   'ns:BatchName': string;

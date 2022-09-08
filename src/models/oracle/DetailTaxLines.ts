@@ -1,3 +1,4 @@
+
 export class DetailTaxLine {
   'ns:AdditionalInformation': string;
   'ns:ApplicationId': number;
@@ -161,3 +162,4 @@ export class DetailTaxLine {
   'ns:UnroundedTaxAmt': number;
   'ns:UnroundedTaxableAmt': number;
 };
+//
