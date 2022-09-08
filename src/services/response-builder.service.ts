@@ -210,9 +210,6 @@ export class ResponseBuilderService {
     }
 
     async createNoCalculationResponse(
-        // sdk: AppknitSDK | AppknitGraphSDK,
-        // message: string,
-        // fusionRequest: Record<string, any>,
     ) {
         const detailTaxLines = [];
         for (const fusionRequestLine of this.fusionRequest.header.lines) {
@@ -234,9 +231,7 @@ export class ResponseBuilderService {
     }
 
     async createErrorResponse(
-        // sdk: AppknitSDK | AppknitGraphSDK,
         message: string,
-        // fusionRequest: Record<string, any>,
     ) {
         const detailTaxLines = [];
         for (const fusionRequestLine of this.fusionRequest.header.lines) {
