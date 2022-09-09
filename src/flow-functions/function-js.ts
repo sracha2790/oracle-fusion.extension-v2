@@ -27,10 +27,10 @@ export const checkAndProcessVBTDetailsJS = (sdk: AppknitSDK | AppknitGraphSDK, c
 };
 
 export const addCreditMemoLinesJS = async (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
-    const { avalaraRequestLineItems } = configuration;
+    const { avalaraCreateTransactionLineItems } = configuration;
     const responseBuilder = new ExtendedFunctionsService();
     const result = responseBuilder.addCreditMemoLines(
-        avalaraRequestLineItems,
+        avalaraCreateTransactionLineItems,
     );
     return result;
 };
@@ -51,11 +51,11 @@ export const proRateTaxesJS = (sdk: AppknitSDK | AppknitGraphSDK, configuration:
 };
 
 export const addProratedTaxesAsTaxOverridesJS = async (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
-    const { taxOverrides, avalaraRequest, glDate } = configuration;
+    const { taxOverrides, avalaraCreateTransactionModel, glDate } = configuration;
     const responseBuilder = new ExtendedFunctionsService();
     const result = responseBuilder.addProratedTaxesAsTaxOverrides(
         taxOverrides,
-        avalaraRequest,
+        avalaraCreateTransactionModel,
         glDate,
     );
     return result;

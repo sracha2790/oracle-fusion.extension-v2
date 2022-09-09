@@ -34,7 +34,7 @@ export const checkAndProcessVBTDetails: SdkFlowFunctionEntry = {
     inputSchema: {
         type: 'object',
         properties: {
-            request: {
+            fusionRequest: {
                 type: 'object',
             },
             configCodes: {
@@ -60,7 +60,7 @@ export const addCreditMemoLines: SdkFlowFunctionEntry = {
     inputSchema: {
         type: 'object',
         properties: {
-            avalaraRequestLineItems: {
+            avalaraCreateTransactionLineItems: {
                 type: 'array',
                 items: {
                     type: 'object'
@@ -117,7 +117,7 @@ export const addProratedTaxesAsTaxOverrides: SdkFlowFunctionEntry = {
             taxOverrides: {
                 type: 'object',
             },
-            avalaraDocument: {
+            avalaraCreateTransactionModel: {
                 type: 'object',
             },
             glDate: {
@@ -139,7 +139,10 @@ export const mapToFusionForNoCalculationResponse: SdkFlowFunctionEntry = {
         properties: {
             message: {
                 type: 'string',
-            }
+            },
+            fusionRequest: {
+                type: 'object',
+            },
         },
     },
     js: mapToFusionForNoCalculationResponseJS,
@@ -156,7 +159,10 @@ export const mapToFusionForErrorResponse: SdkFlowFunctionEntry = {
         properties: {
             message: {
                 type: 'string',
-            }
+            },
+            fusionRequest: {
+                type: 'object',
+            },
         },
     },
     js: mapToFusionForErrorResponseJS,
@@ -171,7 +177,7 @@ export const mapToFusionResponse: SdkFlowFunctionEntry = {
     inputSchema: {
         type: 'object',
         properties: {
-            avaTaxModel: {
+            avalaraTransaction: {
                 type: 'object',
             },
             fusionRequest: {
