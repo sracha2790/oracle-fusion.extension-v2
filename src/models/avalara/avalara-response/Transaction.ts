@@ -1,3 +1,4 @@
+import { adjustmentReasonEnum } from "../AdjustTransaction";
 import { AvaTaxMessage } from "../AvaTaxMessage";
 import { InvoiceMessage } from "../InvoiceMessage";
 import { TaxDetailsByTaxType } from "../TaxDetailsByTaxType";
@@ -5,7 +6,15 @@ import { TransactionAddress } from "../TransactionAddress";
 import { TransactionLocationType } from "../TransactionLocationType";
 import { TransactionParameter } from "../TransactionParameter";
 import { TransactionSummary } from "../TransactionSummary";
-import { TransactionLine } from "./TransactionLine";
+import { TransactionTypeEnums } from "../TransactionTypes";
+import { taxOverrideTypeEnum, TransactionLine } from "./TransactionLine";
+
+export enum statusEnum {
+  'Temporary', 'Saved', 'Posted', 'Committed', 'Cancelled', 'Adjusted', 'Queued', 'PendingApproval', 'Any'
+}
+
+
+
 
 export class Transaction {
   id: number;
@@ -13,8 +22,8 @@ export class Transaction {
   companyId: number;
   date: string;
   paymentDate: string;
-  status: string;
-  type: string;
+  status: statusEnum;
+  type: TransactionTypeEnums;
   batchCode: string;
   currencyCode: string;
   customerUsageType: string;
@@ -28,7 +37,7 @@ export class Transaction {
   purchaseOrderNo: string;
   referenceCode: string;
   salespersonCode:string;
-  taxOverrideType: string;
+  taxOverrideType: taxOverrideTypeEnum;
   taxOverrideAmount: number;
   taxOverrideReason: string;
   totalAmount: number;
@@ -37,7 +46,7 @@ export class Transaction {
   totalTax: number;
   totalTaxable: number;
   totalTaxCalculated: number;
-  adjustmentReason: string;
+  adjustmentReason: adjustmentReasonEnum;
   adjustmentDescription: string;
   locked: boolean;
   region: string;
