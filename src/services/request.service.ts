@@ -107,7 +107,7 @@ export class RequestService {
         configCodes: Array<configurationCodeRecord>,
         currentLegalEntity: Record<string, any>,
     ): {
-        header: Record<string, any>,
+        taxableHeader: Record<string, any>,
         vendorTaxed: boolean,
         totalVBT: number,
         vendorTaxes: Record<string, number>
@@ -130,7 +130,7 @@ export class RequestService {
         const { vendorTaxed, totalVBT, vendorTaxes } = this.checkAndGetTotalVendorTax(fusionRequest.taxableHeader.taxableLines)
 
         return {
-            header: fusionRequest.taxableHeader,
+            taxableHeader: fusionRequest.taxableHeader,
             vendorTaxed,
             totalVBT,
             vendorTaxes,

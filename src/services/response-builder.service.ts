@@ -32,7 +32,7 @@ export class ResponseBuilderService {
             isIntl,
         );
         this.configurationCodesService = new ConfigurationCodesService(customerProfile.ATX_CONFIG_CODES);
-        this.taxApportionmentLineNumber = 0;
+        this.taxApportionmentLineNumber = 1;
     }
 
     public async createResponse(
