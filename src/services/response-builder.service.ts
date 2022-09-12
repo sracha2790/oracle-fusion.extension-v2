@@ -276,7 +276,7 @@ export class ResponseBuilderService {
             existingMatchingDetailTaxLine['ns:UnroundedTaxAmt'] = _.toString(_.toNumber(existingMatchingDetailTaxLine['ns:UnroundedTaxAmt']) + _.toNumber(detailTaxLineToInsert['ns:UnroundedTaxAmt']));
             existingMatchingDetailTaxLine['ns:TaxRate'] = _.toString(_.toNumber(existingMatchingDetailTaxLine['ns:TaxRate']) + _.toNumber(detailTaxLineToInsert['ns:TaxRate']));
         } else {
-            detailTaxLineToInsert['ns:TaxApportionmentLineNumber'] = this.taxApportionmentLineNumber++;
+            detailTaxLineToInsert['ns:TaxApportionmentLineNumber'] = detailTaxLineToInsert['ns:TaxApportionmentLineNumber'] ? detailTaxLineToInsert['ns:TaxApportionmentLineNumber'] : this.taxApportionmentLineNumber++;
             detailTaxLines.push(detailTaxLineToInsert)
         }
     }
