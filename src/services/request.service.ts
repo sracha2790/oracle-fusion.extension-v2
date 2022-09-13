@@ -86,12 +86,17 @@ export class RequestService {
                 } else {
                     taxLinesArray = txLines
                 }
+                let lineNumber = 1;
                 for (const line of taxLinesArray) {
                     this.extractAddresses(line);
                     if (detTaxLineMap.hasOwnProperty(line['ns:TrxLineId'])) {
                         line.detailTaxLines = detTaxLineMap[line['ns:TrxLineId']]
                     }
+                    if (mappings.taxableHeader['ns:EventClassCode'] == 'PO_PA' || mappings.taxableHeader['ns:EventClassCode'] == 'PO_CA' || !line['ns:TrxLineNumber']) {
+                        line['ns:TrxLineNumber'] = lineNumber;
+                    }
                     mappings.taxableHeader.taxableLines.push(line);
+                    lineNumber++;
                 }
             }
         }
@@ -159,7 +164,7 @@ export class RequestService {
                 vendorTaxes[taxableLine['ns:TrxLineId']] = lineAmount;
             }
         }
-        if (!vendorTaxed && this.configurationCodesService.getCodeValue('AP_SELF_ASSESS_TAX') != 'Y'){
+        if (!vendorTaxed && this.configurationCodesService.getCodeValue('AP_SELF_ASSESS_TAX') != 'Y') {
             vendorTaxed = true;
         }
         return {
