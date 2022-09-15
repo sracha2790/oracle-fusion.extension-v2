@@ -60,12 +60,10 @@ export class FieldMappingService {
                     if (UDFMappingItem.ATX_FUSION_FIELD_LEVEL == 'HDR') {
                         if (fusionRequestTaxableHeader[UDFMappingItem.ATX_FUSION_PROP_COLUMN_NAME]) {
                             value = fusionRequestTaxableHeader[UDFMappingItem.ATX_FUSION_PROP_COLUMN_NAME]
-                            continue;
                         }
                     } else {
                         if (fusionRequestTaxableLine[UDFMappingItem.ATX_FUSION_PROP_COLUMN_NAME]) {
                             value = fusionRequestTaxableLine[UDFMappingItem.ATX_FUSION_PROP_COLUMN_NAME]
-                            continue;
                         }
                     }
                 }
@@ -103,7 +101,6 @@ export class FieldMappingService {
                 if (paramMappingItem.ATX_FUSION_FIELD_TYPE == 'FFLD') {
                     if (fusionRequestTaxableHeader[paramMappingItem.ATX_FUSION_PROP_COLUMN_NAME]) {
                         value = fusionRequestTaxableHeader[paramMappingItem.ATX_FUSION_PROP_COLUMN_NAME]
-                        continue;
                     }
                 }
 
