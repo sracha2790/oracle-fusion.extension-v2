@@ -25,11 +25,7 @@ export class ResponseBuilderService {
             sdk,
             customerProfile,
             currentLegalEntity,
-            isUS2US,
-            isCA2CA,
-            isUS2CA,
-            isIndia,
-            isIntl,
+            fusionRequest.taxableHeader['ns:ApplicationShortname']
         );
         this.configurationCodesService = new ConfigurationCodesService(customerProfile.ATX_CONFIG_CODES);
         this.taxApportionmentLineNumber = 1;
@@ -67,7 +63,6 @@ export class ResponseBuilderService {
                     undefined,
                     'N'
                 );
-
                 if (this.isUS2US) {
                     await this.jurisDataMapper.addJurisDataForUS2US(
                         detailTaxLine,
@@ -345,7 +340,7 @@ export class ResponseBuilderService {
         ) {
             return true
         }
-        if (this.configurationCodesService.getCodeValue('CHECK_FOR_REGIME_SUBSCRIPTION') == 'Y' && ! (await this.hasRegimeSubscription())) {
+        if (this.configurationCodesService.getCodeValue('CHECK_FOR_REGIME_SUBSCRIPTION') == 'Y' && !(await this.hasRegimeSubscription())) {
             return true
         }
         return false;

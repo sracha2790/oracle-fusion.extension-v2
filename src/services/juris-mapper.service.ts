@@ -8,11 +8,7 @@ export class JurisDataMapper {
         private sdk: AppknitSDK | AppknitGraphSDK,
         private customerProfile: Record<string, any>,
         private currentLegalEntity: Record<string, any>,
-        private isUS2US: boolean,
-        private isCA2CA: boolean,
-        private isUS2CA: boolean,
-        private isIndia: boolean,
-        private isIntl: boolean,
+        private application: string,
     ) {
         this.jurisData = []
     }
@@ -127,22 +123,23 @@ export class JurisDataMapper {
             }
         }
         if (jurisDataResult) {
-            if (jurisDataResult) {
-                detailTaxLine['ns:Tax'] = jurisDataResult.ATX_TAX_CODE;
-                if (jurisDataResult.ATX_TAX_CODE == 'SPECIAL' || jurisDataResult.ATX_JURISDICTION_TYPE == 'SPECIAL') {
-                    detailTaxLine['ns:TaxRateCode'] = this.currentLegalEntity.ATX_JURISDICTION_CODE_PREFIX + jurisDataResult.ATX_RATE_CODE;
-                } else {
-                    detailTaxLine['ns:TaxRateCode'] = jurisDataResult.ATX_RATE_CODE;
-                }
-                detailTaxLine['ns:TaxStatusCode'] = jurisDataResult.ATX_TAX_STATUS_CODE;
-                detailTaxLine['ns:TaxJurisdictionCode'] = this.currentLegalEntity.ATX_JURISDICTION_CODE_PREFIX + jurisDataResult.ATX_JURISDICTION_CODE;
-                if (jurisDataResult.ATX_PROVIDER_REC_RATE > 0) {
-                    detailTaxLine['ns:ProviderRecRate'] = jurisDataResult.ATX_PROVIDER_REC_RATE;
-                };
-                if (jurisDataResult.ATX_PROVIDER_REC_RATE_CODE > 0) {
-                    detailTaxLine['ns:ProviderRecRateCode'] = jurisDataResult.ATX_PROVIDER_REC_RATE_CODE;
-                };
+            const regimeCodeAndJurisPrefix = this.getRegimeAndJurisdictionCode(whereClause.ATX_COUNTRY, this.application, jurisDataResult.ATX_TAX_CODE)
+            detailTaxLine['ns:Tax'] = jurisDataResult.ATX_TAX_CODE;
+            detailTaxLine['ns:TaxRegimeCode'] = regimeCodeAndJurisPrefix.regimeCode;
+
+            if (jurisDataResult.ATX_TAX_CODE == 'SPECIAL' || jurisDataResult.ATX_JURISDICTION_TYPE == 'SPECIAL') {
+                detailTaxLine['ns:TaxRateCode'] = regimeCodeAndJurisPrefix.jurisdictionCodePrefix + jurisDataResult.ATX_RATE_CODE;
+            } else {
+                detailTaxLine['ns:TaxRateCode'] = jurisDataResult.ATX_RATE_CODE;
             }
+            detailTaxLine['ns:TaxStatusCode'] = jurisDataResult.ATX_TAX_STATUS_CODE;
+            detailTaxLine['ns:TaxJurisdictionCode'] = regimeCodeAndJurisPrefix.jurisdictionCodePrefix + jurisDataResult.ATX_JURISDICTION_CODE;
+            if (jurisDataResult.ATX_PROVIDER_REC_RATE > 0) {
+                detailTaxLine['ns:ProviderRecRate'] = jurisDataResult.ATX_PROVIDER_REC_RATE;
+            };
+            if (jurisDataResult.ATX_PROVIDER_REC_RATE_CODE > 0) {
+                detailTaxLine['ns:ProviderRecRateCode'] = jurisDataResult.ATX_PROVIDER_REC_RATE_CODE;
+            };
         }
     }
 
@@ -183,4 +180,24 @@ export class JurisDataMapper {
         }
         return query;
     }
+
+    private getRegimeAndJurisdictionCode(country: string, application: string, taxCode: string): { regimeCode: string, jurisdictionCodePrefix: string } {
+        const result = {
+            regimeCode: '',
+            jurisdictionCodePrefix: ''
+        }
+        if (country != 'US') {
+            const countryRegimeItem = (this.customerProfile.ATX_COUNTRIES as Array<Record<string, any>>)
+                ?.find(countryItem => countryItem.ATX_COUNTRY == country)?.ATX_COUNTRIES_REGIME_DETAILS
+                ?.find(countryRegimeItem => countryRegimeItem.ATX_APPLICATION == application && countryRegimeItem.ATX_TAX_CODE == taxCode)
+            result.regimeCode = countryRegimeItem?.ATX_TAX_REGIME_CODE || '';
+            result.jurisdictionCodePrefix = countryRegimeItem?.ATX_JURISDICTION_CODE_PREFIX || ''
+        } else {
+            result.regimeCode = this.currentLegalEntity.ATX_TAX_REGIME_CODE || '';
+            result.jurisdictionCodePrefix = this.currentLegalEntity.ATX_JURISDICTION_CODE_PREFIX || ''
+        }
+        return result;
+    }
+
+
 }
