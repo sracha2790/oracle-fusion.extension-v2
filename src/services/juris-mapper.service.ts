@@ -1,6 +1,7 @@
 import { AppknitSDK, AdhocQueryUnion, AdhocQuery } from '@appknit-project/appknit-platform-sdk-v2';
 import { AppknitGraphSDK } from '@appknit-project/common-frameworks';
 import _ = require('lodash');
+import { RegimeAndJurisdiction } from '../types'
 export class JurisDataMapper {
     private jurisData: Array<Record<string, any>>;
 
@@ -114,32 +115,27 @@ export class JurisDataMapper {
     }
 
     private async findAndAddJurisDataOnDetailsTaxLine(whereClause: Record<string, any>, detailTaxLine: Record<string, any>) {
-        let jurisDataResult = _.find(this.jurisData, whereClause);
-        if (!jurisDataResult) {
-            const jurisDataResultFromDB = await this.sdk.adhocDataProvider.queryDataRecords(this.getJurisdictionQuery(whereClause));
-            if (jurisDataResultFromDB && Array.isArray(jurisDataResultFromDB) && jurisDataResultFromDB[0]) {
-                jurisDataResult = jurisDataResultFromDB[0];
-                this.jurisData.push(jurisDataResult)
+        let jurisDataResults = _.filter(this.jurisData, whereClause);
+        if (jurisDataResults.length <= 0 ) {
+            jurisDataResults = await this.sdk.adhocDataProvider.queryDataRecords(this.getJurisdictionQuery(whereClause));
+            if (jurisDataResults && Array.isArray(jurisDataResults) && jurisDataResults.length > 0) {
+                this.jurisData.push(...jurisDataResults)
             }
         }
-        if (jurisDataResult) {
-            const regimeCodeAndJurisPrefix = this.getRegimeAndJurisdictionCode(whereClause.ATX_COUNTRY, this.application, jurisDataResult.ATX_TAX_CODE)
-            detailTaxLine['ns:Tax'] = jurisDataResult.ATX_TAX_CODE;
-            detailTaxLine['ns:TaxRegimeCode'] = regimeCodeAndJurisPrefix.regimeCode;
-
-            if (jurisDataResult.ATX_TAX_CODE == 'SPECIAL' || jurisDataResult.ATX_JURISDICTION_TYPE == 'SPECIAL') {
-                detailTaxLine['ns:TaxRateCode'] = regimeCodeAndJurisPrefix.jurisdictionCodePrefix + jurisDataResult.ATX_RATE_CODE;
-            } else {
-                detailTaxLine['ns:TaxRateCode'] = jurisDataResult.ATX_RATE_CODE;
+        if (jurisDataResults && Array.isArray(jurisDataResults) && jurisDataResults.length > 0) {
+            const regimeCodeAndJurisdiction = this.getRegimeAndJurisdiction(whereClause.ATX_COUNTRY, this.application, jurisDataResults)
+            if (regimeCodeAndJurisdiction) {
+                detailTaxLine['ns:Tax'] = regimeCodeAndJurisdiction.tax;
+                detailTaxLine['ns:TaxRegimeCode'] = regimeCodeAndJurisdiction.taxRegimeCode;
+                detailTaxLine['ns:TaxRateCode'] = regimeCodeAndJurisdiction.taxRateCode
+                detailTaxLine['ns:TaxStatusCode'] = regimeCodeAndJurisdiction.taxStatusCode;
+                detailTaxLine['ns:TaxJurisdictionCode'] = regimeCodeAndJurisdiction.taxJurisdictionCode
+                if (regimeCodeAndJurisdiction.providerRecRate > 0) {
+                    detailTaxLine['ns:ProviderRecRate'] = regimeCodeAndJurisdiction.providerRecRate;
+                    detailTaxLine['ns:ProviderRecRateCode'] = regimeCodeAndJurisdiction.providerRecRateCode;
+                };
             }
-            detailTaxLine['ns:TaxStatusCode'] = jurisDataResult.ATX_TAX_STATUS_CODE;
-            detailTaxLine['ns:TaxJurisdictionCode'] = regimeCodeAndJurisPrefix.jurisdictionCodePrefix + jurisDataResult.ATX_JURISDICTION_CODE;
-            if (jurisDataResult.ATX_PROVIDER_REC_RATE > 0) {
-                detailTaxLine['ns:ProviderRecRate'] = jurisDataResult.ATX_PROVIDER_REC_RATE;
-            };
-            if (jurisDataResult.ATX_PROVIDER_REC_RATE_CODE > 0) {
-                detailTaxLine['ns:ProviderRecRateCode'] = jurisDataResult.ATX_PROVIDER_REC_RATE_CODE;
-            };
+
         }
     }
 
@@ -181,20 +177,40 @@ export class JurisDataMapper {
         return query;
     }
 
-    private getRegimeAndJurisdictionCode(country: string, application: string, taxCode: string): { regimeCode: string, jurisdictionCodePrefix: string } {
-        const result = {
-            regimeCode: '',
-            jurisdictionCodePrefix: ''
-        }
+    private getRegimeAndJurisdiction(country: string, application: string, jurisDataResults: Array<Record<string, any>>): RegimeAndJurisdiction {
+        let result: RegimeAndJurisdiction;
+        let regimeConfigItem: Record<string, any>
+        let jurisData:Record<string, any>;
         if (country != 'US') {
-            const countryRegimeItem = (this.customerProfile.ATX_COUNTRIES as Array<Record<string, any>>)
-                ?.find(countryItem => countryItem.ATX_COUNTRY == country)?.ATX_COUNTRIES_REGIME_DETAILS
-                ?.find(countryRegimeItem => countryRegimeItem.ATX_APPLICATION == application && countryRegimeItem.ATX_TAX_CODE == taxCode)
-            result.regimeCode = countryRegimeItem?.ATX_TAX_REGIME_CODE || '';
-            result.jurisdictionCodePrefix = countryRegimeItem?.ATX_JURISDICTION_CODE_PREFIX || ''
+            for (const jurisDataResultsItem of jurisDataResults) {
+                regimeConfigItem = (this.customerProfile.ATX_COUNTRIES as Array<Record<string, any>>)
+                    ?.find(countryItem => countryItem.ATX_COUNTRY == country)?.ATX_COUNTRIES_REGIME_DETAILS
+                    ?.find(countryRegimeItem => countryRegimeItem.ATX_APPLICATION == application && countryRegimeItem.ATX_TAX_CODE == jurisDataResultsItem.ATX_TAX_CODE)
+                if (regimeConfigItem) {
+                    jurisData = jurisDataResultsItem;
+                    break;
+                }
+            }
+
+            result = {
+                tax: jurisData?.ATX_TAX_CODE || '',
+                taxRateCode:  jurisData?.ATX_TAX_CODE == 'SPECIAL' ? (regimeConfigItem.ATX_JURISDICTION_CODE_PREFIX || '') +  jurisData?.ATX_RATE_CODE :  jurisData?.ATX_RATE_CODE,
+                taxStatusCode:  jurisData?.ATX_TAX_STATUS_CODE,
+                taxJurisdictionCode: (regimeConfigItem.ATX_JURISDICTION_CODE_PREFIX || '') +  jurisData?.ATX_JURISDICTION_CODE,
+                taxRegimeCode: (regimeConfigItem.ATX_TAX_REGIME_CODE || ''),
+                providerRecRate:  jurisData?.ATX_PROVIDER_REC_RATE,
+                providerRecRateCode:  jurisData?.ATX_PROVIDER_REC_RATE_CODE,
+            }
         } else {
-            result.regimeCode = this.currentLegalEntity.ATX_TAX_REGIME_CODE || '';
-            result.jurisdictionCodePrefix = this.currentLegalEntity.ATX_JURISDICTION_CODE_PREFIX || ''
+            result = {
+                tax: jurisDataResults[0].ATX_TAX_CODE,
+                taxRateCode: jurisDataResults[0].ATX_TAX_CODE == 'SPECIAL' ? (this.currentLegalEntity.ATX_JURISDICTION_CODE_PREFIX || '') + jurisDataResults[0].ATX_RATE_CODE : jurisDataResults[0].ATX_RATE_CODE,
+                taxStatusCode: jurisDataResults[0].ATX_TAX_STATUS_CODE,
+                taxJurisdictionCode: (this.currentLegalEntity.ATX_JURISDICTION_CODE_PREFIX || '') + jurisDataResults[0].ATX_JURISDICTION_CODE,
+                taxRegimeCode: (this.currentLegalEntity.ATX_TAX_REGIME_CODE || ''),
+                providerRecRate: jurisDataResults[0].ATX_PROVIDER_REC_RATE,
+                providerRecRateCode: jurisDataResults[0].ATX_PROVIDER_REC_RATE_CODE,
+            }
         }
         return result;
     }
