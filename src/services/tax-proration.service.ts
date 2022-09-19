@@ -20,7 +20,7 @@ export class TaxProrationService {
         let taxDet = {};
         taxDet['lineNumber'] = avalaraTransactionLine.lineNumber;
         taxDet['override'] = avalaraTransactionLine.taxCalculated;
-        taxDet['taxRate'] = _.sumBy(avalaraTransactionLine.details, function(detail:Record<string, any>) { return detail.rate; }) * 100;
+        taxDet['taxRate'] = _.round(_.sumBy(avalaraTransactionLine.details, function(detail:Record<string, any>) { return detail.rate; }) * 100, 2);
         taxDet['taxDetails'] = avalaraTransactionLine.taxDetails;
         taxDet['taxAmtTaxCurr'] = avalaraTransactionLine.tax;
         taxDet['unroundedTaxAmt'] = avalaraTransactionLine.tax;
@@ -79,20 +79,20 @@ export class TaxProrationService {
       // taxOverrideDetails.push(taxDet);
       // if (tl.rate > 0) {
       // let taxRate = 0;
-      const taxRate = _.sumBy(avalaraTransactionLine.details, function(detail:Record<string, any>) { return detail.rate; })
+      const taxRate = _.round(_.sumBy(avalaraTransactionLine.details, function(detail:Record<string, any>) { return detail.rate; }), 2)
 
       if (exactVBT) {
         //need not do the prorate calculation
         // balance will be 0 here in this if block
       } else {
         prevRunningProrateVBTTotal = runningProrateVBTTotal;
-        prorateVBT = (vendorTax * avalaraTransactionLine.taxCalculated) / totalTaxCalculated;
+        prorateVBT = _.round((vendorTax * avalaraTransactionLine.taxCalculated) / totalTaxCalculated, 2);
         // prorateVBT = prorateVBTNotRounded.setScale(2, BigDecimal.ROUND_HALF_UP);
-        runningProrateVBTTotal = runningProrateVBTTotal + prorateVBT;
+        runningProrateVBTTotal =  _.round(runningProrateVBTTotal + prorateVBT, 2);
         if (runningProrateVBTTotal - vendorTax > 0) {
-          prorateVBT = prorateVBT - runningProrateVBTTotal - vendorTax;
+          prorateVBT =  _.round(prorateVBT - runningProrateVBTTotal - vendorTax, 2);
         }
-        balance = avalaraTransactionLine.taxCalculated - prorateVBT;
+        balance =  _.round(avalaraTransactionLine.taxCalculated - prorateVBT, 2);
       }
       // console.log('Balance : ' + parseFloat(balance))
       if (balance < 0) {
