@@ -259,6 +259,7 @@ export class ResponseBuilderService {
                     && detailTaxLineToInsert['ns:TrxId'] == detailTaxLine['ns:TrxId']
                     && detailTaxLineToInsert['ns:TrxLineId'] == detailTaxLine['ns:TrxLineId']
                     && detailTaxLineToInsert['ns:TrxLineNumber'] == detailTaxLine['ns:TrxLineNumber']
+                    && detailTaxLine['ns:ManuallyEnteredFlag'] != 'Y'
                 ) {
                     return true
                 }

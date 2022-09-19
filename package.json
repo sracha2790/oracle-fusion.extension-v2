@@ -1,6 +1,6 @@
 {
   "name": "oracle-fusion.extension-v2",
-  "version": "2.3.9",
+  "version": "2.3.10",
   "description": "Oracle Fusion Tax Partner API connector",
   "main": "dist/index.js",
   "author": "Prince Kaushal <prince.kaushal@appknit.io>",
@@ -17,7 +17,7 @@
   "dependencies": {
     "@appknit-project/common-frameworks": "2.4.98",
     "lodash": "^4.17.20",
-    "joi" :"^17.6.0"
+    "joi": "^17.6.0"
   },
   "devDependencies": {
     "@types/jest": "^26.0.9",
