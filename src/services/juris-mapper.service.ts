@@ -86,7 +86,7 @@ export class JurisDataMapper {
         if (avalaraTransactionLineDetail.jurisType === 'STA') {
             whereClause = {
                 ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
-                ATX_JURISDICTION_TYPE: 'COUNTRY',
+                ATX_JURISDICTION_TYPE: 'STATE',
                 ATX_REGION: avalaraTransactionLineDetail.region,
                 ATX_COUNTRY: avalaraTransactionLineDetail.country,
             };
