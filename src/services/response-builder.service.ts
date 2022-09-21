@@ -28,7 +28,8 @@ export class ResponseBuilderService {
             fusionRequest.taxableHeader['ns:ApplicationShortname']
         );
         this.configurationCodesService = new ConfigurationCodesService(customerProfile.ATX_CONFIG_CODES);
-        this.taxApportionmentLineNumber = 1;
+        this.taxApportionmentLineNumber = 0;
+        this.setStartingApportionmentNumber(fusionRequest);
     }
 
     public async createResponse(
@@ -42,6 +43,16 @@ export class ResponseBuilderService {
             case 'AP':
             case 'PO':
                 return await this.createP2PResponse(vbtTaxAmtDetails)
+        }
+    }
+
+    private setStartingApportionmentNumber(fusionRequest: Record<string, any>) {
+        for (const line of this.fusionRequest.taxableHeader.taxableLines) {
+            for (const detailTaxLine of line.detailTaxLines) {
+                if (Helpers.isVBTDetailtaxLine(detailTaxLine)) {
+                    this.taxApportionmentLineNumber++
+                }
+            }
         }
     }
 
@@ -273,7 +284,6 @@ export class ResponseBuilderService {
             existingMatchingDetailTaxLine['ns:TaxAmtTaxCurr'] = _.toString(_.toNumber(existingMatchingDetailTaxLine['ns:TaxAmtTaxCurr']) + _.toNumber(detailTaxLineToInsert['ns:TaxAmtTaxCurr']));
             existingMatchingDetailTaxLine['ns:UnroundedTaxAmt'] = _.toString(_.toNumber(existingMatchingDetailTaxLine['ns:UnroundedTaxAmt']) + _.toNumber(detailTaxLineToInsert['ns:UnroundedTaxAmt']));
             existingMatchingDetailTaxLine['ns:TaxRate'] = _.toString(_.toNumber(existingMatchingDetailTaxLine['ns:TaxRate']) + _.toNumber(detailTaxLineToInsert['ns:TaxRate']));
-            this.taxApportionmentLineNumber++;
         } else {
             detailTaxLineToInsert['ns:TaxApportionmentLineNumber'] = detailTaxLineToInsert['ns:TaxApportionmentLineNumber'] ? detailTaxLineToInsert['ns:TaxApportionmentLineNumber'] : this.taxApportionmentLineNumber++;
             detailTaxLines.push(detailTaxLineToInsert)
