@@ -29,7 +29,7 @@ export class ResponseBuilderService {
         );
         this.configurationCodesService = new ConfigurationCodesService(customerProfile.ATX_CONFIG_CODES);
         this.taxApportionmentLineNumber = 0;
-        this.setStartingApportionmentNumber(fusionRequest);
+        this.setStartingApportionmentNumber();
     }
 
     public async createResponse(
@@ -46,9 +46,9 @@ export class ResponseBuilderService {
         }
     }
 
-    private setStartingApportionmentNumber(fusionRequest: Record<string, any>) {
+    private setStartingApportionmentNumber() {
         for (const line of this.fusionRequest.taxableHeader.taxableLines) {
-            for (const detailTaxLine of line.detailTaxLines) {
+            for (const detailTaxLine of line.detailTaxLines || []) {
                 if (Helpers.isVBTDetailtaxLine(detailTaxLine)) {
                     this.taxApportionmentLineNumber++
                 }
