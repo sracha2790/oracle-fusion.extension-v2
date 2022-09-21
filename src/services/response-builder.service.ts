@@ -155,10 +155,12 @@ export class ResponseBuilderService {
             if (!VendorLineHandledFlag) {
                 for (const detailTaxLine of matchingFusionTaxableLine.detailTaxLines ? matchingFusionTaxableLine.detailTaxLines : []) {
                     if (Helpers.isVBTDetailtaxLine(detailTaxLine)) {
-                        detailTaxLine['ns:TaxAmt'] = vbtTaxAmtDetail['taxAmt']
-                        detailTaxLine['ns:UnroundedTaxAmt'] = vbtTaxAmtDetail['unroundedTaxAmt']
-                        detailTaxLine['ns:TaxAmtTaxCurr'] = vbtTaxAmtDetail['taxAmtTaxCurr']
-                        detailTaxLine['ns:TaxRate'] = vbtTaxAmtDetail['taxRate']
+                        if (!this.isCA2CA) {
+                            detailTaxLine['ns:TaxAmt'] = vbtTaxAmtDetail['taxAmt']
+                            detailTaxLine['ns:UnroundedTaxAmt'] = vbtTaxAmtDetail['unroundedTaxAmt']
+                            detailTaxLine['ns:TaxAmtTaxCurr'] = vbtTaxAmtDetail['taxAmtTaxCurr']
+                            detailTaxLine['ns:TaxRate'] = vbtTaxAmtDetail['taxRate']
+                        }
                         this.addToDetailTaxLinesCollection(detailTaxLines, detailTaxLine)
                     }
                 }
@@ -271,6 +273,7 @@ export class ResponseBuilderService {
             existingMatchingDetailTaxLine['ns:TaxAmtTaxCurr'] = _.toString(_.toNumber(existingMatchingDetailTaxLine['ns:TaxAmtTaxCurr']) + _.toNumber(detailTaxLineToInsert['ns:TaxAmtTaxCurr']));
             existingMatchingDetailTaxLine['ns:UnroundedTaxAmt'] = _.toString(_.toNumber(existingMatchingDetailTaxLine['ns:UnroundedTaxAmt']) + _.toNumber(detailTaxLineToInsert['ns:UnroundedTaxAmt']));
             existingMatchingDetailTaxLine['ns:TaxRate'] = _.toString(_.toNumber(existingMatchingDetailTaxLine['ns:TaxRate']) + _.toNumber(detailTaxLineToInsert['ns:TaxRate']));
+            this.taxApportionmentLineNumber++;
         } else {
             detailTaxLineToInsert['ns:TaxApportionmentLineNumber'] = detailTaxLineToInsert['ns:TaxApportionmentLineNumber'] ? detailTaxLineToInsert['ns:TaxApportionmentLineNumber'] : this.taxApportionmentLineNumber++;
             detailTaxLines.push(detailTaxLineToInsert)
