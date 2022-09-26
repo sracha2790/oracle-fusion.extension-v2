@@ -36,7 +36,7 @@ export const addCreditMemoLinesJS = async (sdk: AppknitSDK | AppknitGraphSDK, co
 };
 
 export const proRateTaxesJS = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
-    const { apSelfAssesTaxFlag, vendorBilledTax, avalaraTransactionLines, apTolerances } = configuration;
+    const { apSelfAssesTaxFlag, vendorBilledTax, avalaraTransactionLines, apTolerances, customerProfile, isIntlTransaction, isUS2US } = configuration;
 
     const taxProrationService = new TaxProrationService();
     let taxOverRideDtls = taxProrationService.prorateTaxes(
@@ -45,6 +45,9 @@ export const proRateTaxesJS = (sdk: AppknitSDK | AppknitGraphSDK, configuration:
         avalaraTransactionLines,
         apTolerances.tolerancePct,
         apTolerances.toleranceAmt,
+        customerProfile,
+        isIntlTransaction,
+        isUS2US,
     );
 
     return Promise.resolve(taxOverRideDtls);

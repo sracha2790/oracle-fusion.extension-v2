@@ -89,16 +89,30 @@ export const proRateTaxes: SdkFlowFunctionEntry = {
                 type: 'number',
             },
             avalaraTransactionLines: {
-                title: 'Tolerance pct and amt',
+                title: 'Avalara Transaction Lines',
                 type: 'array',
                 items: {
-                    type: 'object',
-                },
+                    type: 'object'
+                }
             },
             apTolerances: {
                 title: 'Tolerance pct and amt',
-                type: 'number',
+                type: 'object',
             },
+            customerProfile: {
+                title: 'Customer Profile',
+                type: 'object',
+            },
+            isIntlTransaction: {
+                title: 'International Transaction',
+                type: 'boolean'
+            },
+
+            isUS2US: {
+                title: 'is US to US?',
+                type: 'boolean'
+            },
+
         },
     },
     js: proRateTaxesJS,
