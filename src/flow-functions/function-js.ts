@@ -119,3 +119,12 @@ export const mapToFusionResponseJS = async (sdk: AppknitSDK | AppknitGraphSDK, c
 
     return result;
 };
+
+export const prepareBatchRequestJS = async (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+    const { fusionRequest } = configuration;
+
+    const requestService = new RequestService();
+    const result = requestService.prepareBatchRequest(fusionRequest);
+
+    return Promise.resolve(result);
+};

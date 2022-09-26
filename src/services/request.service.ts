@@ -113,6 +113,15 @@ export class RequestService {
     return mappings;
   }
 
+  public prepareBatchRequest(fusionRequest: {
+    taxableHeader: Record<string, any>;
+  }): Record<string, any> {
+    fusionRequest.taxableHeader.taxableLines.forEach((taxableLine: Record<string, any>) => {
+      this.extractAddresses(taxableLine);
+    });
+    return fusionRequest;
+  }
+  
   public checkAndProcessVBTDetails(
     fusionRequest: {
       taxableHeader: Record<string, any>;

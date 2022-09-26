@@ -8,6 +8,7 @@ import {
     mapToFusionForErrorResponseJS,
     mapToFusionForNoCalculationResponseJS,
     mapToFusionResponseJS,
+    prepareBatchRequestJS,
     proRateTaxesJS,
 } from "./function-js";
 
@@ -210,6 +211,23 @@ export const mapToFusionResponse: SdkFlowFunctionEntry = {
         },
     },
     js: mapToFusionResponseJS,
+    outputSchema: {
+        type: 'object',
+    },
+};
+
+export const prepareBatchRequest: SdkFlowFunctionEntry = {
+    description: 'Prepare Batch Request For Processing.',
+    longDescription: 'Prepare Batch Request For Processing.',
+    inputSchema: {
+        type: 'object',
+        properties: {
+            fusionRequest: {
+                type: 'object',
+            },
+        },
+    },
+    js: prepareBatchRequestJS,
     outputSchema: {
         type: 'object',
     },
