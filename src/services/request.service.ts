@@ -1,4 +1,5 @@
 import _ = require('lodash');
+import { Helpers } from '../../src/utils/helpers';
 import { configurationCodeRecord, ConfigurationCodesService } from '../services/configuration.service';
 
 export class RequestService {
@@ -113,6 +114,20 @@ export class RequestService {
     return mappings;
   }
 
+  public prepareBatchRequest(fusionRequest: {
+    taxableHeader: Record<string, any>;
+  }): Record<string, any> {
+    fusionRequest.taxableHeader.taxableLines.forEach((taxableLine: Record<string, any>) => {
+      taxableLine['ns:TrxDate'] = Helpers.convertYYYYMMDDToIsoDateString(taxableLine['ns:TrxDate']);
+      taxableLine['ns:TaxDate'] = Helpers.convertYYYYMMDDToIsoDateString(taxableLine['ns:TaxDate']);
+      taxableLine['ns:AdjustedDocDate'] = Helpers.convertYYYYMMDDToIsoDateString(taxableLine['ns:AdjustedDocDate']);
+      taxableLine['ns:TrxLineGlDate'] = Helpers.convertYYYYMMDDToIsoDateString(taxableLine['ns:TrxLineGlDate']);
+      this.extractAddresses(taxableLine);
+    });
+    fusionRequest.taxableHeader['ns:TrxDate'] = Helpers.convertYYYYMMDDToIsoDateString( fusionRequest.taxableHeader['ns:TrxDate']);
+    return fusionRequest;
+  }
+  
   public checkAndProcessVBTDetails(
     fusionRequest: {
       taxableHeader: Record<string, any>;

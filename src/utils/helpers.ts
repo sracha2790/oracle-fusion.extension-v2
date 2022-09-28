@@ -12,12 +12,23 @@ export class Helpers {
 
     static findMatchingFusionLineForAvataxResponseLine(avalaraTransactionLine: Record<string, any>, fusionTaxableLines: Array<Record<string, any>>) {
         const matchingFusionLine = fusionTaxableLines.find(
-            fusionLine => 
+            fusionLine =>
                 fusionLine['ns:TrxLineId'] == avalaraTransactionLine.originationDocumentId
                 || (!avalaraTransactionLine.originationDocumentId && fusionLine['ns:TrxLineNumber'] == avalaraTransactionLine.lineNumber));
         if (!matchingFusionLine) {
             throw new Error(`No Matching Fusion Line Found for Avalara Response Line: ${avalaraTransactionLine.lineNumber}`);
         }
         return matchingFusionLine;
+    }
+
+    static convertYYYYMMDDToIsoDateString(YYYYMMDDString: string): string {
+        if (!YYYYMMDDString){
+            return undefined;
+        }
+        const year = YYYYMMDDString.substring(0, 4)
+        const month = YYYYMMDDString.substring(4, 6);
+        const dt = YYYYMMDDString.substring(6, 8);
+
+        return year + '-' + month + '-' + dt;
     }
 }
