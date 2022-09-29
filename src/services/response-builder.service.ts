@@ -335,8 +335,11 @@ export class ResponseBuilderService {
 
         detailTaxLine['ns:TaxRegimeCode'] = this.currentLegalEntity.ATX_TAX_REGIME_CODE;
 
-        if (avalaraTransactionLine['ns:ref2']) {
+        if (avalaraTransactionLine.ref2) {
             detailTaxLine['ns:LegalJustificationText3'] = avalaraTransactionLine.ref2;
+        }
+        if (fusionTaxableLine['ns:LinesDetFactorId']) {
+            detailTaxLine['ns:LinesDetFactorId'] = fusionTaxableLine['ns:LinesDetFactorId'];
         }
 
         if (vbtTaxAmtDetail && _.toNumber(avalaraTransactionLineDetail.taxCalculated) > _.toNumber(avalaraTransactionLineDetail.tax)) {
