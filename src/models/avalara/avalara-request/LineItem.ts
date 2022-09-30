@@ -1,3 +1,4 @@
+import { TaxableLinesWithDetailTaxLines } from "src/models/oracle/TaxableLines";
 import { AddressLocation } from "../AddressLocation";
 import { TaxOverride } from "../TaxOverride";
 
@@ -29,4 +30,5 @@ export class LineItem {
   businessIdentificationNo: string;
   taxOverride: TaxOverride; 
   hsCode: string;
+  fusionLine?: TaxableLinesWithDetailTaxLines;
 }

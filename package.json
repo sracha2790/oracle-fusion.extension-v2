@@ -16,8 +16,9 @@
   },
   "dependencies": {
     "@appknit-project/common-frameworks": "2.4.98",
+    "joi": "^17.6.0",
     "lodash": "^4.17.20",
-    "joi": "^17.6.0"
+    "yarn": "^1.22.19"
   },
   "devDependencies": {
     "@types/jest": "^26.0.9",

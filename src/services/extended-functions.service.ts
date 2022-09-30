@@ -1,3 +1,7 @@
+import { CreateTransaction } from "src/models/avalara/avalara-request/CreateTransaction";
+import { LineItem } from "src/models/avalara/avalara-request/LineItem";
+import { lineItemTaxOverrideTypeEnum } from "src/models/avalara/TaxOverride";
+
 export class ExtendedFunctionsService {
 
     constructor(
@@ -6,7 +10,7 @@ export class ExtendedFunctionsService {
 
     public addProratedTaxesAsTaxOverrides(
         taxOverrides: Record<string, any>,
-        avalaraCreateTransactionModel: Record<string, any>,
+        avalaraCreateTransactionModel: CreateTransaction,
         glDate: Date,
     ) {
         for (const avalaraRequestLineItem of avalaraCreateTransactionModel.lines) {
@@ -17,25 +21,25 @@ export class ExtendedFunctionsService {
             }
             if (glDate) {
                 avalaraRequestLineItem.taxOverride = {
-                    type: 'TaxAmount',
+                    type: lineItemTaxOverrideTypeEnum.TaxAmount,
                     taxDate: avalaraCreateTransactionModel.date,
                     taxAmount: lineOverrideItem,
                     reason: 'Tax Amount and Tax Date override'
                 }
             } else {
                 avalaraRequestLineItem.taxOverride = {
-                    type: 'TaxAmount',
+                    type: lineItemTaxOverrideTypeEnum.TaxAmount,
                     taxAmount: lineOverrideItem,
                     reason: 'To get prorated vendor billed tax amounts for the lines'
                 }
             }
         }
-        avalaraCreateTransactionModel.commitFlag = true;
+        avalaraCreateTransactionModel.commit = true;
         return avalaraCreateTransactionModel;
     }
 
     public addCreditMemoLines(
-        avalaraCreateTransactionLineItems: Array<Record<string, any>>,
+        avalaraCreateTransactionLineItems: Array<LineItem>,
     ) {
         const inputLines = avalaraCreateTransactionLineItems;
         const outputLines = [];

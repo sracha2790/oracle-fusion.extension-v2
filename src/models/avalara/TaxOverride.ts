@@ -1,11 +1,11 @@
 
-export enum typeEnum {
+export enum lineItemTaxOverrideTypeEnum {
   'None', 'TaxAmount', 'Exemption', 'TaxDate', 'AccruedTaxAmount', 'DeriveTaxable'
 }
 
 export class TaxOverride {
-  type: typeEnum;
-  taxAmount: number;
-  taxDate: string;
-  reason: string;
+  type: lineItemTaxOverrideTypeEnum;
+  taxAmount?: number;
+  taxDate?: string;
+  reason?: string;
 }

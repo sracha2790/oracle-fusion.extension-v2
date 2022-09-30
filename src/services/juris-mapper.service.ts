@@ -1,6 +1,10 @@
 import { AppknitSDK, AdhocQueryUnion, AdhocQuery } from '@appknit-project/appknit-platform-sdk-v2';
 import { AppknitGraphSDK } from '@appknit-project/common-frameworks';
 import _ = require('lodash');
+import { TransactionLinesWithTransactionLineDetails } from 'src/models/avalara/avalara-response/TransactionLine';
+import { jurisTypeEnum, TransactionLineDetail } from 'src/models/avalara/avalara-response/TransactionLineDetail';
+import { DetailTaxLine } from 'src/models/oracle/DetailTaxLines';
+import { TaxableLinesWithDetailTaxLines } from 'src/models/oracle/TaxableLines';
 import { RegimeAndJurisdiction } from '../types'
 export class JurisDataMapper {
     private jurisData: Array<Record<string, any>>;
@@ -14,14 +18,14 @@ export class JurisDataMapper {
         this.jurisData = []
     }
     async addJurisDataForUS2US(
-        detailTaxLine: Record<string, any>,
-        matchingFusionTaxableLine: Record<string, any>,
-        avalaraTransactionLine: Record<string, any>,
-        avalaraTransactionLineDetail: Record<string, any>,
+        detailTaxLine: DetailTaxLine,
+        matchingFusionTaxableLine: TaxableLinesWithDetailTaxLines,
+        avalaraTransactionLine: TransactionLinesWithTransactionLineDetails,
+        avalaraTransactionLineDetail: TransactionLineDetail,
     ) {
         let queryResults: Record<string, any>;
         let whereClause: Record<string, any>;
-        if (avalaraTransactionLineDetail.jurisType === 'STA') {
+        if (avalaraTransactionLineDetail.jurisType === jurisTypeEnum.STA) {
             whereClause = {
                 ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
                 ATX_JURISDICTION_TYPE: 'STATE',
@@ -30,7 +34,7 @@ export class JurisDataMapper {
             };
         }
 
-        if (avalaraTransactionLineDetail.jurisType === 'CTY') {
+        if (avalaraTransactionLineDetail.jurisType === jurisTypeEnum.CTY) {
             whereClause = {
                 ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
                 ATX_JURISDICTION_TYPE: 'COUNTY',
@@ -40,7 +44,7 @@ export class JurisDataMapper {
             };
         }
 
-        if (avalaraTransactionLineDetail.jurisType === 'CIT') {
+        if (avalaraTransactionLineDetail.jurisType === jurisTypeEnum.CIT) {
             whereClause = {
                 ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
                 ATX_JURISDICTION_TYPE: 'CITY',
@@ -50,7 +54,7 @@ export class JurisDataMapper {
             };
         }
 
-        if (avalaraTransactionLineDetail.jurisType === 'STJ') {
+        if (avalaraTransactionLineDetail.jurisType === jurisTypeEnum.STJ) {
             whereClause = {
                 ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
                 ATX_JURISDICTION_TYPE: 'SPECIAL',
@@ -62,13 +66,13 @@ export class JurisDataMapper {
     }
 
     async addJurisDataForCA2CA(
-        detailTaxLine: Record<string, any>,
-        matchingFusionTaxableLine: Record<string, any>,
-        avalaraTransactionLine: Record<string, any>,
-        avalaraTransactionLineDetail: Record<string, any>,
+        detailTaxLine: DetailTaxLine,
+        matchingFusionTaxableLine: TaxableLinesWithDetailTaxLines,
+        avalaraTransactionLine: TransactionLinesWithTransactionLineDetails,
+        avalaraTransactionLineDetail: TransactionLineDetail,
     ) {
         let whereClause: Record<string, any>;
-        if (avalaraTransactionLineDetail.jurisType === 'CNT') {
+        if (avalaraTransactionLineDetail.jurisType === jurisTypeEnum.CNT) {
             let region = avalaraTransactionLineDetail.country;
             (avalaraTransactionLine.details as Array<Record<string, any>>).forEach(detail => {
                 if (detail.id != avalaraTransactionLineDetail.id && detail.jurisType == 'STA') {
@@ -83,7 +87,7 @@ export class JurisDataMapper {
             }
         }
 
-        if (avalaraTransactionLineDetail.jurisType === 'STA') {
+        if (avalaraTransactionLineDetail.jurisType === jurisTypeEnum.STA) {
             whereClause = {
                 ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
                 ATX_JURISDICTION_TYPE: 'STATE',
@@ -96,13 +100,13 @@ export class JurisDataMapper {
     }
 
     async addJurisDataForUS2CA(
-        detailTaxLine: Record<string, any>,
-        matchingFusionTaxableLine: Record<string, any>,
-        avalaraTransactionLine: Record<string, any>,
-        avalaraTransactionLineDetail: Record<string, any>,
+        detailTaxLine: DetailTaxLine,
+        matchingFusionTaxableLine: TaxableLinesWithDetailTaxLines,
+        avalaraTransactionLine: TransactionLinesWithTransactionLineDetails,
+        avalaraTransactionLineDetail: TransactionLineDetail,
     ) {
         let whereClause: Record<string, any>;
-        if (avalaraTransactionLineDetail.jurisType == 'CNT') {
+        if (avalaraTransactionLineDetail.jurisType == jurisTypeEnum.CNT) {
             const whereClause = {
                 ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
                 ATX_JURISDICTION_TYPE: 'STATE',
@@ -114,7 +118,7 @@ export class JurisDataMapper {
         await this.findAndAddJurisDataOnDetailsTaxLine(whereClause, detailTaxLine);
     }
 
-    private async findAndAddJurisDataOnDetailsTaxLine(whereClause: Record<string, any>, detailTaxLine: Record<string, any>) {
+    private async findAndAddJurisDataOnDetailsTaxLine(whereClause: Record<string, any>, detailTaxLine: DetailTaxLine) {
         let jurisDataResults = _.filter(this.jurisData, whereClause);
         if (jurisDataResults.length <= 0 ) {
             jurisDataResults = await this.sdk.adhocDataProvider.queryDataRecords(this.getJurisdictionQuery(whereClause));

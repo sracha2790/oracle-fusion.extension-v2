@@ -1,9 +1,11 @@
 import _ = require("lodash");
+import { TaxableHeaderWithLines } from "src/models/oracle/TaxableHeaders";
+import { TaxableLine, TaxableLinesWithDetailTaxLines } from "src/models/oracle/TaxableLines";
 
 export class FieldMappingService {
 
     public resolveFieldValueByFieldMapping = (
-        fieldName, application, fieldMapping, fusionRequestTaxableHeader, fusionRequestTaxableLine, additionalData, defaultValue
+        fieldName, application, fieldMapping, fusionRequestTaxableHeader: TaxableHeaderWithLines, fusionRequestTaxableLine: TaxableLinesWithDetailTaxLines, additionalData, defaultValue
     ): any => {
         let additionalDataLine = (additionalData as Array<Record<string, any>>).find(item => {
             return (item.TRX_ID == fusionRequestTaxableLine['ns:TrxId'] && item.TRX_LINE_ID == fusionRequestTaxableLine['ns:TrxLineId'])
@@ -43,7 +45,7 @@ export class FieldMappingService {
         return returnValue;
     }
 
-    public resolveUserDefinedFieldValues = (application, UDFMapping, fusionRequestTaxableHeader, fusionRequestTaxableLine, additionalData) => {
+    public resolveUserDefinedFieldValues = (application, UDFMapping, fusionRequestTaxableHeader: TaxableHeaderWithLines, fusionRequestTaxableLine: TaxableLinesWithDetailTaxLines, additionalData) => {
         let additionalDataLine = (additionalData as Array<Record<string, any>>).find(item => {
             return (item.TRX_ID == fusionRequestTaxableLine['ns:TrxId'] && item.TRX_LINE_ID == fusionRequestTaxableLine['ns:TrxLineId'])
         })
@@ -91,7 +93,7 @@ export class FieldMappingService {
         }
     }
 
-    public resolveAvalaraParametersMapping = (application, paramMapping, fusionRequestTaxableHeader, additionalData) => {
+    public resolveAvalaraParametersMapping = (application, paramMapping, fusionRequestTaxableHeader: TaxableHeaderWithLines, additionalData) => {
         const returnValue = [];
         for (const paramMappingItem of paramMapping) {
             if (paramMappingItem.ATX_APPLICATION == application) {
