@@ -1,10 +1,10 @@
 import { AppknitSDK, AdhocQueryUnion, AdhocQuery } from '@appknit-project/appknit-platform-sdk-v2';
 import { AppknitGraphSDK } from '@appknit-project/common-frameworks';
 import _ = require('lodash');
-import { TransactionLinesWithTransactionLineDetails } from 'src/models/avalara/avalara-response/TransactionLine';
-import { jurisTypeEnum, TransactionLineDetail } from 'src/models/avalara/avalara-response/TransactionLineDetail';
-import { DetailTaxLine } from 'src/models/oracle/DetailTaxLines';
-import { TaxableLinesWithDetailTaxLines } from 'src/models/oracle/TaxableLines';
+import { TransactionLinesWithTransactionLineDetails } from '../../src/models/avalara/avalara-response/TransactionLine';
+import { jurisTypeEnum, TransactionLineDetail } from '../../src/models/avalara/avalara-response/TransactionLineDetail';
+import { DetailTaxLine } from '../../src/models/oracle/DetailTaxLines';
+import { TaxableLinesWithDetailTaxLines } from '../../src/models/oracle/TaxableLines';
 import { RegimeAndJurisdiction } from '../types'
 export class JurisDataMapper {
     private jurisData: Array<Record<string, any>>;

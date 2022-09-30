@@ -1,7 +1,7 @@
 import _ = require('lodash');
-import { DetailTaxLine } from 'src/models/oracle/DetailTaxLines';
-import { TaxableHeaderWithLines } from 'src/models/oracle/TaxableHeaders';
-import { TaxableLinesWithDetailTaxLines } from 'src/models/oracle/TaxableLines';
+import { DetailTaxLine } from '../../src/models/oracle/DetailTaxLines';
+import { TaxableHeaderWithLines } from '../../src/models/oracle/TaxableHeaders';
+import { TaxableLinesWithDetailTaxLines } from '../../src/models/oracle/TaxableLines';
 import { Helpers } from '../../src/utils/helpers';
 import { configurationCodeRecord, ConfigurationCodesService } from '../services/configuration.service';
 

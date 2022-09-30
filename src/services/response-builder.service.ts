@@ -5,12 +5,12 @@ import { Helpers } from '../../src/utils/helpers';
 import { getConfigurationCodeValue } from '../../src/expression-functions';
 import { ConfigurationCodesService } from './configuration.service';
 import { JurisDataMapper } from './juris-mapper.service';
-import { TaxableHeaderWithLines } from 'src/models/oracle/TaxableHeaders';
-import { Transaction, TransactionWithTransactionLines } from 'src/models/avalara/avalara-response/Transaction';
-import { DetailTaxLine } from 'src/models/oracle/DetailTaxLines';
-import { TaxableLinesWithDetailTaxLines } from 'src/models/oracle/TaxableLines';
-import { TransactionLinesWithTransactionLineDetails } from 'src/models/avalara/avalara-response/TransactionLine';
-import { jurisTypeEnum, TransactionLineDetail } from 'src/models/avalara/avalara-response/TransactionLineDetail';
+import { TaxableHeaderWithLines } from '../../src/models/oracle/TaxableHeaders';
+import { Transaction, TransactionWithTransactionLines } from '../../src/models/avalara/avalara-response/Transaction';
+import { DetailTaxLine } from '../../src/models/oracle/DetailTaxLines';
+import { TaxableLinesWithDetailTaxLines } from '../../src/models/oracle/TaxableLines';
+import { TransactionLinesWithTransactionLineDetails } from '../../src/models/avalara/avalara-response/TransactionLine';
+import { jurisTypeEnum, TransactionLineDetail } from '../../src/models/avalara/avalara-response/TransactionLineDetail';
 export class ResponseBuilderService {
     private jurisDataMapper: JurisDataMapper;
     private configurationCodesService: ConfigurationCodesService;

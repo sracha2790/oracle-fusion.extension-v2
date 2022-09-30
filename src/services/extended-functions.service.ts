@@ -1,6 +1,6 @@
-import { CreateTransaction } from "src/models/avalara/avalara-request/CreateTransaction";
-import { LineItem } from "src/models/avalara/avalara-request/LineItem";
-import { lineItemTaxOverrideTypeEnum } from "src/models/avalara/TaxOverride";
+import { CreateTransaction } from "../../src/models/avalara/avalara-request/CreateTransaction";
+import { LineItem } from "../../src/models/avalara/avalara-request/LineItem";
+import { lineItemTaxOverrideTypeEnum } from "../../src/models/avalara/TaxOverride";
 
 export class ExtendedFunctionsService {
 

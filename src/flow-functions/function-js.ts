@@ -5,7 +5,7 @@ import { ResponseBuilderService } from '../../src/services';
 import { ExtendedFunctionsService } from '../../src/services/extended-functions.service';
 import { TaxProrationService } from '../../src/services/tax-proration.service';
 import { RequestService } from '../../src/services/request.service';
-import { LineItem } from 'src/models/avalara/avalara-request/LineItem';
+import { LineItem } from '../../src/models/avalara/avalara-request/LineItem';
 
 export const convertFusionRequestIntoHierarchyJS = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
     const { body } = configuration;
