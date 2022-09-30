@@ -1,6 +1,10 @@
 
 export enum jurisTypeEnum {
-  'STA', 'CTY', 'CIT', 'STJ', 'CNT'
+  STA ='STA', 
+  CTY= 'CTY', 
+  CIT ='CIT',
+  STJ= 'STJ', 
+  CNT= 'CNT'
 }
 
 export enum nonTaxableTypeEnum {

@@ -25,7 +25,7 @@ export class JurisDataMapper {
     ) {
         let queryResults: Record<string, any>;
         let whereClause: Record<string, any>;
-        if (avalaraTransactionLineDetail.jurisType === jurisTypeEnum.STA) {
+        if (avalaraTransactionLineDetail.jurisType == jurisTypeEnum.STA) {
             whereClause = {
                 ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
                 ATX_JURISDICTION_TYPE: 'STATE',
@@ -34,7 +34,7 @@ export class JurisDataMapper {
             };
         }
 
-        if (avalaraTransactionLineDetail.jurisType === jurisTypeEnum.CTY) {
+        if (avalaraTransactionLineDetail.jurisType == jurisTypeEnum.CTY) {
             whereClause = {
                 ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
                 ATX_JURISDICTION_TYPE: 'COUNTY',
@@ -44,7 +44,7 @@ export class JurisDataMapper {
             };
         }
 
-        if (avalaraTransactionLineDetail.jurisType === jurisTypeEnum.CIT) {
+        if (avalaraTransactionLineDetail.jurisType == jurisTypeEnum.CIT) {
             whereClause = {
                 ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
                 ATX_JURISDICTION_TYPE: 'CITY',
@@ -54,7 +54,7 @@ export class JurisDataMapper {
             };
         }
 
-        if (avalaraTransactionLineDetail.jurisType === jurisTypeEnum.STJ) {
+        if (avalaraTransactionLineDetail.jurisType == jurisTypeEnum.STJ) {
             whereClause = {
                 ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
                 ATX_JURISDICTION_TYPE: 'SPECIAL',
