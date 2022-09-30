@@ -1,6 +1,6 @@
 import _ = require("lodash");
-import { TaxableHeaderWithLines } from "src/models/oracle/TaxableHeaders";
-import { TaxableLine, TaxableLinesWithDetailTaxLines } from "src/models/oracle/TaxableLines";
+import { TaxableHeaderWithLines } from "../../src/models/oracle/TaxableHeaders";
+import { TaxableLine, TaxableLinesWithDetailTaxLines } from "../../src/models/oracle/TaxableLines";
 
 export class FieldMappingService {
 
