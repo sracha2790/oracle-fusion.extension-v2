@@ -235,7 +235,7 @@ export class ResponseBuilderService {
     }
 
     private getNoCalculationDetailTaxLine(fusionTaxableLine: TaxableLinesWithDetailTaxLines): DetailTaxLine {
-        let detailTaxLine: DetailTaxLine;
+        let detailTaxLine: DetailTaxLine = {};
         detailTaxLine['ns:ErrorMessageTypeFlag'] = 'X';
         detailTaxLine['ns:ErrorString'] = "";
         detailTaxLine['ns:ApplicationId'] = fusionTaxableLine['ns:ApplicationId'];
@@ -251,7 +251,7 @@ export class ResponseBuilderService {
     ) {
         const detailTaxLines = [];
         for (const fusionTaxableLine of this.fusionRequest.taxableHeader.taxableLines) {
-            let detailTaxLine: DetailTaxLine;
+            let detailTaxLine: DetailTaxLine = {};
             detailTaxLine['ns:ErrorMessageTypeFlag'] = 'E';
             detailTaxLine['ns:ErrorString'] = message;
             detailTaxLine['ns:ApplicationId'] = fusionTaxableLine['ns:ApplicationId'];
@@ -305,7 +305,7 @@ export class ResponseBuilderService {
         vbtTaxAmtDetail: Record<string, any>,
         SelfAssessedFlag: string,
     ): DetailTaxLine {
-        let detailTaxLine: DetailTaxLine;
+        let detailTaxLine: DetailTaxLine = {} ;
         detailTaxLine['ns:ErrorMessageTypeFlag'] = 'S';
         detailTaxLine['ns:ApplicationId'] = fusionTaxableLine['ns:ApplicationId'];
         detailTaxLine['ns:EntityCode'] = fusionTaxableLine['ns:EntityCode'];
