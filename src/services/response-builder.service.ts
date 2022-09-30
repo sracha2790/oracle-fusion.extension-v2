@@ -35,7 +35,7 @@ export class ResponseBuilderService {
             currentLegalEntity,
             fusionRequest.taxableHeader['ns:ApplicationShortname']
         );
-        this.configurationCodesService = new ConfigurationCodesService(customerProfile.ATX_CONFIG_CODES);
+        this.configurationCodesService = new ConfigurationCodesService(customerProfile?.ATX_CONFIG_CODES || []);
         this.taxApportionmentLineNumber = 0;
         this.setStartingApportionmentNumber();
     }
