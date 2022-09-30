@@ -16,8 +16,12 @@ export class Helpers {
 
     static findMatchingFusionLineForAvataxResponseLine(avalaraTransactionLine: TransactionLinesWithTransactionLineDetails, fusionTaxableLines: Array<TaxableLinesWithDetailTaxLines>) {
         const matchingFusionLine = fusionTaxableLines.find(
+<<<<<<< HEAD
             fusionLine => 
             // @ts-ignore
+=======
+            fusionLine =>
+>>>>>>> master
                 fusionLine['ns:TrxLineId'] == avalaraTransactionLine.originationDocumentId
             // @ts-ignore
                 || (!avalaraTransactionLine.originationDocumentId && fusionLine['ns:TrxLineNumber'] == avalaraTransactionLine.lineNumber));
@@ -25,5 +29,16 @@ export class Helpers {
             throw new Error(`No Matching Fusion Line Found for Avalara Response Line: ${avalaraTransactionLine.lineNumber}`);
         }
         return matchingFusionLine;
+    }
+
+    static convertYYYYMMDDToIsoDateString(YYYYMMDDString: string): string {
+        if (!YYYYMMDDString){
+            return undefined;
+        }
+        const year = YYYYMMDDString.substring(0, 4)
+        const month = YYYYMMDDString.substring(4, 6);
+        const dt = YYYYMMDDString.substring(6, 8);
+
+        return year + '-' + month + '-' + dt;
     }
 }

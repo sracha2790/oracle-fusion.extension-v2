@@ -1,7 +1,11 @@
 import _ = require('lodash');
+<<<<<<< HEAD
 import { DetailTaxLine } from 'src/models/oracle/DetailTaxLines';
 import { TaxableHeaderWithLines } from 'src/models/oracle/TaxableHeaders';
 import { TaxableLinesWithDetailTaxLines } from 'src/models/oracle/TaxableLines';
+=======
+import { Helpers } from '../../src/utils/helpers';
+>>>>>>> master
 import { configurationCodeRecord, ConfigurationCodesService } from '../services/configuration.service';
 
 export class RequestService {
@@ -115,6 +119,7 @@ export class RequestService {
     return mappings;
   }
 
+<<<<<<< HEAD
 
   public convertToNumberDetTaxLine (dtLine: DetailTaxLine) {
       for (let property in dtLine) {
@@ -136,6 +141,22 @@ export class RequestService {
       }
     }
   
+=======
+  public prepareBatchRequest(fusionRequest: {
+    taxableHeader: Record<string, any>;
+  }): Record<string, any> {
+    fusionRequest.taxableHeader.taxableLines.forEach((taxableLine: Record<string, any>) => {
+      taxableLine['ns:TrxDate'] = Helpers.convertYYYYMMDDToIsoDateString(taxableLine['ns:TrxDate']);
+      taxableLine['ns:TaxDate'] = Helpers.convertYYYYMMDDToIsoDateString(taxableLine['ns:TaxDate']);
+      taxableLine['ns:AdjustedDocDate'] = Helpers.convertYYYYMMDDToIsoDateString(taxableLine['ns:AdjustedDocDate']);
+      taxableLine['ns:TrxLineGlDate'] = Helpers.convertYYYYMMDDToIsoDateString(taxableLine['ns:TrxLineGlDate']);
+      this.extractAddresses(taxableLine);
+    });
+    fusionRequest.taxableHeader['ns:TrxDate'] = Helpers.convertYYYYMMDDToIsoDateString( fusionRequest.taxableHeader['ns:TrxDate']);
+    return fusionRequest;
+  }
+  
+>>>>>>> master
   public checkAndProcessVBTDetails(
     fusionRequest: {
       taxableHeader: TaxableHeaderWithLines;
