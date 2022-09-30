@@ -16,12 +16,8 @@ export class Helpers {
 
     static findMatchingFusionLineForAvataxResponseLine(avalaraTransactionLine: TransactionLinesWithTransactionLineDetails, fusionTaxableLines: Array<TaxableLinesWithDetailTaxLines>) {
         const matchingFusionLine = fusionTaxableLines.find(
-<<<<<<< HEAD
             fusionLine => 
             // @ts-ignore
-=======
-            fusionLine =>
->>>>>>> master
                 fusionLine['ns:TrxLineId'] == avalaraTransactionLine.originationDocumentId
             // @ts-ignore
                 || (!avalaraTransactionLine.originationDocumentId && fusionLine['ns:TrxLineNumber'] == avalaraTransactionLine.lineNumber));

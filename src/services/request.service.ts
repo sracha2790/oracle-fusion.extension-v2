@@ -1,11 +1,8 @@
 import _ = require('lodash');
-<<<<<<< HEAD
 import { DetailTaxLine } from 'src/models/oracle/DetailTaxLines';
 import { TaxableHeaderWithLines } from 'src/models/oracle/TaxableHeaders';
 import { TaxableLinesWithDetailTaxLines } from 'src/models/oracle/TaxableLines';
-=======
 import { Helpers } from '../../src/utils/helpers';
->>>>>>> master
 import { configurationCodeRecord, ConfigurationCodesService } from '../services/configuration.service';
 
 export class RequestService {
@@ -119,7 +116,6 @@ export class RequestService {
     return mappings;
   }
 
-<<<<<<< HEAD
 
   public convertToNumberDetTaxLine (dtLine: DetailTaxLine) {
       for (let property in dtLine) {
@@ -141,7 +137,6 @@ export class RequestService {
       }
     }
   
-=======
   public prepareBatchRequest(fusionRequest: {
     taxableHeader: Record<string, any>;
   }): Record<string, any> {
@@ -156,7 +151,6 @@ export class RequestService {
     return fusionRequest;
   }
   
->>>>>>> master
   public checkAndProcessVBTDetails(
     fusionRequest: {
       taxableHeader: TaxableHeaderWithLines;
