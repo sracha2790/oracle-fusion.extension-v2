@@ -1,3 +1,5 @@
+import { DetailTaxLine } from "./DetailTaxLines";
+
 export class TaxableLine {
   'ns:AccountCcid': number; 
   'ns: ApplicationId': number; 
@@ -330,5 +332,7 @@ export class TaxableLine {
 
 }
 
-//
+export class TaxableLinesWithDetailTaxLines extends TaxableLine {
+  detailTaxLines?: Array<DetailTaxLine>; 
+}
 

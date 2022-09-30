@@ -1,7 +1,8 @@
 import _ = require("lodash");
+import { TransactionLinesWithTransactionLineDetails } from "src/models/avalara/avalara-response/TransactionLine";
 
 export class TaxProrationService {
-  public prorateTaxes(apSelfAssesTaxFlag: string, vendorBilledTax, avalaraTransactionLines, tolerancePct, toleranceAmt) {
+  public prorateTaxes(apSelfAssesTaxFlag: string, vendorBilledTax, avalaraTransactionLines: Array<TransactionLinesWithTransactionLineDetails>, tolerancePct, toleranceAmt) {
     let result = {};
 
     let taxOverrides: Record<string, any> = {};
@@ -21,7 +22,7 @@ export class TaxProrationService {
         taxDet['lineNumber'] = avalaraTransactionLine.lineNumber;
         taxDet['override'] = avalaraTransactionLine.taxCalculated;
         taxDet['taxRate'] = _.round(_.sumBy(avalaraTransactionLine.details, function(detail:Record<string, any>) { return detail.rate; }) * 100, 2);
-        taxDet['taxDetails'] = avalaraTransactionLine.taxDetails;
+        // taxDet['taxDetails'] = avalaraTransactionLine.taxDetails;
         taxDet['taxAmtTaxCurr'] = avalaraTransactionLine.tax;
         taxDet['unroundedTaxAmt'] = avalaraTransactionLine.tax;
         taxDet['ReturnVbtLineOnly'] = true; // will return vbt lines only
@@ -98,7 +99,7 @@ export class TaxProrationService {
       if (balance < 0) {
         taxOverrides[avalaraTransactionLine.lineNumber] = avalaraTransactionLine.taxCalculated; //set VBT -- correct one
         taxDet['taxRate'] = taxRate * 100;
-        taxDet['taxDetails'] = avalaraTransactionLine.taxDetails;
+        //taxDet['taxDetails'] = avalaraTransactionLine.taxDetails;
         taxDet['ReturnVbtLineOnly'] = true; // will return vbt lines only
         let taxToSet = 0;
         if (withinTolerance) {

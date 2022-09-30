@@ -5,14 +5,22 @@ import { Helpers } from '../../src/utils/helpers';
 import { getConfigurationCodeValue } from '../../src/expression-functions';
 import { ConfigurationCodesService } from './configuration.service';
 import { JurisDataMapper } from './juris-mapper.service';
+import { TaxableHeaderWithLines } from 'src/models/oracle/TaxableHeaders';
+import { Transaction, TransactionWithTransactionLines } from 'src/models/avalara/avalara-response/Transaction';
+import { DetailTaxLine } from 'src/models/oracle/DetailTaxLines';
+import { TaxableLinesWithDetailTaxLines } from 'src/models/oracle/TaxableLines';
+import { TransactionLinesWithTransactionLineDetails } from 'src/models/avalara/avalara-response/TransactionLine';
+import { jurisTypeEnum, TransactionLineDetail } from 'src/models/avalara/avalara-response/TransactionLineDetail';
 export class ResponseBuilderService {
     private jurisDataMapper: JurisDataMapper;
     private configurationCodesService: ConfigurationCodesService;
     private taxApportionmentLineNumber: number;
     constructor(
         private sdk: AppknitSDK | AppknitGraphSDK,
-        private avalaraTransaction: Record<string, any>,
-        private fusionRequest: Record<string, any>,
+        private avalaraTransaction: TransactionWithTransactionLines,
+        private fusionRequest: {
+            taxableHeader: TaxableHeaderWithLines;
+        },
         private customerProfile: Record<string, any>,
         private currentLegalEntity: Record<string, any>,
         private isUS2US: boolean,
@@ -58,13 +66,13 @@ export class ResponseBuilderService {
 
     async createO2CResponse(
     ) {
-        const detailTaxLines = [];
+        const detailTaxLines:Array<DetailTaxLine> = [];
         let i = 1;
         for (const avalaraTransactionLine of this.avalaraTransaction.lines) {
             if (Helpers.isCreditMemoAdditionalLine(avalaraTransactionLine)) {
                 continue;
             }
-            const matchingFusionTaxableLine = Helpers.findMatchingFusionLineForAvataxResponseLine(avalaraTransactionLine, this.fusionRequest.taxableHeader.taxableLines);
+            const matchingFusionTaxableLine: TaxableLinesWithDetailTaxLines = Helpers.findMatchingFusionLineForAvataxResponseLine(avalaraTransactionLine, this.fusionRequest.taxableHeader.taxableLines);
             for (const avalaraTransactionLineDetail of avalaraTransactionLine.details) {
 
                 const detailTaxLine = this.buildFusionDetailTaxLine(
@@ -122,7 +130,7 @@ export class ResponseBuilderService {
                     && processUS2CATaxesSameAsCA2CA != 'Y'
                     && customerImplementsCustomDutyTax == 'Y'
                 ) {
-                    if (avalaraTransactionLineDetail.jurisType != 'CNT') {
+                    if (avalaraTransactionLineDetail.jurisType !== jurisTypeEnum.CNT) {
                         continue;
                     }
                     await this.jurisDataMapper.addJurisDataForUS2CA(
@@ -146,7 +154,7 @@ export class ResponseBuilderService {
         if (this.isUS2US && this.avalaraTransaction.totalTax == 0 && this.configurationCodesService.getCodeValue('CORRECT_VBT_FOR_OC') == 'Y') {
             VendorLineHandledFlag = true;
             for (const line of this.fusionRequest.taxableHeader.taxableLines) {
-                line.detailTaxLines?.filter((detailTaxLine: Record<string, any>) => Helpers.isVBTDetailtaxLine(detailTaxLine)).forEach((vbtDetailTaxLine: Record<string, any>) => {
+                line.detailTaxLines?.filter((detailTaxLine: DetailTaxLine) => Helpers.isVBTDetailtaxLine(detailTaxLine)).forEach((vbtDetailTaxLine: DetailTaxLine) => {
                     vbtDetailTaxLine['ns:TaxAmt'] = 0
                     vbtDetailTaxLine['ns:UnroundedTaxAmt'] = 0
                     vbtDetailTaxLine['ns:TaxAmtTaxCurr'] = 0
@@ -226,8 +234,8 @@ export class ResponseBuilderService {
         return detailTaxLines;
     }
 
-    private getNoCalculationDetailTaxLine(fusionTaxableLine: Record<string, any>): Record<string, any> {
-        const detailTaxLine: Record<string, any> = {};
+    private getNoCalculationDetailTaxLine(fusionTaxableLine: TaxableLinesWithDetailTaxLines): DetailTaxLine {
+        let detailTaxLine: DetailTaxLine;
         detailTaxLine['ns:ErrorMessageTypeFlag'] = 'X';
         detailTaxLine['ns:ErrorString'] = "";
         detailTaxLine['ns:ApplicationId'] = fusionTaxableLine['ns:ApplicationId'];
@@ -243,7 +251,7 @@ export class ResponseBuilderService {
     ) {
         const detailTaxLines = [];
         for (const fusionTaxableLine of this.fusionRequest.taxableHeader.taxableLines) {
-            const detailTaxLine: Record<string, any> = {};
+            let detailTaxLine: DetailTaxLine;
             detailTaxLine['ns:ErrorMessageTypeFlag'] = 'E';
             detailTaxLine['ns:ErrorString'] = message;
             detailTaxLine['ns:ApplicationId'] = fusionTaxableLine['ns:ApplicationId'];
@@ -254,7 +262,7 @@ export class ResponseBuilderService {
             detailTaxLine['ns:TaxCurrencyCode'] = fusionTaxableLine['ns:TrxLineCurrencyCode'];
             detailTaxLine['ns:TrxLineId'] = fusionTaxableLine['ns:TrxLineId'];
             detailTaxLine['ns:TrxLineNumber'] = fusionTaxableLine['ns:TrxLineNumber'];
-            detailTaxLine['ns:TrxLevelType'] = fusionTaxableLine['ns:TrxLineNumber'];
+            detailTaxLine['ns:TrxLevelType'] = fusionTaxableLine['ns:TrxLevelType'];
             detailTaxLine['ns:InternalOrganizationId'] = this.fusionRequest.taxableHeader['ns:InternalOrganizationId'];
             detailTaxLine['ns:LegalEntityId'] = this.fusionRequest.taxableHeader['ns:LegalEntityId'];
 
@@ -263,7 +271,7 @@ export class ResponseBuilderService {
         return detailTaxLines;
     }
 
-    private addToDetailTaxLinesCollection(detailTaxLines: Array<Record<string, any>>, detailTaxLineToInsert: Record<string, any>) {
+    private addToDetailTaxLinesCollection(detailTaxLines: Array<DetailTaxLine>, detailTaxLineToInsert: DetailTaxLine) {
         let existingMatchingDetailTaxLine: Record<string, any>;
         if (detailTaxLineToInsert['ns:Tax'] && detailTaxLineToInsert['ns:TrxId'] && detailTaxLineToInsert['ns:TrxLineId'] && detailTaxLineToInsert['ns:TrxLineNumber']) {
             existingMatchingDetailTaxLine = detailTaxLines.find(detailTaxLine => {
@@ -291,13 +299,13 @@ export class ResponseBuilderService {
     }
 
     private buildFusionDetailTaxLine(
-        fusionTaxableLine: Record<string, any>,
-        avalaraTransactionLine: Record<string, any>,
-        avalaraTransactionLineDetail: Record<string, any>,
+        fusionTaxableLine: TaxableLinesWithDetailTaxLines,
+        avalaraTransactionLine: TransactionLinesWithTransactionLineDetails,
+        avalaraTransactionLineDetail: TransactionLineDetail,
         vbtTaxAmtDetail: Record<string, any>,
         SelfAssessedFlag: string,
-    ): Record<string, any> {
-        const detailTaxLine: Record<string, any> = {};
+    ): DetailTaxLine {
+        let detailTaxLine: DetailTaxLine;
         detailTaxLine['ns:ErrorMessageTypeFlag'] = 'S';
         detailTaxLine['ns:ApplicationId'] = fusionTaxableLine['ns:ApplicationId'];
         detailTaxLine['ns:EntityCode'] = fusionTaxableLine['ns:EntityCode'];
@@ -319,7 +327,7 @@ export class ResponseBuilderService {
         detailTaxLine['ns:TaxDate'] = fusionTaxableLine['ns:TaxDate'] ? fusionTaxableLine['ns:TaxDate'] : this.fusionRequest.taxableHeader['ns:TaxDate'];
         detailTaxLine['ns:TaxDetermineDate'] = fusionTaxableLine['ns:TaxDate'] ? fusionTaxableLine['ns:TaxDate'] : this.fusionRequest.taxableHeader['ns:TaxDate'];
 
-        detailTaxLine['ns:TaxRate'] = _.toString(_.toNumber(avalaraTransactionLineDetail.rate) * 100);
+        detailTaxLine['ns:TaxRate'] = _.toNumber(avalaraTransactionLineDetail.rate) * 100;
 
         detailTaxLine['ns:TaxAmt'] = avalaraTransactionLineDetail.taxCalculated;
         detailTaxLine['ns:TaxAmtTaxCurr'] = avalaraTransactionLineDetail.taxCalculated;
@@ -343,14 +351,14 @@ export class ResponseBuilderService {
         }
 
         if (vbtTaxAmtDetail && _.toNumber(avalaraTransactionLineDetail.taxCalculated) > _.toNumber(avalaraTransactionLineDetail.tax)) {
-            detailTaxLine['ns:TaxAmt'] = _.toString(_.toNumber(avalaraTransactionLineDetail.taxCalculated) - _.toNumber(avalaraTransactionLineDetail.tax));
-            detailTaxLine['ns:TaxAmtTaxCurr'] = _.toString(_.toNumber(avalaraTransactionLineDetail.taxCalculated) - _.toNumber(avalaraTransactionLineDetail.tax));
-            detailTaxLine['ns:UnroundedTaxAmt'] = _.toString(_.toNumber(avalaraTransactionLineDetail.taxCalculated) - _.toNumber(avalaraTransactionLineDetail.tax));
+            detailTaxLine['ns:TaxAmt'] = _.toNumber(avalaraTransactionLineDetail.taxCalculated) - _.toNumber(avalaraTransactionLineDetail.tax);
+            detailTaxLine['ns:TaxAmtTaxCurr'] = _.toNumber(avalaraTransactionLineDetail.taxCalculated) - _.toNumber(avalaraTransactionLineDetail.tax);
+            detailTaxLine['ns:UnroundedTaxAmt'] = _.toNumber(avalaraTransactionLineDetail.taxCalculated) - _.toNumber(avalaraTransactionLineDetail.tax);
         }
         return detailTaxLine;
     }
 
-    private async returnNoTaxCalculationForAvaTaxLine(avalaraTransactionLine: Record<string, any>): Promise<boolean> {
+    private async returnNoTaxCalculationForAvaTaxLine(avalaraTransactionLine: TransactionLinesWithTransactionLineDetails): Promise<boolean> {
         if (
             this.configurationCodesService.getCodeValue('AP_SELF_ASSESS_TAX') == 'Y'
             && this.configurationCodesService.getCodeValue('BLOCK_AP_SELF_ASSESS_RESP') == 'Y'

@@ -7,7 +7,7 @@ import { TransactionLocationType } from "../TransactionLocationType";
 import { TransactionParameter } from "../TransactionParameter";
 import { TransactionSummary } from "../TransactionSummary";
 import { TransactionTypeEnums } from "../TransactionTypes";
-import { taxOverrideTypeEnum, TransactionLine } from "./TransactionLine";
+import { taxOverrideTypeEnum, TransactionLine, TransactionLinesWithTransactionLineDetails } from "./TransactionLine";
 
 export enum statusEnum {
   'Temporary', 'Saved', 'Posted', 'Committed', 'Cancelled', 'Adjusted', 'Queued', 'PendingApproval', 'Any'
@@ -72,4 +72,8 @@ export class Transaction {
   parameters: Array<TransactionParameter>
   messages: Array<AvaTaxMessage>;
   invoiceMessages: Array<InvoiceMessage>
+}
+
+export class TransactionWithTransactionLines extends Transaction {
+  lines: Array<TransactionLinesWithTransactionLineDetails> 
 }

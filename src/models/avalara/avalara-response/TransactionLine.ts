@@ -46,5 +46,9 @@ export class TransactionLine {
   taxOverrideAmount: number;
   taxOverrideReason: string;
   taxIncluded: boolean;
-  details: Array<TransactionLineDetail>
+  originationDocumentId: string;
+}
+
+export class TransactionLinesWithTransactionLineDetails extends TransactionLine {
+  details?: Array<TransactionLineDetail>
 }
