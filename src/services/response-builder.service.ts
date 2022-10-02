@@ -15,6 +15,7 @@ export class ResponseBuilderService {
     private jurisDataMapper: JurisDataMapper;
     private configurationCodesService: ConfigurationCodesService;
     private taxApportionmentLineNumber: number;
+    private taxLineNumberMap: Record<string, number> = {};
     constructor(
         private sdk: AppknitSDK | AppknitGraphSDK,
         private avalaraTransaction: TransactionWithTransactionLines,
@@ -37,7 +38,7 @@ export class ResponseBuilderService {
         );
         this.configurationCodesService = new ConfigurationCodesService(customerProfile?.ATX_CONFIG_CODES || []);
         this.taxApportionmentLineNumber = 0;
-        this.setStartingApportionmentNumber();
+        this.setStartingApportionmentAndTaxLineNumber();
     }
 
     public async createResponse(
@@ -54,9 +55,13 @@ export class ResponseBuilderService {
         }
     }
 
-    private setStartingApportionmentNumber() {
+    private setStartingApportionmentAndTaxLineNumber() {
         for (const line of this.fusionRequest.taxableHeader.taxableLines) {
+            this.taxLineNumberMap[line['ns:TrxLineId']] = 0;
             for (const detailTaxLine of line.detailTaxLines || []) {
+                if (detailTaxLine['ns:TaxLineNumber'] > this.taxLineNumberMap[line['ns:TrxLineId']]) {
+                    this.taxLineNumberMap[line['ns:TrxLineId']] = detailTaxLine['ns:TaxLineNumber'];
+                }
                 if (Helpers.isVBTDetailtaxLine(detailTaxLine)) {
                     this.taxApportionmentLineNumber++
                 }
@@ -294,6 +299,7 @@ export class ResponseBuilderService {
             existingMatchingDetailTaxLine['ns:TaxRate'] = _.toString(_.toNumber(existingMatchingDetailTaxLine['ns:TaxRate']) + _.toNumber(detailTaxLineToInsert['ns:TaxRate']));
         } else {
             detailTaxLineToInsert['ns:TaxApportionmentLineNumber'] = detailTaxLineToInsert['ns:TaxApportionmentLineNumber'] ? detailTaxLineToInsert['ns:TaxApportionmentLineNumber'] : ++this.taxApportionmentLineNumber;
+            detailTaxLineToInsert['ns:TaxLineNumber'] = detailTaxLineToInsert['ns:TaxLineNumber'] ? detailTaxLineToInsert['ns:TaxLineNumber'] : ++this.taxLineNumberMap[detailTaxLineToInsert['ns:TrxLineId']]
             detailTaxLines.push(detailTaxLineToInsert)
         }
     }
