@@ -329,9 +329,9 @@ export class ResponseBuilderService {
 
         detailTaxLine['ns:SelfAssessedFlag'] = SelfAssessedFlag;
 
-        detailTaxLine['ns:TrxDate'] = fusionTaxableLine['ns:TrxDate'] ? fusionTaxableLine['ns:TrxDate'] : this.fusionRequest.taxableHeader['ns:TrxDate'];
-        detailTaxLine['ns:TaxDate'] = fusionTaxableLine['ns:TaxDate'] ? fusionTaxableLine['ns:TaxDate'] : this.fusionRequest.taxableHeader['ns:TaxDate'];
-        detailTaxLine['ns:TaxDetermineDate'] = fusionTaxableLine['ns:TaxDate'] ? fusionTaxableLine['ns:TaxDate'] : this.fusionRequest.taxableHeader['ns:TaxDate'];
+        detailTaxLine['ns:TrxDate'] =  avalaraTransactionLine.taxDate;
+        detailTaxLine['ns:TaxDate'] = avalaraTransactionLine.taxDate;
+        detailTaxLine['ns:TaxDetermineDate'] =  avalaraTransactionLine.taxDate;
 
         detailTaxLine['ns:TaxRate'] = _.toNumber(avalaraTransactionLineDetail.rate) * 100;
 
