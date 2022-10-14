@@ -11,7 +11,7 @@ const extension: SdkExtension = {
   description: 'Oracle Fusion Tax Partner API Extension',
   longDescription: 'Oracle Fusion Tax Partner API Extension',
   version: packageJson.version,
-  platformVersion: packageJson.dependencies['@appknit-project/common-frameworks'],
+  platformVersion: packageJson.dependencies['@appknit-project/appknit-platform-sdk-v2'],
   releaseChanges: 'Created extension',
   flowFunctions,
   graphFunctions: {},
