@@ -1,7 +1,7 @@
+import { SdkExtension } from '@appknit-project/appknit-platform-sdk-v2';
 import * as packageJson from '../package.json';
-import { SdkExtension } from '@appknit-project/common-frameworks';
-import * as expressionFunctions from './expression-functions'
-import * as flowFunctions from './flow-functions'
+import * as expressionFunctions from './expression-functions';
+import * as flowFunctions from './flow-functions';
 
 const extension: SdkExtension = {
   name: 'oracleFusion',
@@ -14,7 +14,7 @@ const extension: SdkExtension = {
   platformVersion: packageJson.dependencies['@appknit-project/common-frameworks'],
   releaseChanges: 'Created extension',
   flowFunctions,
-  graphFunctions :{},
+  graphFunctions: {},
   expressionFunctions,
 };
 
