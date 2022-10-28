@@ -122,4 +122,16 @@ export class FieldMappingService {
         }
     }
 
+    public itemHSNCodeMapping = (application, isIndTransaction: boolean, itemcode, hsnCodeData) => {
+        let returnValue = '';
+            if (application == 'AR' && isIndTransaction) {
+                for(const hsnCodeDataItem of hsnCodeData){
+                    if(hsnCodeDataItem.ITEM_NUMBER == itemcode){
+                        returnValue = hsnCodeDataItem.HSN_CODE
+                        break;
+                    }
+                }
+            }
+        return returnValue;
+    }
 }

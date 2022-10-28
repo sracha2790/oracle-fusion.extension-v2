@@ -58,3 +58,14 @@ export const resolveAvalaraParametersMappingJS = async (context: SdkExpressionFu
     additionalData,
   );
 };
+
+export const itemHSNCodeMappingJS = async (context: SdkExpressionFunctionArgument): Promise<any> => {
+  const [application, isIndTransaction, itemcode, hsnCodeData] = context.functionArguments;
+  const fieldMappingService = new FieldMappingService();
+  return fieldMappingService.itemHSNCodeMapping(
+    application,
+    isIndTransaction,
+    itemcode,
+    hsnCodeData,
+  );
+};
