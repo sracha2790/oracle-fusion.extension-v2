@@ -9,7 +9,9 @@ import { Transaction, TransactionWithTransactionLines } from '../../src/models/a
 import { DetailTaxLine } from '../../src/models/oracle/DetailTaxLines';
 import { TaxableLinesWithDetailTaxLines } from '../../src/models/oracle/TaxableLines';
 import { TransactionLinesWithTransactionLineDetails } from '../../src/models/avalara/avalara-response/TransactionLine';
-import { jurisTypeEnum, TransactionLineDetail } from '../../src/models/avalara/avalara-response/TransactionLineDetail';
+import { jurisTypeEnum, taxTypeEnum, TransactionLineDetail } from '../../src/models/avalara/avalara-response/TransactionLineDetail';
+import { TransactionTypeEnums } from "../../src/models/avalara/TransactionTypes";
+import { boolean } from 'joi';
 export class ResponseBuilderService {
   private jurisDataMapper: JurisDataMapper;
   private configurationCodesService: ConfigurationCodesService;
@@ -18,6 +20,7 @@ export class ResponseBuilderService {
   constructor(
     private sdk: AppknitSDK | AppknitGraphSDK,
     private avalaraTransaction: TransactionWithTransactionLines,
+    // private avalaraTransaction: Transaction,
     private fusionRequest: {
       taxableHeader: TaxableHeaderWithLines;
     },
@@ -136,6 +139,8 @@ export class ResponseBuilderService {
   async createP2PResponse(vbtTaxAmtDetails: Record<string, any>) {
     const detailTaxLines = [];
     let VendorLineHandledFlag = false;
+    let isReverseCharge = ((this.fusionRequest.taxableHeader['ns:ApplicationShortname'] == 'AP' && this.avalaraTransaction.type == TransactionTypeEnums.ReverseChargeInvoice) || (this.fusionRequest.taxableHeader['ns:ApplicationShortname'] == 'PO' && this.avalaraTransaction.type == TransactionTypeEnums.ReverseChargeOrder));
+
     if (
       this.isUS2US &&
       this.avalaraTransaction.totalTax == 0 &&
@@ -216,6 +221,51 @@ export class ResponseBuilderService {
             avalaraTransactionLineDetail,
           );
         }
+
+        if (this.isIntl) {
+          if (isReverseCharge && this.fusionRequest.taxableHeader['ns:ApplicationShortname'] == 'AP' && avalaraTransactionLineDetail.taxType == taxTypeEnum.Input) {
+            detailTaxLine['ns:TaxAmt'] = avalaraTransactionLineDetail.taxCalculated * -1;
+            detailTaxLine['ns:UnroundedTaxAmt'] = avalaraTransactionLineDetail.taxCalculated * -1;
+            detailTaxLine['ns:TaxAmtTaxCurr'] = avalaraTransactionLineDetail.taxCalculated * -1;
+          }
+
+          await this.jurisDataMapper.addJurisDataForIntl(
+            detailTaxLine,
+            matchingFusionTaxableLine,
+            avalaraTransactionLine,
+            avalaraTransactionLineDetail,
+          );
+
+          if (avalaraTransactionLineDetail.jurisType == jurisTypeEnum.CNT) {
+            if (isReverseCharge && this.fusionRequest.taxableHeader['ns:ApplicationShortname'] == 'AP') {
+              if (avalaraTransactionLineDetail.taxType == taxTypeEnum.Output) {
+                detailTaxLine['ns:Tax'] = detailTaxLine['ns:Tax'].replace("INPUT", "OUTPUT");
+                detailTaxLine['ns:TaxRateCode'] = detailTaxLine['ns:TaxRateCode'].replace("INPUT", "OUTPUT");
+                detailTaxLine['ns:TaxRegimeCode'] = detailTaxLine['ns:TaxRegimeCode'].replace("INPUT", "OUTPUT");
+                detailTaxLine['ns:ProviderRecRate'] = 0;
+                detailTaxLine['ns:ProviderRecRateCode'] = '';
+                detailTaxLine['ns:SelfAssessedFlag'] = 'N';
+              }
+            }
+          }
+          detailTaxLine['ns:Char1'] = avalaraTransactionLine.vatCode;
+
+          for (const avalaraTransactionInvoiceMessage of this.avalaraTransaction.invoiceMessages) {
+
+            for (const avalaraTransactionInvoiceMessageLineNumber of avalaraTransactionInvoiceMessage.lineNumbers) {
+
+              if (avalaraTransactionLine.lineNumber == avalaraTransactionInvoiceMessageLineNumber) {
+                if (!detailTaxLine['ns:LegalJustificationText1'] || detailTaxLine['ns:LegalJustificationText1'].length < 1 || detailTaxLine['ns:LegalJustificationText1'] == '') {
+                  detailTaxLine['ns:LegalJustificationText1'] = avalaraTransactionInvoiceMessage.content;
+                } else if (!detailTaxLine['ns:LegalJustificationText2'] || detailTaxLine['ns:LegalJustificationText2'].length < 1 || detailTaxLine['ns:LegalJustificationText2'] == '') {
+                  detailTaxLine['ns:LegalJustificationText2'] = avalaraTransactionInvoiceMessage.content;
+                } else {
+                  break;
+                }
+              }
+            }
+          }
+        }
         this.addToDetailTaxLinesCollection(detailTaxLines, detailTaxLine);
       }
     }
@@ -292,11 +342,11 @@ export class ResponseBuilderService {
       );
       existingMatchingDetailTaxLine['ns:TaxAmtTaxCurr'] = _.toString(
         _.toNumber(existingMatchingDetailTaxLine['ns:TaxAmtTaxCurr']) +
-          _.toNumber(detailTaxLineToInsert['ns:TaxAmtTaxCurr']),
+        _.toNumber(detailTaxLineToInsert['ns:TaxAmtTaxCurr']),
       );
       existingMatchingDetailTaxLine['ns:UnroundedTaxAmt'] = _.toString(
         _.toNumber(existingMatchingDetailTaxLine['ns:UnroundedTaxAmt']) +
-          _.toNumber(detailTaxLineToInsert['ns:UnroundedTaxAmt']),
+        _.toNumber(detailTaxLineToInsert['ns:UnroundedTaxAmt']),
       );
       existingMatchingDetailTaxLine['ns:TaxRate'] = _.toString(
         _.toNumber(existingMatchingDetailTaxLine['ns:TaxRate']) + _.toNumber(detailTaxLineToInsert['ns:TaxRate']),
