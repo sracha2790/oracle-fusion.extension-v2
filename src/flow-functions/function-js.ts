@@ -1,6 +1,5 @@
 
-import { AppknitSDK, SdkExecutionError, SdkGenericErrorCodes } from '@appknit-project/appknit-platform-sdk-v2';
-import { AppknitGraphSDK } from '@appknit-project/common-frameworks';
+import { AppknitSDK, SdkExecutionError, SdkGenericErrorCodes, AppknitGraphSDK } from '@appknit-project/appknit-platform-sdk-v2';
 import { AFCResponseBuilderService, ResponseBuilderService } from '../../src/services';
 import { ExtendedFunctionsService } from '../../src/services/extended-functions.service';
 import { TaxProrationService } from '../../src/services/tax-proration.service';
