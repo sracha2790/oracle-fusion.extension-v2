@@ -1,5 +1,4 @@
-import { AppknitSDK } from '@appknit-project/appknit-platform-sdk-v2';
-import { AppknitGraphSDK } from '@appknit-project/common-frameworks';
+import { AppknitSDK, AppknitGraphSDK} from '@appknit-project/appknit-platform-sdk-v2';
 import * as _ from 'lodash';
 import { Helpers } from '../../src/utils/helpers';
 import { getConfigurationCodeValue } from '../../src/expression-functions';
@@ -47,7 +46,7 @@ export class AFCResponseBuilderService {
     ) {
         const detailTaxLines:Array<DetailTaxLine> = [];
         let i = 1; 
-        for (const avalaraTransactionLine of this.avalaraTransaction.itms) {
+        for (const avalaraTransactionLine of this.avalaraTransaction.inv[0].itms) {
             const matchingFusionTaxableLine: TaxableLinesWithDetailTaxLines = Helpers.findMatchingFusionLineForAFCResponseLine(avalaraTransactionLine, this.fusionRequest.taxableHeader.taxableLines);
             for (const avalaraTransactionLineDetail of avalaraTransactionLine.txs) {
                 const detailTaxLine = this.buildAFCFusionDetailTaxLine(
