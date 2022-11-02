@@ -1,16 +1,17 @@
 import { SdkFlowFunctionEntry } from '@appknit-project/appknit-platform-sdk-v2';
 import { ProRateTaxDetailModel } from '../../src/openapimodels/ProRateTaxDetailModel';
 import {
-  addCreditMemoLinesJS,
-  addProratedTaxesAsTaxOverridesJS,
-  checkAndProcessVBTDetailsJS,
-  convertFusionRequestIntoHierarchyJS,
-  mapToFusionForErrorResponseJS,
-  mapToFusionForNoCalculationResponseJS,
-  mapToFusionResponseJS,
-  prepareBatchRequestJS,
-  proRateTaxesJS,
-} from './function-js';
+    addCreditMemoLinesJS,
+    addProratedTaxesAsTaxOverridesJS,
+    checkAndProcessVBTDetailsJS,
+    convertFusionRequestIntoHierarchyJS,
+    mapToFusionAFCResponseJS,
+    mapToFusionForErrorResponseJS,
+    mapToFusionForNoCalculationResponseJS,
+    mapToFusionResponseJS,
+    prepareBatchRequestJS,
+    proRateTaxesJS,
+} from "./function-js";
 
 export const convertFusionRequestIntoHierarchy: SdkFlowFunctionEntry = {
   description: 'Converts the Fusion Request Into Hierarchy',
@@ -214,6 +215,32 @@ export const mapToFusionResponse: SdkFlowFunctionEntry = {
   outputSchema: {
     type: 'object',
   },
+};
+
+export const mapToFusionAFCResponse: SdkFlowFunctionEntry = {
+    description: 'Map to fusion response for AFC', 
+    longDescription: 'Map to fusion response for AFC',
+    inputSchema: {
+        type: 'object',
+        properties: {
+            avalaraTransaction: {
+                type: 'object',
+            },
+            fusionRequest: {
+                type: 'object',
+            },
+            customerProfile: {
+                type: 'object',
+            },
+            currentLegalEntity: {
+                type: 'object',
+            },
+        },
+    },
+    js: mapToFusionAFCResponseJS,
+    outputSchema: {
+        type: 'object',
+    },
 };
 
 export const prepareBatchRequest: SdkFlowFunctionEntry = {

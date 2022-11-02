@@ -1,3 +1,4 @@
+import { AFCCalculateTaxesResponse, AFCLineItemResult } from "src/models/afc/AFCCalculateTaxesResponse";
 import { TransactionLinesWithTransactionLineDetails } from "src/models/avalara/avalara-response/TransactionLine";
 import { DetailTaxLine } from "src/models/oracle/DetailTaxLines";
 import { TaxableLinesWithDetailTaxLines } from "src/models/oracle/TaxableLines";
@@ -23,6 +24,18 @@ export class Helpers {
                 || (!avalaraTransactionLine.originationDocumentId && fusionLine['ns:TrxLineNumber'] == avalaraTransactionLine.lineNumber));
         if (!matchingFusionLine) {
             throw new Error(`No Matching Fusion Line Found for Avalara Response Line: ${avalaraTransactionLine.lineNumber}`);
+        }
+        return matchingFusionLine;
+    }
+
+    static findMatchingFusionLineForAFCResponseLine(avalaraTransactionLine: AFCLineItemResult, fusionTaxableLines:Array<TaxableLinesWithDetailTaxLines>) {
+        const matchingFusionLine = fusionTaxableLines.find(
+            fusionLine =>
+            // @ts-ignore
+                fusionLine['ns:TrxLineId'] == avalaraTransactionLine.ref 
+        ); 
+        if (!matchingFusionLine) {
+            throw new Error(`No Matching Fusion Line Found for Avalara Response Line ${avalaraTransactionLine.ref}`);
         }
         return matchingFusionLine;
     }

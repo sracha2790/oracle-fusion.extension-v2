@@ -1,5 +1,7 @@
-import { AppknitGraphSDK, AppknitSDK } from '@appknit-project/appknit-platform-sdk-v2';
-import { ResponseBuilderService } from '../../src/services';
+
+import { AppknitSDK, SdkExecutionError, SdkGenericErrorCodes } from '@appknit-project/appknit-platform-sdk-v2';
+import { AppknitGraphSDK } from '@appknit-project/common-frameworks';
+import { AFCResponseBuilderService, ResponseBuilderService } from '../../src/services';
 import { ExtendedFunctionsService } from '../../src/services/extended-functions.service';
 import { TaxProrationService } from '../../src/services/tax-proration.service';
 import { RequestService } from '../../src/services/request.service';
@@ -132,6 +134,23 @@ export const mapToFusionResponseJS = async (sdk: AppknitSDK | AppknitGraphSDK, c
 
   return result;
 };
+
+
+export const mapToFusionAFCResponseJS = async (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
+    const {avalaraTransaction, fusionRequest, customerProfile, currentLegalEntity} = configuration;
+    const responseBuilder = new AFCResponseBuilderService(
+        sdk,
+        avalaraTransaction,
+        fusionRequest,
+        customerProfile,
+        currentLegalEntity,
+    );
+    const result = await responseBuilder.createAFCResponse()
+
+    return result; 
+}
+
+//map to fusion for error response specifically for AFC because of different configuration? 
 
 export const prepareBatchRequestJS = async (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
   const { fusionRequest } = configuration;
