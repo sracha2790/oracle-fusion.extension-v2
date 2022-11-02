@@ -1,5 +1,10 @@
-import { SdkExpressionFunctionEntry } from "@appknit-project/common-frameworks";
-import { getConfigurationCodeValueJS, resolveAvalaraParametersMappingJS, resolveFieldValueByFieldMappingJS, resolveUserDefinedFieldValuesJS } from "./function-js";
+import { SdkExpressionFunctionEntry } from '@appknit-project/appknit-platform-sdk-v2';
+import {
+  getConfigurationCodeValueJS,
+  resolveAvalaraParametersMappingJS,
+  resolveFieldValueByFieldMappingJS,
+  resolveUserDefinedFieldValuesJS,
+} from './function-js';
 
 export const getConfigurationCodeValue: SdkExpressionFunctionEntry = {
   description: 'Appknit custom expression funtion to fetch config code values',
