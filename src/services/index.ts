@@ -4,4 +4,5 @@ export * from './field-mapping.service';
 export * from './juris-mapper.service';
 export * from './request.service';
 export * from './response-builder.service';
+export * from './afc-response-builder.service';
 export * from './tax-proration.service';
