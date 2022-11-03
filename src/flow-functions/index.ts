@@ -5,6 +5,7 @@ import {
     addProratedTaxesAsTaxOverridesJS,
     checkAndProcessVBTDetailsJS,
     convertFusionRequestIntoHierarchyJS,
+    mapToFusionAFCErrorResponseJS,
     mapToFusionAFCResponseJS,
     mapToFusionForErrorResponseJS,
     mapToFusionForNoCalculationResponseJS,
@@ -242,6 +243,26 @@ export const mapToFusionAFCResponse: SdkFlowFunctionEntry = {
         type: 'object',
     },
 };
+
+export const mapToFusionAFCErrorResponse: SdkFlowFunctionEntry = {
+    description: 'Map To Fusion For AFC Error Response.',
+    longDescription: 'Map To Fusion For AFC Error Response.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        message: {
+          type: 'string',
+        },
+        fusionRequest: {
+          type: 'object',
+        },
+      },
+    },
+    js: mapToFusionAFCErrorResponseJS,
+    outputSchema: {
+      type: 'object',
+    },
+  };
 
 export const prepareBatchRequest: SdkFlowFunctionEntry = {
   description: 'Prepare Batch Request For Processing.',

@@ -13,6 +13,7 @@ export class AFCResponseBuilderService {
     private jurisDataMapper: JurisDataMapper;
     private configurationCodesService: ConfigurationCodesService;
     private taxApportionmentLineNumber: number;
+    private taxLineNumberMap: Record<string, number> = {};
     constructor(
         private sdk: AppknitSDK | AppknitGraphSDK,
         private avalaraTransaction: AFCCalculateTaxesResponse,
@@ -30,16 +31,20 @@ export class AFCResponseBuilderService {
         );
         this.configurationCodesService = new ConfigurationCodesService(customerProfile?.ATX_CONFIG_CODES || []);
         this.taxApportionmentLineNumber = 0;
-        this.setStartingApportionmentNumber();
+        this.setStartingApportionmentAndTaxLineNumber();
     }
 
-    private setStartingApportionmentNumber() {
+    private setStartingApportionmentAndTaxLineNumber() {
         for (const line of this.fusionRequest.taxableHeader.taxableLines) {
-            for (const detailTaxLine of line.detailTaxLines || []) {
-                    this.taxApportionmentLineNumber++
+          this.taxLineNumberMap[line['ns:TrxLineId']] = 0;
+          for (const detailTaxLine of line.detailTaxLines || []) {
+            if (detailTaxLine['ns:TaxLineNumber'] > this.taxLineNumberMap[line['ns:TrxLineId']]) {
+              this.taxLineNumberMap[line['ns:TrxLineId']] = detailTaxLine['ns:TaxLineNumber'];
             }
+            this.taxApportionmentLineNumber++;
+          }
         }
-    }
+      }
     
     async createAFCResponse(
 
@@ -84,6 +89,7 @@ export class AFCResponseBuilderService {
             existingMatchingDetailTaxLine['ns:TaxRate'] = _.toString(_.toNumber(existingMatchingDetailTaxLine['ns:TaxRate']) + _.toNumber(detailTaxLineToInsert['ns:TaxRate']));
         } else {
             detailTaxLineToInsert['ns:TaxApportionmentLineNumber'] = detailTaxLineToInsert['ns:TaxApportionmentLineNumber'] ? detailTaxLineToInsert['ns:TaxApportionmentLineNumber'] : ++this.taxApportionmentLineNumber;
+            detailTaxLineToInsert['ns:TaxLineNumber'] = detailTaxLineToInsert['ns:TaxLineNumber'] ? detailTaxLineToInsert['ns:TaxLineNumber'] : ++this.taxLineNumberMap[detailTaxLineToInsert['ns:TrxLineId']];
             detailTaxLines.push(detailTaxLineToInsert)
         }
     }
@@ -105,10 +111,9 @@ export class AFCResponseBuilderService {
         detailTaxLine['ns:PlaceOfSupplyTypeCode'] = 'SHIP_TO';
         detailTaxLine['ns:ReportingOnlyFlag'] = 'N';
         detailTaxLine['ns:SelfAssessedFlag'] = 'N';
-        detailTaxLine['ns:Tax'] = 'STATE'; //hardcoded for right now, should be taken from JSON
+        detailTaxLine['ns:Tax'] = avalaraTransactionLineDetail.cat; 
         detailTaxLine['ns:TaxAmt'] = avalaraTransactionLineDetail.tax;
         detailTaxLine['ns:CalTaxAmtTaxCurr'] = avalaraTransactionLineDetail.tax;
-        detailTaxLine['ns:TaxApportionmentLineNumber'] = this.taxApportionmentLineNumber;
         detailTaxLine['ns:TrxLineCurrencyCode'] = fusionTaxableLine['ns:TrxLineCurrencyCode'];
         detailTaxLine['ns:TaxDate'] = fusionTaxableLine['ns:TaxDate'] ? fusionTaxableLine['ns:TaxDate'] : this.fusionRequest.taxableHeader['ns:TrxDate'];
         detailTaxLine['ns:TaxDetermineDate'] = fusionTaxableLine['ns:TrxLineGlDate'] ? fusionTaxableLine['ns:TrxLineGlDate'] : this.fusionRequest.taxableHeader['ns:TrxDate'];
@@ -130,6 +135,30 @@ export class AFCResponseBuilderService {
         detailTaxLine['ns:UnroundedTaxableAmt'] = avalaraTransactionLineDetail.tm; //check this is same as taxable amount??
         return detailTaxLine
     }
+
+
+  async createAFCErrorResponse(message: string) {
+    const detailTaxLines = [];
+    for (const fusionTaxableLine of this.fusionRequest.taxableHeader.taxableLines) {
+      let detailTaxLine: DetailTaxLine = {};
+      detailTaxLine['ns:ErrorMessageTypeFlag'] = 'E';
+      detailTaxLine['ns:ErrorString'] = message;
+      detailTaxLine['ns:ApplicationId'] = fusionTaxableLine['ns:ApplicationId'];
+      detailTaxLine['ns:EntityCode'] = fusionTaxableLine['ns:EntityCode'];
+      detailTaxLine['ns:EventClassCode'] = fusionTaxableLine['ns:EventClassCode'];
+      detailTaxLine['ns:TrxId'] = fusionTaxableLine['ns:TrxId'];
+
+      detailTaxLine['ns:TaxCurrencyCode'] = fusionTaxableLine['ns:TrxLineCurrencyCode'];
+      detailTaxLine['ns:TrxLineId'] = fusionTaxableLine['ns:TrxLineId'];
+      detailTaxLine['ns:TrxLineNumber'] = fusionTaxableLine['ns:TrxLineNumber'];
+      detailTaxLine['ns:TrxLevelType'] = fusionTaxableLine['ns:TrxLevelType'];
+      detailTaxLine['ns:InternalOrganizationId'] = this.fusionRequest.taxableHeader['ns:InternalOrganizationId'];
+      detailTaxLine['ns:LegalEntityId'] = this.fusionRequest.taxableHeader['ns:LegalEntityId'];
+
+      detailTaxLines.push(detailTaxLine);
+    }
+    return detailTaxLines;
+  }
 
 }
 
