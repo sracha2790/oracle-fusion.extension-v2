@@ -149,7 +149,22 @@ export const mapToFusionAFCResponseJS = async (sdk: AppknitSDK | AppknitGraphSDK
     return result; 
 }
 
-//map to fusion for error response specifically for AFC because of different configuration? 
+export const mapToFusionAFCErrorResponseJS = async (
+    sdk: AppknitSDK | AppknitGraphSDK,
+    configuration: any,
+  ): Promise<any> => {
+    const { message, fusionRequest } = configuration;
+    const responseBuilder = new AFCResponseBuilderService(
+      sdk,
+      undefined,
+      fusionRequest,
+      undefined,
+      undefined,
+    );
+    const result = await responseBuilder.createAFCErrorResponse(message);
+  
+    return result;
+  };
 
 export const prepareBatchRequestJS = async (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
   const { fusionRequest } = configuration;
