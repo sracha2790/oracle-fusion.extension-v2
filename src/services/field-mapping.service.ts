@@ -7,7 +7,7 @@ export class FieldMappingService {
     public resolveFieldValueByFieldMapping = (
         fieldName, application, fieldMapping, fusionRequestTaxableHeader: TaxableHeaderWithLines, fusionRequestTaxableLine: TaxableLinesWithDetailTaxLines, additionalData, defaultValue
     ): any => {
-        let additionalDataLine = (additionalData as Array<Record<string, any>>).find(item => {
+        let additionalDataLine = (additionalData as Array<Record<string, any>>)?.find(item => {
             return (item.TRX_ID == fusionRequestTaxableLine['ns:TrxId'] && item.TRX_LINE_ID == fusionRequestTaxableLine['ns:TrxLineId'])
         })
         if (!additionalDataLine) {
@@ -46,7 +46,7 @@ export class FieldMappingService {
     }
 
     public resolveUserDefinedFieldValues = (application, UDFMapping, fusionRequestTaxableHeader: TaxableHeaderWithLines, fusionRequestTaxableLine: TaxableLinesWithDetailTaxLines, additionalData) => {
-        let additionalDataLine = (additionalData as Array<Record<string, any>>).find(item => {
+        let additionalDataLine = (additionalData as Array<Record<string, any>>)?.find(item => {
             return (item.TRX_ID == fusionRequestTaxableLine['ns:TrxId'] && item.TRX_LINE_ID == fusionRequestTaxableLine['ns:TrxLineId'])
         })
         if (!additionalDataLine) {
