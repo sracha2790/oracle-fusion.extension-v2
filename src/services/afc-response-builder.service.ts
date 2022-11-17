@@ -8,10 +8,12 @@ import { TaxableHeaderWithLines } from '../../src/models/oracle/TaxableHeaders';
 import { DetailTaxLine } from '../../src/models/oracle/DetailTaxLines';
 import { TaxableLinesWithDetailTaxLines } from '../../src/models/oracle/TaxableLines';
 import { AFCCalculateTaxesResponse, AFCLineItemResult, AFCTaxesGenerated } from 'src/models/afc/AFCCalculateTaxesResponse';
+import { JurisDataMapperAFC } from './afc-juris-mapper.service';
+import { ConfigurationCodesServiceAFC } from './afc-configuration.service';
 
 export class AFCResponseBuilderService {
-    private jurisDataMapper: JurisDataMapper;
-    private configurationCodesService: ConfigurationCodesService;
+    private jurisDataMapper: JurisDataMapperAFC;
+    private configurationCodesService: ConfigurationCodesServiceAFC;
     private taxApportionmentLineNumber: number;
     private taxLineNumberMap: Record<string, number> = {};
     constructor(
@@ -23,13 +25,13 @@ export class AFCResponseBuilderService {
         private customerProfile: Record<string, any>,
         private currentLegalEntity: Record<string, any>,
     ) {
-        this.jurisDataMapper = new JurisDataMapper(
+        this.jurisDataMapper = new JurisDataMapperAFC(
             sdk,
             customerProfile,
             currentLegalEntity,
             fusionRequest.taxableHeader['ns:ApplicationShortname']
         );
-        this.configurationCodesService = new ConfigurationCodesService(customerProfile?.ATX_CONFIG_CODES || []);
+        this.configurationCodesService = new ConfigurationCodesServiceAFC(customerProfile?.AFC_CONFIG_CODES || []);
         this.taxApportionmentLineNumber = 0;
         this.setStartingApportionmentAndTaxLineNumber();
     }
@@ -55,6 +57,12 @@ export class AFCResponseBuilderService {
             const matchingFusionTaxableLine: TaxableLinesWithDetailTaxLines = Helpers.findMatchingFusionLineForAFCResponseLine(avalaraTransactionLine, this.fusionRequest.taxableHeader.taxableLines);
             for (const avalaraTransactionLineDetail of avalaraTransactionLine.txs) {
                 const detailTaxLine = this.buildAFCFusionDetailTaxLine(
+                    matchingFusionTaxableLine,
+                    avalaraTransactionLine,
+                    avalaraTransactionLineDetail,
+                );
+                await this.jurisDataMapper.addJurisDataforUS2USAFC(
+                    detailTaxLine,
                     matchingFusionTaxableLine,
                     avalaraTransactionLine,
                     avalaraTransactionLineDetail,
@@ -117,12 +125,8 @@ export class AFCResponseBuilderService {
         detailTaxLine['ns:TrxLineCurrencyCode'] = fusionTaxableLine['ns:TrxLineCurrencyCode'];
         detailTaxLine['ns:TaxDate'] = fusionTaxableLine['ns:TaxDate'] ? fusionTaxableLine['ns:TaxDate'] : this.fusionRequest.taxableHeader['ns:TrxDate'];
         detailTaxLine['ns:TaxDetermineDate'] = fusionTaxableLine['ns:TrxLineGlDate'] ? fusionTaxableLine['ns:TrxLineGlDate'] : this.fusionRequest.taxableHeader['ns:TrxDate'];
-        detailTaxLine['ns:TaxJurisdictionCode'] = 'USTJ-ST-0300000' //hardcoded for now, pick up from JSON
         detailTaxLine['ns:TrxLineNumber'] = fusionTaxableLine['ns:TrxLineNumber'];
-        detailTaxLine['ns:TaxRate'] = _.toNumber(avalaraTransactionLineDetail.rate) * 100;
-        detailTaxLine['ns:TaxRateCode'] = 'dynamic'; //hardcoded for now 
-        detailTaxLine['ns:TaxRegimeCode'] = '' //fill in from avalara profile details
-        detailTaxLine['ns:TaxStatusCode'] = ''//from json row
+        detailTaxLine['ns:TaxRate'] = avalaraTransactionLineDetail.rate
         detailTaxLine['ns:CalTaxableAmt'] = fusionTaxableLine['ns:LineAmt'];
         detailTaxLine['ns:TaxableAmtTaxCurr'] = fusionTaxableLine['ns:LineAmt'];
         detailTaxLine['ns:TrxCurrencyCode'] = this.fusionRequest.taxableHeader['ns:TrxCurrencyCode'];
