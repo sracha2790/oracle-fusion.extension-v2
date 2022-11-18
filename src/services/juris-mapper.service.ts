@@ -177,7 +177,7 @@ export class JurisDataMapper {
 
     const query: AdhocQuery = {
       fieldSets: {
-        ATX_JURIS_DATA: '3oZt8K4pbDtFtBJSovmEpL',
+        ATX_JURIS_DATA: 'nm2btNGY8GLZMG9JG2ktWx',
       },
       joins: undefined,
       select: {
