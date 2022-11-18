@@ -66,7 +66,7 @@ export class JurisDataMapperAFC {
 
     const query: AdhocQuery = {
       fieldSets: {
-        AFC_JURIS_DATA: 'dXN5shyjK3ebgDKD7AwAau',
+        AFC_JURIS_DATA: '@NAME:AFC_JURIS_DATA',
       },
       joins: undefined,
       select: {
