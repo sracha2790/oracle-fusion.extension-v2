@@ -11,7 +11,7 @@ export class JurisDataMapperAFC {
     private sdk: AppknitSDK | AppknitGraphSDK,
     private customerProfile: Record<string, any>,
     private currentLegalEntity: Record<string, any>,
-    private application: string, 
+    private application: string,
   ) {
     this.jurisData = [];
   }
@@ -22,11 +22,11 @@ export class JurisDataMapperAFC {
     avalaraTransactionLineDetail: AFCTaxesGenerated,
   ) {
     let queryResults: Record<string, any>;
-    let whereClause: Record<string, any>;
-    whereClause = {
+    // let whereClause: Record<string, any>;
+    const whereClause = {
         AFC_TAX_TYPE: avalaraTransactionLineDetail.tid,
-        AFC_TAX_LEVEL: avalaraTransactionLineDetail.lvl
-    }
+        AFC_TAX_LEVEL: avalaraTransactionLineDetail.lvl,
+    };
 
     await this.findAndAddJurisDataOnDetailsTaxLineAFC(whereClause, detailTaxLine, avalaraTransactionLineDetail);
   }
@@ -49,7 +49,7 @@ export class JurisDataMapperAFC {
             detailTaxLine['ns:TaxRegimeCode'] = regimeCodeAndJurisdiction.taxRegimeCode;
             detailTaxLine['ns:TaxRateCode'] = regimeCodeAndJurisdiction.taxRateCode;
             detailTaxLine['ns:TaxStatusCode'] = regimeCodeAndJurisdiction.taxStatusCode;
-            detailTaxLine['ns:TaxJurisdictionCode'] = regimeCodeAndJurisdiction.taxJurisdictionCode; 
+            detailTaxLine['ns:TaxJurisdictionCode'] = regimeCodeAndJurisdiction.taxJurisdictionCode;
         }
     }
   }
@@ -79,18 +79,9 @@ export class JurisDataMapperAFC {
         AFC_TAX_JURISDICTION_CODE: '@FIELD:AFC_JURIS_DATA.AFC_TAX_JURISDICTION_CODE',
       },
       filter: {
-        '@and': [
-            {
-              '@FIELD:AFC_JURIS_DATA.AFC_TAX_LEVEL': {
-                '@eq': avalaraTransactionLineDetail.lvl
-              }, 
-              '@FIELD:AFC_JURIS_DATA.AFC_TAX_TYPE': {
-                '@eq': avalaraTransactionLineDetail.tid
-              }, 
-            },
-        ]
-      }
-    }
+        '@and': queryFilters,
+      },
+    };
     return query;
     }
 
@@ -100,8 +91,7 @@ export class JurisDataMapperAFC {
     application: string,
     jurisDataResults: Array<Record<string, any>>,
   ): RegimeAndJurisdiction {
-    let result: RegimeAndJurisdiction;
-    result = {
+    const result: RegimeAndJurisdiction = {
         tax: jurisDataResults[0].ATX_TAX_CODE,
         taxRateCode:jurisDataResults[0].AFC_TAX_RATE_CODE,
         taxStatusCode: jurisDataResults[0].AFC_TAX_STATUS_CODE,
