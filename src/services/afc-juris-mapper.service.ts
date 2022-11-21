@@ -76,15 +76,15 @@ export class JurisDataMapperAFC {
         AFC_TAX_LEVEL_DESCRIPTION: '@FIELD:AFC_JURIS_DATA.AFC_TAX_LEVEL_DESCRIPTION',
         AFC_TAX_STATUS_CODE: '@FIELD:AFC_JURIS_DATA.AFC_TAX_STATUS_CODE',
         AFC_TAX_RATE_CODE: '@FIELD:AFC_JURIS_DATA.AFC_TAX_RATE_CODE',
-        AFC_TAX_JURISDICTION_CODE: '@FIELD:AFC_JURIS_DATA.AFC_TAX_JURISDICTION_CODE'
+        AFC_TAX_JURISDICTION_CODE: '@FIELD:AFC_JURIS_DATA.AFC_TAX_JURISDICTION_CODE',
       },
       filter: {
         '@and': [
             {
-              '@FIELD:ATX_JURIS_DATA.AFC_TAX_LEVEL': {
+              '@FIELD:AFC_JURIS_DATA.AFC_TAX_LEVEL': {
                 '@eq': avalaraTransactionLineDetail.lvl
               }, 
-              '@FIELD:ATX_JURIS_DATA.AFC_TAX_TYPE': {
+              '@FIELD:AFC_JURIS_DATA.AFC_TAX_TYPE': {
                 '@eq': avalaraTransactionLineDetail.tid
               }, 
             },
