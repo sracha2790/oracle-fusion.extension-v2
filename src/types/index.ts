@@ -7,3 +7,11 @@ export type RegimeAndJurisdiction = {
     providerRecRate?: number,
     providerRecRateCode?: string,
 }
+
+
+export type RegimeAndJurisdictionAFC = {
+    taxRegimeCode: string,
+    taxRateCode: string,
+    taxStatusCode: string,
+    taxJurisdictionCode: string,
+}
