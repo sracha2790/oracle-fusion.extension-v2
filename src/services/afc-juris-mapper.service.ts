@@ -3,7 +3,7 @@ import _ = require('lodash');
 import { AFCLineItemResult, AFCTaxesGenerated } from 'src/models/afc/AFCCalculateTaxesResponse';
 import { DetailTaxLine } from '../../src/models/oracle/DetailTaxLines';
 import { TaxableLinesWithDetailTaxLines } from '../../src/models/oracle/TaxableLines';
-import { RegimeAndJurisdiction } from '../types';
+import { RegimeAndJurisdiction, RegimeAndJurisdictionAFC } from '../types';
 export class JurisDataMapperAFC {
   private jurisData: Array<Record<string, any>>;
 
@@ -86,18 +86,17 @@ export class JurisDataMapperAFC {
     }
 
 
-
-  private getRegimeAndJurisdictionAFC(
+private getRegimeAndJurisdictionAFC(
     application: string,
     jurisDataResults: Array<Record<string, any>>,
-  ): RegimeAndJurisdiction {
-    const result: RegimeAndJurisdiction = {
-        tax: jurisDataResults[0].ATX_TAX_CODE,
-        taxRateCode:jurisDataResults[0].AFC_TAX_RATE_CODE,
+  ): RegimeAndJurisdictionAFC {
+    let result: RegimeAndJurisdictionAFC;
+    result = {
+        taxRateCode: (this.currentLegalEntity.ATX_JURISDICTION_CODE_PREFIX || '') + jurisDataResults[0].AFC_TAX_RATE_CODE,
         taxStatusCode: jurisDataResults[0].AFC_TAX_STATUS_CODE,
         taxJurisdictionCode:
-            (this.currentLegalEntity.AFC_JURISDICTION_CODE_PREFIX || '') + jurisDataResults[0].AFC_JURISDICTION_CODE,
-        taxRegimeCode: this.currentLegalEntity.AFC_TAX_REGIME_CODE|| '',
+            (this.currentLegalEntity.ATX_JURISDICTION_CODE_PREFIX || '') + jurisDataResults[0].AFC_JURISDICTION_CODE,
+        taxRegimeCode: this.currentLegalEntity.ATX_TAX_REGIME_CODE|| '',
         };
         return result;
     }
