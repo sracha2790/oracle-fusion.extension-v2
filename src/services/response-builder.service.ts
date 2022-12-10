@@ -111,6 +111,14 @@ export class ResponseBuilderService {
             avalaraTransactionLineDetail,
           );
         }
+          if (this.isIntl) {
+            await this.jurisDataMapper.addJurisDataForIntl(
+              detailTaxLine,
+              matchingFusionTaxableLine,
+              avalaraTransactionLine,
+              avalaraTransactionLineDetail,
+            );
+          }
 
         const customerImplementsCustomDutyTax = await getConfigurationCodeValue.js({
           calculableFramework: null,
