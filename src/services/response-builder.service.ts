@@ -111,6 +111,14 @@ export class ResponseBuilderService {
             avalaraTransactionLineDetail,
           );
         }
+          if (this.isIntl) {
+            await this.jurisDataMapper.addJurisDataForIntl(
+              detailTaxLine,
+              matchingFusionTaxableLine,
+              avalaraTransactionLine,
+              avalaraTransactionLineDetail,
+            );
+          }
 
         const customerImplementsCustomDutyTax = await getConfigurationCodeValue.js({
           calculableFramework: null,
@@ -181,6 +189,16 @@ export class ResponseBuilderService {
               detailTaxLine['ns:TaxAmtTaxCurr'] = vbtTaxAmtDetail['taxAmtTaxCurr'];
               detailTaxLine['ns:TaxRate'] = vbtTaxAmtDetail['taxRate'];
             }
+            for (const avalaraTransactionLineDetail of avalaraTransactionLine.details) {
+              if (this.isIntl) {
+                await this.jurisDataMapper.addJurisDataForIntl(
+                  detailTaxLine,
+                  matchingFusionTaxableLine,
+                  avalaraTransactionLine,
+                  avalaraTransactionLineDetail,
+                );
+              }
+            }
             this.addToDetailTaxLinesCollection(detailTaxLines, detailTaxLine);
           }
         }
@@ -250,17 +268,17 @@ export class ResponseBuilderService {
           }
           detailTaxLine['ns:Char1'] = avalaraTransactionLine.vatCode;
 
-          for (const avalaraTransactionInvoiceMessage of this.avalaraTransaction.invoiceMessages) {
-
-            for (const avalaraTransactionInvoiceMessageLineNumber of avalaraTransactionInvoiceMessage.lineNumbers) {
-
-              if (avalaraTransactionLine.lineNumber == avalaraTransactionInvoiceMessageLineNumber) {
-                if (!detailTaxLine['ns:LegalJustificationText1'] || detailTaxLine['ns:LegalJustificationText1'].length < 1 || detailTaxLine['ns:LegalJustificationText1'] == '') {
-                  detailTaxLine['ns:LegalJustificationText1'] = avalaraTransactionInvoiceMessage.content;
-                } else if (!detailTaxLine['ns:LegalJustificationText2'] || detailTaxLine['ns:LegalJustificationText2'].length < 1 || detailTaxLine['ns:LegalJustificationText2'] == '') {
-                  detailTaxLine['ns:LegalJustificationText2'] = avalaraTransactionInvoiceMessage.content;
-                } else {
-                  break;
+          if (this.avalaraTransaction.invoiceMessages) {
+            for (const avalaraTransactionInvoiceMessage of this.avalaraTransaction.invoiceMessages) {
+              for (const avalaraTransactionInvoiceMessageLineNumber of avalaraTransactionInvoiceMessage.lineNumbers) {
+                if (avalaraTransactionLine.lineNumber == avalaraTransactionInvoiceMessageLineNumber) {
+                  if (!detailTaxLine['ns:LegalJustificationText1'] || detailTaxLine['ns:LegalJustificationText1'].length < 1 || detailTaxLine['ns:LegalJustificationText1'] == '') {
+                    detailTaxLine['ns:LegalJustificationText1'] = avalaraTransactionInvoiceMessage.content;
+                  } else if (!detailTaxLine['ns:LegalJustificationText2'] || detailTaxLine['ns:LegalJustificationText2'].length < 1 || detailTaxLine['ns:LegalJustificationText2'] == '') {
+                    detailTaxLine['ns:LegalJustificationText2'] = avalaraTransactionInvoiceMessage.content;
+                  } else {
+                    break;
+                  }
                 }
               }
             }
