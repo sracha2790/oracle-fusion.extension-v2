@@ -1,10 +1,6 @@
 {
   "name": "oracle-fusion.extension-v2",
-<<<<<<< HEAD
   "version": "2.6.4",
-=======
-  "version": "2.6.3",
->>>>>>> 7945f6a394a8b3dc984bb75e8f458c2b2313363b
   "description": "Oracle Fusion Tax Partner API connector",
   "main": "dist/index.js",
   "author": "Prince Kaushal <prince.kaushal@appknit.io>",
