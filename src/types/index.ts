@@ -8,10 +8,3 @@ export type RegimeAndJurisdiction = {
     providerRecRateCode?: string,
 }
 
-
-export type RegimeAndJurisdictionAFC = {
-    taxRegimeCode: string,
-    taxRateCode: string,
-    taxStatusCode: string,
-    taxJurisdictionCode: string,
-}
