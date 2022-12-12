@@ -3,7 +3,7 @@ import _ = require('lodash');
 import { AFCLineItemResult, AFCTaxesGenerated } from 'src/models/afc/AFCCalculateTaxesResponse';
 import { DetailTaxLine } from '../../src/models/oracle/DetailTaxLines';
 import { TaxableLinesWithDetailTaxLines } from '../../src/models/oracle/TaxableLines';
-import { RegimeAndJurisdiction, RegimeAndJurisdictionAFC } from '../types';
+import { RegimeAndJurisdiction } from '../types';
 export class JurisDataMapperAFC {
   private jurisData: Array<Record<string, any>>;
 
@@ -46,6 +46,7 @@ export class JurisDataMapperAFC {
             jurisDataResults
         );
         if (regimeCodeAndJurisdiction) {
+            detailTaxLine['ns:Tax'] = regimeCodeAndJurisdiction.tax; 
             detailTaxLine['ns:TaxRegimeCode'] = regimeCodeAndJurisdiction.taxRegimeCode;
             detailTaxLine['ns:TaxRateCode'] = regimeCodeAndJurisdiction.taxRateCode;
             detailTaxLine['ns:TaxStatusCode'] = regimeCodeAndJurisdiction.taxStatusCode;
@@ -89,13 +90,14 @@ export class JurisDataMapperAFC {
 private getRegimeAndJurisdictionAFC(
     application: string,
     jurisDataResults: Array<Record<string, any>>,
-  ): RegimeAndJurisdictionAFC {
-    let result: RegimeAndJurisdictionAFC;
+  ): RegimeAndJurisdiction {
+    let result: RegimeAndJurisdiction;
     result = {
-        taxRateCode: (this.currentLegalEntity.ATX_JURISDICTION_CODE_PREFIX || '') + jurisDataResults[0].AFC_TAX_RATE_CODE,
+        tax: jurisDataResults[0].AFC_TAX_LEVEL_DESCRIPTION, 
+        taxRateCode: (this.currentLegalEntity.ATX_JURISDICTION_CODE_PREFIX || '') + jurisDataResults[0].AFC_JURISDICTION_CODE, //values for tax rate code and juris code are switched/mislabeled in the DB. will correct this - temp 
         taxStatusCode: jurisDataResults[0].AFC_TAX_STATUS_CODE,
         taxJurisdictionCode:
-            (this.currentLegalEntity.ATX_JURISDICTION_CODE_PREFIX || '') + jurisDataResults[0].AFC_JURISDICTION_CODE,
+            (this.currentLegalEntity.ATX_JURISDICTION_CODE_PREFIX || '') + jurisDataResults[0].AFC_TAX_RATE_CODE,
         taxRegimeCode: this.currentLegalEntity.ATX_TAX_REGIME_CODE|| '',
         };
         return result;

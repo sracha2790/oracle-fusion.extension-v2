@@ -119,7 +119,6 @@ export class AFCResponseBuilderService {
         detailTaxLine['ns:PlaceOfSupplyTypeCode'] = 'SHIP_TO';
         detailTaxLine['ns:ReportingOnlyFlag'] = 'N';
         detailTaxLine['ns:SelfAssessedFlag'] = 'N';
-        detailTaxLine['ns:Tax'] = avalaraTransactionLineDetail.name; 
         detailTaxLine['ns:TaxAmt'] = avalaraTransactionLineDetail.tax;
         detailTaxLine['ns:CalTaxAmtTaxCurr'] = avalaraTransactionLineDetail.tax;
         detailTaxLine['ns:TrxLineCurrencyCode'] = fusionTaxableLine['ns:TrxLineCurrencyCode'];
