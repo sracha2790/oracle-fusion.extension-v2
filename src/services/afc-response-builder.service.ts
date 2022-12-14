@@ -121,6 +121,7 @@ export class AFCResponseBuilderService {
         detailTaxLine['ns:SelfAssessedFlag'] = 'N';
         detailTaxLine['ns:TaxAmt'] = avalaraTransactionLineDetail.tax;
         detailTaxLine['ns:CalTaxAmtTaxCurr'] = avalaraTransactionLineDetail.tax;
+        detailTaxLine['ns:TaxAmtTaxCurr'] = avalaraTransactionLineDetail.tax; 
         detailTaxLine['ns:TrxLineCurrencyCode'] = fusionTaxableLine['ns:TrxLineCurrencyCode'];
         detailTaxLine['ns:TaxDate'] = fusionTaxableLine['ns:TaxDate'] ? fusionTaxableLine['ns:TaxDate'] : this.fusionRequest.taxableHeader['ns:TrxDate'];
         detailTaxLine['ns:TaxDetermineDate'] = fusionTaxableLine['ns:TrxLineGlDate'] ? fusionTaxableLine['ns:TrxLineGlDate'] : this.fusionRequest.taxableHeader['ns:TrxDate'];
