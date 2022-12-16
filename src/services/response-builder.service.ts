@@ -111,14 +111,33 @@ export class ResponseBuilderService {
             avalaraTransactionLineDetail,
           );
         }
-          if (this.isIntl) {
-            await this.jurisDataMapper.addJurisDataForIntl(
-              detailTaxLine,
-              matchingFusionTaxableLine,
-              avalaraTransactionLine,
-              avalaraTransactionLineDetail,
-            );
+        if (this.isIntl) {
+          await this.jurisDataMapper.addJurisDataForIntl(
+            detailTaxLine,
+            matchingFusionTaxableLine,
+            avalaraTransactionLine,
+            avalaraTransactionLineDetail,
+          );
+
+          detailTaxLine['ns:Char1'] = avalaraTransactionLine.vatCode;
+
+          if (this.avalaraTransaction.invoiceMessages) {
+            for (const avalaraTransactionInvoiceMessage of this.avalaraTransaction.invoiceMessages) {
+              for (const avalaraTransactionInvoiceMessageLineNumber of avalaraTransactionInvoiceMessage.lineNumbers) {
+                if (avalaraTransactionLine.lineNumber == avalaraTransactionInvoiceMessageLineNumber) {
+                  if (!detailTaxLine['ns:LegalJustificationText1'] || detailTaxLine['ns:LegalJustificationText1'].length < 1 || detailTaxLine['ns:LegalJustificationText1'] == '') {
+                    detailTaxLine['ns:LegalJustificationText1'] = avalaraTransactionInvoiceMessage.content;
+                  }
+                  else if (!detailTaxLine['ns:LegalJustificationText2'] || detailTaxLine['ns:LegalJustificationText2'].length < 1 || detailTaxLine['ns:LegalJustificationText2'] == '') {
+                    detailTaxLine['ns:LegalJustificationText2'] = avalaraTransactionInvoiceMessage.content;
+                  } else {
+                    break;
+                  }
+                }
+              }
+            }
           }
+        }
 
         const customerImplementsCustomDutyTax = await getConfigurationCodeValue.js({
           calculableFramework: null,
