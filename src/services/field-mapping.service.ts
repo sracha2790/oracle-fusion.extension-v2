@@ -16,7 +16,7 @@ export class FieldMappingService {
         let returnValue = defaultValue;
         for (const fieldMappingItem of fieldMapping) {
             if (fieldMappingItem.ATX_APPLICATION == application && fieldMappingItem.ATX_FIELD == fieldName) {
-                const sortedByPriority = _.sortBy(fieldMappingItem.ATX_FIELD_MAPPING_PRIORITY, [function(o){return Number(o.ATX_PRIORITY);}]);
+                const sortedByPriority = _.sortBy(fieldMappingItem.ATX_FIELD_MAPPING_PRIORITY, [function(o){return _.toNumber(o.ATX_PRIORITY);}]);
                 for (const fieldMappingPriorityItem of sortedByPriority) {
 
                     if (fieldMappingPriorityItem.ATX_FUSION_FIELD_TYPE == 'FFLD') {
