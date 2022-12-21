@@ -49,12 +49,13 @@ export const resolveUserDefinedFieldValuesJS = async (context: SdkExpressionFunc
 };
 
 export const resolveAvalaraParametersMappingJS = async (context: SdkExpressionFunctionArgument): Promise<any> => {
-  const [application, paramMapping, fusionRequestTaxableHeader, additionalData] = context.functionArguments;
+  const [application, paramMapping, fusionRequestTaxableHeader, fusionRequestTaxableLines,additionalData] = context.functionArguments;
   const fieldMappingService = new FieldMappingService();
-  fieldMappingService.resolveAvalaraParametersMapping(
+  return fieldMappingService.resolveAvalaraParametersMapping(
     application,
     paramMapping,
     fusionRequestTaxableHeader,
+    fusionRequestTaxableLines,
     additionalData,
   );
 };

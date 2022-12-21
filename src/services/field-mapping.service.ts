@@ -93,7 +93,7 @@ export class FieldMappingService {
         }
     }
 
-    public resolveAvalaraParametersMapping = (application, paramMapping, fusionRequestTaxableHeader: TaxableHeaderWithLines, additionalData) => {
+    public resolveAvalaraParametersMapping = (application, paramMapping, fusionRequestTaxableHeader: TaxableHeaderWithLines,fusionRequestTaxableLine: TaxableLinesWithDetailTaxLines, additionalData) => {
         const returnValue = [];
         for (const paramMappingItem of paramMapping) {
             if (paramMappingItem.ATX_APPLICATION == application) {
@@ -101,10 +101,16 @@ export class FieldMappingService {
                 const key = paramMappingItem.ATX_FIELD;
                 let value = paramMappingItem.ATX_DEFAULT_VALUE;
                 if (paramMappingItem.ATX_FUSION_FIELD_TYPE == 'FFLD') {
-                    if (fusionRequestTaxableHeader[paramMappingItem.ATX_FUSION_PROP_COLUMN_NAME]) {
-                        value = fusionRequestTaxableHeader[paramMappingItem.ATX_FUSION_PROP_COLUMN_NAME]
+                    if(paramMappingItem.ATX_FUSION_FIELD_LEVEL == 'HDR'){
+                        if (fusionRequestTaxableHeader[paramMappingItem.ATX_FUSION_PROP_COLUMN_NAME]) {
+                            value = fusionRequestTaxableHeader[paramMappingItem.ATX_FUSION_PROP_COLUMN_NAME]
+                    }
+                }else{
+                    if (fusionRequestTaxableLine[paramMappingItem.ATX_FUSION_PROP_COLUMN_NAME]) {
+                        value = fusionRequestTaxableLine[paramMappingItem.ATX_FUSION_PROP_COLUMN_NAME]
                     }
                 }
+            }
 
                 if (value) {
                     returnValue.push({
