@@ -108,7 +108,7 @@ export class FieldMappingService {
                     }
                     else {
                         if (fusionRequestTaxableLine[paramMappingItem.ATX_FUSION_PROP_COLUMN_NAME]) {
-                            value = fusionRequestTaxableLine[paramMappingItem.ATX_FUSION_PROP_COLUMN_NAME];
+                             value = fusionRequestTaxableLine[paramMappingItem.ATX_FUSION_PROP_COLUMN_NAME];
                         }
                     }
                 }
