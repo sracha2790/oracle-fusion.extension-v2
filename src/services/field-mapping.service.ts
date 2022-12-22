@@ -8,8 +8,8 @@ export class FieldMappingService {
         fieldName, application, fieldMapping, fusionRequestTaxableHeader: TaxableHeaderWithLines, fusionRequestTaxableLine: TaxableLinesWithDetailTaxLines, additionalData, defaultValue
     ): any => {
         let additionalDataLine = (additionalData as Array<Record<string, any>>)?.find(item => {
-            return (item.TRX_ID == fusionRequestTaxableLine['ns:TrxId'] && item.TRX_LINE_ID == fusionRequestTaxableLine['ns:TrxLineId'])
-        })
+            return (item.TRX_ID == fusionRequestTaxableLine['ns:TrxId'] && item.TRX_LINE_ID == fusionRequestTaxableLine['ns:TrxLineId']);
+        });
         if (!additionalDataLine) {
             additionalDataLine = {};
         }
@@ -22,20 +22,20 @@ export class FieldMappingService {
                     if (fieldMappingPriorityItem.ATX_FUSION_FIELD_TYPE == 'FFLD') {
                         if (fieldMappingPriorityItem.ATX_FUSION_FIELD_LEVEL == 'HDR') {
                             if (fusionRequestTaxableHeader[fieldMappingPriorityItem.ATX_FUSION_PROP_COLUMN_NAME]) {
-                                returnValue = fusionRequestTaxableHeader[fieldMappingPriorityItem.ATX_FUSION_PROP_COLUMN_NAME]
+                                returnValue = fusionRequestTaxableHeader[fieldMappingPriorityItem.ATX_FUSION_PROP_COLUMN_NAME];
                                 break;
                             }
                         } else {
                             if (fusionRequestTaxableLine[fieldMappingPriorityItem.ATX_FUSION_PROP_COLUMN_NAME]) {
-                                returnValue = fusionRequestTaxableLine[fieldMappingPriorityItem.ATX_FUSION_PROP_COLUMN_NAME]
+                                returnValue = fusionRequestTaxableLine[fieldMappingPriorityItem.ATX_FUSION_PROP_COLUMN_NAME];
                                 break;
                             }
                         }
                     }
 
                     if (fieldMappingPriorityItem.ATX_FUSION_FIELD_TYPE == 'FADD') {
-                        if (additionalData[fieldMappingPriorityItem.ATX_FUSION_PROP_COLUMN_NAME]) {
-                            returnValue = additionalDataLine[fieldMappingPriorityItem.ATX_FUSION_PROP_COLUMN_NAME]
+                        if (additionalDataLine[fieldMappingPriorityItem.ATX_FUSION_PROP_COLUMN_NAME]) {
+                            returnValue = additionalDataLine[fieldMappingPriorityItem.ATX_FUSION_PROP_COLUMN_NAME];
                             break;
                         }
                     }
@@ -43,12 +43,12 @@ export class FieldMappingService {
             }
         }
         return returnValue;
-    }
+    };
 
     public resolveUserDefinedFieldValues = (application, UDFMapping, fusionRequestTaxableHeader: TaxableHeaderWithLines, fusionRequestTaxableLine: TaxableLinesWithDetailTaxLines, additionalData) => {
         let additionalDataLine = (additionalData as Array<Record<string, any>>)?.find(item => {
-            return (item.TRX_ID == fusionRequestTaxableLine['ns:TrxId'] && item.TRX_LINE_ID == fusionRequestTaxableLine['ns:TrxLineId'])
-        })
+            return (item.TRX_ID == fusionRequestTaxableLine['ns:TrxId'] && item.TRX_LINE_ID == fusionRequestTaxableLine['ns:TrxLineId']);
+        });
         if (!additionalDataLine) {
             additionalDataLine = {};
         }
@@ -61,18 +61,18 @@ export class FieldMappingService {
                 if (UDFMappingItem.ATX_FUSION_FIELD_TYPE == 'FFLD') {
                     if (UDFMappingItem.ATX_FUSION_FIELD_LEVEL == 'HDR') {
                         if (fusionRequestTaxableHeader[UDFMappingItem.ATX_FUSION_PROP_COLUMN_NAME]) {
-                            value = fusionRequestTaxableHeader[UDFMappingItem.ATX_FUSION_PROP_COLUMN_NAME]
+                            value = fusionRequestTaxableHeader[UDFMappingItem.ATX_FUSION_PROP_COLUMN_NAME];
                         }
                     } else {
                         if (fusionRequestTaxableLine[UDFMappingItem.ATX_FUSION_PROP_COLUMN_NAME]) {
-                            value = fusionRequestTaxableLine[UDFMappingItem.ATX_FUSION_PROP_COLUMN_NAME]
+                            value = fusionRequestTaxableLine[UDFMappingItem.ATX_FUSION_PROP_COLUMN_NAME];
                         }
                     }
                 }
 
                 if (UDFMappingItem.ATX_FUSION_FIELD_TYPE == 'FADD') {
-                    if (additionalData[UDFMappingItem.ATX_FUSION_PROP_COLUMN_NAME]) {
-                        value = additionalDataLine[UDFMappingItem.ATX_FUSION_PROP_COLUMN_NAME]
+                    if (additionalDataLine[UDFMappingItem.ATX_FUSION_PROP_COLUMN_NAME]) {
+                        value = additionalDataLine[UDFMappingItem.ATX_FUSION_PROP_COLUMN_NAME];
                         continue;
                     }
                 }
@@ -81,7 +81,7 @@ export class FieldMappingService {
                     returnValue.push({
                         name: key,
                         value,
-                    })
+                    });
                 }
 
             }
@@ -89,9 +89,9 @@ export class FieldMappingService {
         if (returnValue.length > 0) {
             return returnValue;
         } else {
-            return undefined
+            return undefined;
         }
-    }
+    };
 
     public resolveAvalaraParametersMapping = (application, paramMapping, fusionRequestTaxableHeader: TaxableHeaderWithLines, additionalData) => {
         const returnValue = [];
@@ -102,7 +102,7 @@ export class FieldMappingService {
                 let value = paramMappingItem.ATX_DEFAULT_VALUE;
                 if (paramMappingItem.ATX_FUSION_FIELD_TYPE == 'FFLD') {
                     if (fusionRequestTaxableHeader[paramMappingItem.ATX_FUSION_PROP_COLUMN_NAME]) {
-                        value = fusionRequestTaxableHeader[paramMappingItem.ATX_FUSION_PROP_COLUMN_NAME]
+                        value = fusionRequestTaxableHeader[paramMappingItem.ATX_FUSION_PROP_COLUMN_NAME];
                     }
                 }
 
@@ -110,7 +110,7 @@ export class FieldMappingService {
                     returnValue.push({
                         name: key,
                         value,
-                    })
+                    });
                 }
 
             }
@@ -118,8 +118,8 @@ export class FieldMappingService {
         if (returnValue.length > 0) {
             return returnValue;
         } else {
-            return undefined
+            return undefined;
         }
-    }
+    };
 
 }
