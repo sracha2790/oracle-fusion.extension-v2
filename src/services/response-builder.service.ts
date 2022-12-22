@@ -81,6 +81,11 @@ export class ResponseBuilderService {
         this.fusionRequest.taxableHeader.taxableLines,
       );
       for (const avalaraTransactionLineDetail of avalaraTransactionLine.details) {
+
+        if(this.isUS2CA && avalaraTransactionLineDetail.country !="CA"){
+          this.isUS2CA=false;
+          this.isUS2US=true;
+        }
         const detailTaxLine = this.buildFusionDetailTaxLine(
           matchingFusionTaxableLine,
           avalaraTransactionLine,
@@ -235,6 +240,12 @@ export class ResponseBuilderService {
         continue;
       }
       for (const avalaraTransactionLineDetail of avalaraTransactionLine.details) {
+
+        if(this.isUS2CA && avalaraTransactionLineDetail.country !="CA"){
+          this.isUS2CA=false;
+          this.isUS2US=true;
+        }
+        
         const detailTaxLine = this.buildFusionDetailTaxLine(
           matchingFusionTaxableLine,
           avalaraTransactionLine,
