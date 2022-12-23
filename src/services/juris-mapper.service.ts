@@ -98,6 +98,26 @@ export class JurisDataMapper {
     await this.findAndAddJurisDataOnDetailsTaxLine(whereClause, detailTaxLine);
   }
 
+  async addJurisDataForIntl(
+    detailTaxLine: DetailTaxLine,
+    matchingFusionTaxableLine: TaxableLinesWithDetailTaxLines,
+    avalaraTransactionLine: TransactionLinesWithTransactionLineDetails,
+    avalaraTransactionLineDetail: TransactionLineDetail,
+  ) {
+    let queryResults: Record<string, any>;
+    let whereClause: Record<string, any>;
+
+    if (avalaraTransactionLineDetail.jurisType == jurisTypeEnum.CNT) {
+      whereClause = {
+        ATX_GEO_SOURCE: 'AVA',
+        ATX_JURISDICTION_TYPE: 'COUNTRY',
+        ATX_REGION: avalaraTransactionLineDetail.region,
+        ATX_COUNTRY: avalaraTransactionLineDetail.country,
+      };
+    }
+    await this.findAndAddJurisDataOnDetailsTaxLine(whereClause, detailTaxLine);
+  }
+
   async addJurisDataForUS2CA(
     detailTaxLine: DetailTaxLine,
     matchingFusionTaxableLine: TaxableLinesWithDetailTaxLines,
@@ -157,7 +177,7 @@ export class JurisDataMapper {
 
     const query: AdhocQuery = {
       fieldSets: {
-        ATX_JURIS_DATA: '3oZt8K4pbDtFtBJSovmEpL',
+        ATX_JURIS_DATA: 'nm2btNGY8GLZMG9JG2ktWx',
       },
       joins: undefined,
       select: {

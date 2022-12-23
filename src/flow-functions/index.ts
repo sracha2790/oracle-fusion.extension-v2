@@ -1,16 +1,18 @@
 import { SdkFlowFunctionEntry } from '@appknit-project/appknit-platform-sdk-v2';
 import { ProRateTaxDetailModel } from '../../src/openapimodels/ProRateTaxDetailModel';
 import {
-  addCreditMemoLinesJS,
-  addProratedTaxesAsTaxOverridesJS,
-  checkAndProcessVBTDetailsJS,
-  convertFusionRequestIntoHierarchyJS,
-  mapToFusionForErrorResponseJS,
-  mapToFusionForNoCalculationResponseJS,
-  mapToFusionResponseJS,
-  prepareBatchRequestJS,
-  proRateTaxesJS,
-} from './function-js';
+    addCreditMemoLinesJS,
+    addProratedTaxesAsTaxOverridesJS,
+    checkAndProcessVBTDetailsJS,
+    convertFusionRequestIntoHierarchyJS,
+    mapToFusionAFCErrorResponseJS,
+    mapToFusionAFCResponseJS,
+    mapToFusionForErrorResponseJS,
+    mapToFusionForNoCalculationResponseJS,
+    mapToFusionResponseJS,
+    prepareBatchRequestJS,
+    proRateTaxesJS,
+} from "./function-js";
 
 export const convertFusionRequestIntoHierarchy: SdkFlowFunctionEntry = {
   description: 'Converts the Fusion Request Into Hierarchy',
@@ -79,36 +81,50 @@ export const proRateTaxes: SdkFlowFunctionEntry = {
   description: 'ProRateTaxCalculation',
   longDescription: 'Calculate ProRate taxes for AP module, return pro-rated tax for each line',
   inputSchema: {
-    type: 'object',
-    properties: {
-      apSelfAssesTaxFlag: {
-        title: 'Self Assess Tax Flag',
-        type: 'string',
+      type: 'object',
+      properties: {
+          apSelfAssesTaxFlag: {
+              title: 'Self Assess Tax Flag',
+              type: 'string',
+          },
+          vendorBilledTax: {
+              title: 'Self Assess Tax Flag',
+              type: 'number',
+          },
+          avalaraTransactionLines: {
+              title: 'Avalara Transaction Lines',
+              type: 'array',
+              items: {
+                  type: 'object'
+              }
+          },
+          apTolerances: {
+              title: 'Tolerance pct and amt',
+              type: 'object',
+          },
+          customerProfile: {
+              title: 'Customer Profile',
+              type: 'object',
+          },
+          isIntlTransaction: {
+              title: 'International Transaction',
+              type: 'boolean'
+          },
+
+          isUS2US: {
+              title: 'is US to US?',
+              type: 'boolean'
+          },
+
       },
-      vendorBilledTax: {
-        title: 'Self Assess Tax Flag',
-        type: 'number',
-      },
-      avalaraTransactionLines: {
-        title: 'Tolerance pct and amt',
-        type: 'array',
-        items: {
-          type: 'object',
-        },
-      },
-      apTolerances: {
-        title: 'Tolerance pct and amt',
-        type: 'number',
-      },
-    },
   },
   js: proRateTaxesJS,
   outputSchema: {
-    type: 'object',
-    items: ProRateTaxDetailModel,
+      type: 'object',
+      items: ProRateTaxDetailModel,
   },
 };
-
+   
 export const addProratedTaxesAsTaxOverrides: SdkFlowFunctionEntry = {
   description: 'Add Pro Rated Taxes on Avalara Document',
   longDescription: 'Add Pro Rated Taxes on Avalara Document',
@@ -215,6 +231,52 @@ export const mapToFusionResponse: SdkFlowFunctionEntry = {
     type: 'object',
   },
 };
+
+export const mapToFusionAFCResponse: SdkFlowFunctionEntry = {
+    description: 'Map to fusion response for AFC', 
+    longDescription: 'Map to fusion response for AFC',
+    inputSchema: {
+        type: 'object',
+        properties: {
+            avalaraTransaction: {
+                type: 'object',
+            },
+            fusionRequest: {
+                type: 'object',
+            },
+            customerProfile: {
+                type: 'object',
+            },
+            currentLegalEntity: {
+                type: 'object',
+            },
+        },
+    },
+    js: mapToFusionAFCResponseJS,
+    outputSchema: {
+        type: 'object',
+    },
+};
+
+export const mapToFusionAFCErrorResponse: SdkFlowFunctionEntry = {
+    description: 'Map To Fusion For AFC Error Response.',
+    longDescription: 'Map To Fusion For AFC Error Response.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        message: {
+          type: 'string',
+        },
+        fusionRequest: {
+          type: 'object',
+        },
+      },
+    },
+    js: mapToFusionAFCErrorResponseJS,
+    outputSchema: {
+      type: 'object',
+    },
+  };
 
 export const prepareBatchRequest: SdkFlowFunctionEntry = {
   description: 'Prepare Batch Request For Processing.',

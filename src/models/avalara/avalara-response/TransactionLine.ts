@@ -47,6 +47,7 @@ export class TransactionLine {
   taxOverrideReason: string;
   taxIncluded: boolean;
   originationDocumentId: string;
+  vatCode: string
 }
 
 export class TransactionLinesWithTransactionLineDetails extends TransactionLine {

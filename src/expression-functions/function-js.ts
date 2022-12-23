@@ -49,23 +49,22 @@ export const resolveUserDefinedFieldValuesJS = async (context: SdkExpressionFunc
 };
 
 export const resolveAvalaraParametersMappingJS = async (context: SdkExpressionFunctionArgument): Promise<any> => {
-  const [application, paramMapping, fusionRequestTaxableHeader, additionalData] = context.functionArguments;
+  const [application, paramMapping, fusionRequestTaxableHeader, fusionRequestTaxableLines,additionalData] = context.functionArguments;
   const fieldMappingService = new FieldMappingService();
-  fieldMappingService.resolveAvalaraParametersMapping(
+  return fieldMappingService.resolveAvalaraParametersMapping(
     application,
     paramMapping,
     fusionRequestTaxableHeader,
+    fusionRequestTaxableLines,
     additionalData,
   );
 };
 
-export const itemHSNCodeMappingJS = async (context: SdkExpressionFunctionArgument): Promise<any> => {
-  const [application, isIndTransaction, itemcode, hsnCodeData] = context.functionArguments;
+export const resolveHsCodebyItemCodeJS = async (context: SdkExpressionFunctionArgument): Promise<any> => {
+  const [mappingitem, additionalData] = context.functionArguments;
   const fieldMappingService = new FieldMappingService();
-  return fieldMappingService.itemHSNCodeMapping(
-    application,
-    isIndTransaction,
-    itemcode,
-    hsnCodeData,
+  return fieldMappingService.resolveHsCodebyItemCode(
+    mappingitem,
+    additionalData,
   );
 };

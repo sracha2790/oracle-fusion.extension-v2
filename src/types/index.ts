@@ -7,3 +7,4 @@ export type RegimeAndJurisdiction = {
     providerRecRate?: number,
     providerRecRateCode?: string,
 }
+

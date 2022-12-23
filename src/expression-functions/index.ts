@@ -4,7 +4,7 @@ import {
   resolveAvalaraParametersMappingJS,
   resolveFieldValueByFieldMappingJS,
   resolveUserDefinedFieldValuesJS,
-  itemHSNCodeMappingJS,
+  resolveHsCodebyItemCodeJS,
 } from './function-js';
 
 export const getConfigurationCodeValue: SdkExpressionFunctionEntry = {
@@ -79,7 +79,7 @@ export const resolveAvalaraParametersMapping: SdkExpressionFunctionEntry = {
   },
 };
 
-export const itemHSNCodeMapping: SdkExpressionFunctionEntry = {
+export const resolveHsCodebyItemCode: SdkExpressionFunctionEntry = {
   description: 'Appknit custom expression function to resolve HSNCODE Mapping',
   inputSchema: {
     type: 'object',
@@ -90,7 +90,7 @@ export const itemHSNCodeMapping: SdkExpressionFunctionEntry = {
       },
     },
   },
-  js: itemHSNCodeMappingJS,
+  js: resolveHsCodebyItemCodeJS,
   outputSchema: {
     title: 'Result',
     type: 'string',
