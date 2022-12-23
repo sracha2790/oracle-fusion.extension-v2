@@ -1,40 +1,264 @@
 import _ = require("lodash");
-import { TransactionLinesWithTransactionLineDetails } from "src/models/avalara/avalara-response/TransactionLine";
+import { ConfigurationCodesService } from "./configuration.service";
 
 export class TaxProrationService {
-  public prorateTaxes(apSelfAssesTaxFlag: string, vendorBilledTax, avalaraTransactionLines: Array<TransactionLinesWithTransactionLineDetails>, tolerancePct, toleranceAmt) {
-    let result = {};
+  prorateTaxes(apSelfAssesTaxFlag: string, vendorBilledTax: number, avalaraTaxLines: Array<Record<string, any>>, tolerancePct, toleranceAmt, customerProfile: Record<string, any>, isIntlTransaction: boolean, isUS2US: boolean) {
+    let proRateTaxDet = {};
 
-    let taxOverrides: Record<string, any> = {};
-    // let taxOverrideDetails = [];
-    let vbtTaxAmtDetails: Record<string, any> = {};
+    let overRides = new Map();
+    let vbtTaxAmtDetails = new Map();
 
-    result['ReturnOnlyVbtLines'] = false;
-    result['taxOverrides'] = taxOverrides;
-    result['vbtTaxAmtDetails'] = vbtTaxAmtDetails;
-    // result['taxOverrideDetails'] = taxOverrideDetails;
+    proRateTaxDet['ReturnOnlyVbtLines'] = false;
+    proRateTaxDet['overRides'] = overRides;
+    proRateTaxDet['vbtTaxAmtDetails'] = vbtTaxAmtDetails;
 
-    if (apSelfAssesTaxFlag != 'Y') {
-      result['ReturnOnlyVbtLines'] = true;
-      for (const avalaraTransactionLine of avalaraTransactionLines) {
-        taxOverrides[avalaraTransactionLine.lineNumber] = avalaraTransactionLine.taxCalculated;
-        let taxDet = {};
-        taxDet['lineNumber'] = avalaraTransactionLine.lineNumber;
-        taxDet['override'] = avalaraTransactionLine.taxCalculated;
-        taxDet['taxRate'] = _.round(_.sumBy(avalaraTransactionLine.details, function(detail:Record<string, any>) { return detail.rate; }) * 100, 2);
-        // taxDet['taxDetails'] = avalaraTransactionLine.taxDetails;
-        taxDet['taxAmtTaxCurr'] = avalaraTransactionLine.tax;
-        taxDet['unroundedTaxAmt'] = avalaraTransactionLine.tax;
-        taxDet['ReturnVbtLineOnly'] = true; // will return vbt lines only
-        vbtTaxAmtDetails[avalaraTransactionLine.lineNumber] = taxDet;
-      }
-      return result;
+    if (isIntlTransaction) {
+      return this.proRateTaxIntl(avalaraTaxLines, vendorBilledTax, tolerancePct, toleranceAmt, isIntlTransaction);
     }
 
-    let tlSize = avalaraTransactionLines.length;
+    if (isUS2US) {
+      if (apSelfAssesTaxFlag != 'Y') {
+        let overRidesNoSelfAssess = new Map();
+        proRateTaxDet['ReturnOnlyVbtLines'] = true;
+        for (const aoTl of avalaraTaxLines) {
+          let taxDet = {};
 
-    // console.log('TaxLines size : ' + tlSize)
+          // overRidesNoSelfAssess.set(aoTl.lineNumber, aoTl.taxCalculated);
+          overRides.set(aoTl.lineNumber, aoTl.taxCalculated);
+          // taxDet['lineNumber'] = aoTl.lineNumber;
+          // taxDet['override'] = aoTl.taxCalculated;
+          taxDet['taxRate'] = _.sumBy(aoTl.details, function (detail: Record<string, any>) { return detail.rate; }) * 100;
+          taxDet['taxAmt'] = aoTl.tax;
+          taxDet['taxAmtTaxCurr'] = aoTl.tax;
+          taxDet['unroundedTaxAmt'] = aoTl.tax;
+          taxDet['taxDetails'] = aoTl.details;
+          taxDet['ReturnVbtLineOnly'] = true; // will return vbt lines only
 
+          vbtTaxAmtDetails.set(aoTl.lineNumber, taxDet);
+        }
+        return proRateTaxDet;
+      }
+    }
+    let configurationCodesService = new ConfigurationCodesService(customerProfile.ATX_CONFIG_CODES);
+    let tlSize = avalaraTaxLines.length;
+    let linesWithTaxAmount = 0;
+    let totalTaxPercent = 0;
+    let totalTaxCalculated = 0;
+    let runningProrateVBTTotal = 0;
+    let prevRunningProrateVBTTotal = 0;
+    let totalTaxable = 0;
+    let prorateVBTNotRounded = 0;
+    let balance = 0;
+    let prorateVBT = 0;
+    let finalProrateAmount = 0;
+    let exactVBT = false;
+
+    //boolean
+    let withinTolerance = false;
+    let correctVBTForOC = (configurationCodesService.getCodeValue("CORRECT_VBT_FOR_OC") == 'Y');
+    let vendorTax = vendorBilledTax;
+    // Can remove this and pass total taxable and totalTaxCalculated from doc level
+
+    for (let idx = 0; idx < tlSize; idx++) {
+      let tl = avalaraTaxLines[idx];
+
+      totalTaxPercent = totalTaxPercent + _.sumBy(tl.details, function (detail: Record<string, any>) { return detail.rate; });
+      totalTaxCalculated = totalTaxCalculated + tl.taxCalculated;
+      totalTaxable = totalTaxable + tl.taxableAmount;
+      if (tl.Tax != 0) {
+        linesWithTaxAmount = linesWithTaxAmount + 1;
+      }
+      // avalaraTaxLines.push(tl);
+
+    }
+    if (totalTaxCalculated == 0) {
+      totalTaxCalculated = 1;
+    }
+    if (totalTaxPercent == 0) {
+      totalTaxPercent = 1;
+    }
+    withinTolerance = this.isVBTDiffWithinTolerance(vendorTax, totalTaxCalculated, tolerancePct, toleranceAmt);
+
+    // check whether the vendortax was exact
+    exactVBT = (vendorTax == totalTaxCalculated);
+    // super.getAvtxLog().addDebugMessage("D", this.className, "Total tax percent " + totalTaxPercent.toString());
+    tlSize = avalaraTaxLines.length;
+    let lineWithTaxAmountRunning = 0;
+    for (let idx = 0; idx < tlSize; idx++) {
+      let tl = avalaraTaxLines[idx];
+      let taxDet = {};
+
+      const taxRate = _.sumBy(tl.details, function (detail: Record<string, any>) { return detail.rate; });
+      if (tl.tax != 0) {
+        lineWithTaxAmountRunning = lineWithTaxAmountRunning + 1;
+      }
+
+      if (taxRate > 0 || tl.tax == 0) {
+        if (exactVBT) {
+          //need not do the prorate calculation
+          // balance will be 0 here in this if block
+        } else {
+          prevRunningProrateVBTTotal = runningProrateVBTTotal;
+
+          if (tl.tax == 0) {
+            prorateVBTNotRounded = _.round((vendorTax / tlSize), 3);
+          } else {
+            prorateVBTNotRounded = _.round((vendorTax * tl.taxCalculated) / totalTaxCalculated, 3);
+          }
+          prorateVBT = _.round(prorateVBTNotRounded, 2);
+
+          if (lineWithTaxAmountRunning == linesWithTaxAmount) {
+            prorateVBT = vendorTax - prevRunningProrateVBTTotal;
+          }
+
+          runningProrateVBTTotal = runningProrateVBTTotal + prorateVBT;
+
+          if (Math.sign(runningProrateVBTTotal - vendorTax) == 1) {
+            prorateVBT = prorateVBT - (runningProrateVBTTotal - vendorTax);
+          }
+          balance = tl.taxCalculated - prorateVBT;
+        }
+        if (Math.sign(balance) < 0) {
+          if (withinTolerance) {
+            if (lineWithTaxAmountRunning == linesWithTaxAmount) {
+              finalProrateAmount = vendorTax - prevRunningProrateVBTTotal;
+              overRides.set(tl.lineNumber, tl.taxCalculated); //set VBT -- correct one
+              taxDet['taxRate'] = taxRate * 100;
+              taxDet['taxAmt'] = finalProrateAmount;
+              taxDet['taxAmtTaxCurr'] = finalProrateAmount;
+              taxDet['unroundedTaxAmt'] = finalProrateAmount;
+              taxDet['taxDetails'] = tl.details;
+              taxDet['ReturnVbtLineOnly'] = true; // will return vbt lines only
+            } else {
+              overRides.set(tl.lineNumber, tl.taxCalculated); //set VBT -- correct one
+              taxDet['taxRate'] = taxRate * 100;
+              taxDet['taxAmt'] = prorateVBT;
+              taxDet['taxAmtTaxCurr'] = prorateVBT;
+              taxDet['unroundedTaxAmt'] = prorateVBT;
+              taxDet['taxDetails'] = tl.details;
+              taxDet['ReturnVbtLineOnly'] = true; // will return vbt lines only
+            }
+          } else {
+            if (correctVBTForOC) {
+              overRides.set(tl.lineNumber, tl.taxCalculated); //set VBT -- correct one
+              taxDet['taxRate'] = taxRate * 100;
+              taxDet['taxAmt'] = tl.taxCalculated;
+              taxDet['taxAmtTaxCurr'] = tl.taxCalculated;
+              taxDet['unroundedTaxAmt'] = tl.taxCalculated;
+              taxDet['taxDetails'] = tl.details;
+              taxDet['ReturnVbtLineOnly'] = true;
+            } else {
+
+              if (lineWithTaxAmountRunning == linesWithTaxAmount) {
+                finalProrateAmount = vendorTax - prevRunningProrateVBTTotal;
+
+                overRides.set(tl.lineNumber, finalProrateAmount); //set VBT -- correct one
+                taxDet['taxRate'] = taxRate * 100;
+                taxDet['taxAmt'] = finalProrateAmount;
+                taxDet['taxAmtTaxCurr'] = finalProrateAmount;
+                taxDet['unroundedTaxAmt'] = finalProrateAmount;
+                taxDet['taxDetails'] = tl.details;
+                taxDet['ReturnVbtLineOnly'] = true; // will return vbt lines only
+              } else {
+                overRides.set(tl.lineNumber, prorateVBT); //set VBT -- correct one
+                taxDet['taxRate'] = taxRate * 100;
+                taxDet['taxAmt'] = prorateVBT;
+                taxDet['taxAmtTaxCurr'] = prorateVBT;
+                taxDet['unroundedTaxAmt'] = prorateVBT;
+                taxDet['taxDetails'] = tl.details;
+                taxDet['ReturnVbtLineOnly'] = true; // will return vbt lines only
+              }
+            }
+          }
+          vbtTaxAmtDetails.set(tl.lineNumber, taxDet);
+        } else if (Math.sign(balance) > 0) {
+          proRateTaxDet['ReturnOnlyVbtLines'] = false;
+          if (withinTolerance) {
+
+            if (lineWithTaxAmountRunning == linesWithTaxAmount) {
+              finalProrateAmount = vendorTax - prevRunningProrateVBTTotal;
+
+              overRides.set(tl.lineNumber, tl.taxCalculated); //set VBT -- correct one
+              taxDet['taxRate'] = taxRate * 100;
+              taxDet['taxAmt'] = finalProrateAmount;
+              taxDet['taxAmtTaxCurr'] = finalProrateAmount;
+              taxDet['unroundedTaxAmt'] = finalProrateAmount;
+              taxDet['taxDetails'] = tl.details;
+              taxDet['ReturnVbtLineOnly'] = true; // will return vbt lines only
+            } else {
+              overRides.set(tl.lineNumber, tl.taxCalculated); //set VBT -- correct one
+              taxDet['taxRate'] = taxRate * 100;
+              taxDet['taxAmt'] = prorateVBT;
+              taxDet['taxAmtTaxCurr'] = prorateVBT;
+              taxDet['unroundedTaxAmt'] = prorateVBT;
+              taxDet['taxDetails'] = tl.details;
+              taxDet['ReturnVbtLineOnly'] = true; // will return vbt lines only
+            }
+
+          } else {
+            if (lineWithTaxAmountRunning == linesWithTaxAmount) {
+              finalProrateAmount = vendorTax - prevRunningProrateVBTTotal;
+
+              overRides.set(tl.lineNumber, finalProrateAmount); //set VBT -- correct one
+              taxDet['taxRate'] = taxRate * 100;
+              taxDet['taxAmt'] = finalProrateAmount;
+              taxDet['taxAmtTaxCurr'] = finalProrateAmount;
+              taxDet['unroundedTaxAmt'] = finalProrateAmount;
+              taxDet['taxDetails'] = tl.details;
+              taxDet['ReturnVbtLineOnly'] = false; // will return vbt lines only
+            } else {
+              overRides.set(tl.lineNumber, prorateVBT); //set VBT -- correct one
+              taxDet['taxRate'] = taxRate * 100;
+              taxDet['taxAmt'] = prorateVBT;
+              taxDet['taxAmtTaxCurr'] = prorateVBT;
+              taxDet['unroundedTaxAmt'] = prorateVBT;
+              taxDet['taxDetails'] = tl.details;
+              taxDet['ReturnVbtLineOnly'] = false; // will return vbt lines only
+            }
+          }
+          vbtTaxAmtDetails.set(tl.lineNumber, taxDet);
+        } else {
+          proRateTaxDet['ReturnOnlyVbtLines'] = true;
+
+          overRides.set(tl.lineNumber, tl.taxCalculated); // setting correct VBT
+          taxDet['taxRate'] = taxRate * 100;
+          taxDet['taxAmt'] = tl.taxCalculated;
+          taxDet['taxAmtTaxCurr'] = tl.taxCalculated;
+          taxDet['unroundedTaxAmt'] = tl.taxCalculated;
+          taxDet['taxDetails'] = tl.details;
+          taxDet['ReturnVbtLineOnly'] = true;
+          vbtTaxAmtDetails.set(tl.lineNumber, taxDet);
+        }
+      } else {
+
+      }
+    }
+
+    if (isUS2US) {
+      if (configurationCodesService.getCodeValue("AP_SELF_ASSESS_TAX") == 'Y' && configurationCodesService.getCodeValue("BLOCK_AP_SELF_ASSESS_RESP") == 'Y') {
+        let vbtTaxDetailsSize = vbtTaxAmtDetails.size;
+        for (let idx = 0; idx < vbtTaxDetailsSize; idx++) {
+          for (let vbtDetails of Array.from(vbtTaxAmtDetails.values())) {
+            vbtDetails['ReturnVbtLineOnly'] = true;
+          }
+        }
+      }
+    }
+    return proRateTaxDet;
+  }
+  proRateTaxIntl(avalaraTaxLines, vendorBilledTax, tolerancePct, toleranceAmt, isIntlTransaction) {
+
+    let proRateTaxDet = {};
+
+    let overRides = new Map();
+    let vbtTaxAmtDetails = new Map();
+
+    proRateTaxDet['ReturnOnlyVbtLines'] = false;
+    proRateTaxDet['overRides'] = overRides;
+    proRateTaxDet['vbtTaxAmtDetails'] = vbtTaxAmtDetails;
+
+    let tlSize = avalaraTaxLines.length;
+    let totalTaxPercent = 0;
     let totalTaxCalculated = 0;
     let runningProrateVBTTotal = 0;
     let prevRunningProrateVBTTotal = 0;
@@ -46,145 +270,242 @@ export class TaxProrationService {
     let exactVBT = false;
     //boolean
     let withinTolerance = false;
-
+    let correctVBTForOC = false;
     let vendorTax = vendorBilledTax;
+
     // Can remove this and pass total taxable and totalTaxCalculated from doc level
     for (let idx = 0; idx < tlSize; idx++) {
-      let tl = avalaraTransactionLines[idx];
-      // totalTaxPercent = totalTaxPercent.add(tl.rate());
+      let tl = avalaraTaxLines[idx];
+
+      totalTaxPercent = totalTaxPercent + _.sumBy(tl.details, function (detail: Record<string, any>) { return detail.rate; });
       totalTaxCalculated = totalTaxCalculated + tl.taxCalculated;
       totalTaxable = totalTaxable + tl.taxableAmount;
-    }
-    if (totalTaxable == 0) {
-      totalTaxable = 1;
-    }
 
-    exactVBT = vendorTax == totalTaxCalculated;
-
+      //avalaraTaxLines.push(tl);
+    }
     if (totalTaxCalculated == 0) {
       totalTaxCalculated = 1;
     }
 
-    withinTolerance = this.isVBTDiffWithinTolerance(vendorTax, totalTaxCalculated, tolerancePct, toleranceAmt);
-    // console.log('vbtWithinTolerance : ' + withinTolerance)
-
-    // check whether the vendortax was exact
-    // super.getAvtxLog().addDebugMessage("D", this.className, "Total tax percent " + totalTaxPercent.toString());
-    for (let i = 0; i < tlSize; i++) {
-      let avalaraTransactionLine = avalaraTransactionLines[i];
-      // console.log('Line : ' + tl.lineNumber + ', Rate : ' + tl.rate)
-      let taxDet = {};
-      // Most scenarios will need taxCalculated to be set as override, so set it here and reset it when differ
-      taxDet['override'] = avalaraTransactionLine.taxCalculated;
-      taxDet['lineNumber'] = avalaraTransactionLine.lineNumber;
-      // taxOverrideDetails.push(taxDet);
-      // if (tl.rate > 0) {
-      // let taxRate = 0;
-      const taxRate = _.round(_.sumBy(avalaraTransactionLine.details, function(detail:Record<string, any>) { return detail.rate; }), 2)
-
-      if (exactVBT) {
-        //need not do the prorate calculation
-        // balance will be 0 here in this if block
-      } else {
-        prevRunningProrateVBTTotal = runningProrateVBTTotal;
-        prorateVBT = _.round((vendorTax * avalaraTransactionLine.taxCalculated) / totalTaxCalculated, 2);
-        // prorateVBT = prorateVBTNotRounded.setScale(2, BigDecimal.ROUND_HALF_UP);
-        runningProrateVBTTotal =  _.round(runningProrateVBTTotal + prorateVBT, 2);
-        if (runningProrateVBTTotal - vendorTax > 0) {
-          prorateVBT =  _.round(prorateVBT - runningProrateVBTTotal - vendorTax, 2);
-        }
-        balance =  _.round(avalaraTransactionLine.taxCalculated - prorateVBT, 2);
-      }
-      // console.log('Balance : ' + parseFloat(balance))
-      if (balance < 0) {
-        taxOverrides[avalaraTransactionLine.lineNumber] = avalaraTransactionLine.taxCalculated; //set VBT -- correct one
-        taxDet['taxRate'] = taxRate * 100;
-        //taxDet['taxDetails'] = avalaraTransactionLine.taxDetails;
-        taxDet['ReturnVbtLineOnly'] = true; // will return vbt lines only
-        let taxToSet = 0;
-        if (withinTolerance) {
-          taxToSet = avalaraTransactionLine.tax;
-        } else {
-          taxToSet = avalaraTransactionLine.taxCalculated;
-        }
-        taxDet['taxAmt'] = taxToSet;
-        taxDet['taxAmtTaxCurr'] = taxToSet;
-        taxDet['unroundedTaxAmt'] = taxToSet;
-
-        // vbtTaxAmtDetails[avalaraTaxLine.lineNumber] = taxDet;
-      } else if (balance > 0) {
-        result['ReturnOnlyVbtLines'] = false;
-        if (withinTolerance) {
-          taxOverrides[avalaraTransactionLine.lineNumber] = avalaraTransactionLine.taxCalculated; // setting
-          taxDet['taxRate'] =  taxRate * 100;
-          taxDet['taxAmt'] = avalaraTransactionLine.tax;
-          taxDet['taxAmtTaxCurr'] = avalaraTransactionLine.tax;
-          taxDet['unroundedTaxAmt'] = avalaraTransactionLine.tax;
-          taxDet['ReturnVbtLineOnly'] = true;
-        } else {
-          if (i == tlSize - 1) {
-            finalProrateAmount = vendorTax - prevRunningProrateVBTTotal;
-            taxOverrides[avalaraTransactionLine.lineNumber] = finalProrateAmount;
-            taxDet['override'] = finalProrateAmount;
-            taxDet['taxRate'] =  taxRate * 100;
-            taxDet['taxAmt'] = finalProrateAmount;
-            taxDet['taxAmtTaxCurr'] = finalProrateAmount;
-            taxDet['unroundedTaxAmt'] = finalProrateAmount;
-          } else {
-            taxOverrides[avalaraTransactionLine.lineNumber] = prorateVBT;
-            taxDet['override'] = prorateVBT;
-            taxDet['taxRate'] =  taxRate * 100;
-            taxDet['taxAmt'] = prorateVBT;
-            taxDet['taxAmtTaxCurr'] = prorateVBT;
-            taxDet['unroundedTaxAmt'] = prorateVBT;
-          }
-          taxDet['ReturnVbtLineOnly'] = false;
-        }
-        // vbtTaxAmtDetails.set(avalaraTaxLine.lineNumber, taxDet);
-      } else {
-        result['ReturnOnlyVbtLines'] = true;
-        taxOverrides[avalaraTransactionLine.lineNumber] = avalaraTransactionLine.taxCalculated;
-        taxDet['taxRate'] =  taxRate * 100;
-        taxDet['taxAmt'] = avalaraTransactionLine.taxCalculated;
-        taxDet['taxAmtTaxCurr'] = avalaraTransactionLine.taxCalculated;
-        taxDet['unroundedTaxAmt'] = avalaraTransactionLine.taxCalculated;
-        // taxDet['taxDetails']=tl.getTaxDetails();
-        taxDet['ReturnVbtLineOnly'] = true;
-        // vbtTaxAmtDetails.set(avalaraTaxLine.lineNumber, taxDet);
-      }
-      vbtTaxAmtDetails[avalaraTransactionLine.lineNumber] = taxDet;
-      // } else {
-
-      // }
+    if (totalTaxPercent == 0) {
+      totalTaxPercent = 1;
     }
-    // super.getAvtxLog().addDebugMessage("D", this.className, "Prorare Running VBT Total = " + runningProrateVBTTotal.doubleValue());
-    //			for (int idx = 0; idx < tlSize; idx++) {
-    //				TaxLine tl = avaTaxLines.get(idx);
-    //				BigDecimal balance = tl.getTaxCalculated().minus(tl.getTax());
-    //				overRides.set(tl.getNo(), balance);
-    //			}
 
-    return result;
+    withinTolerance = this.isVBTDiffWithinTolerance(vendorTax, totalTaxCalculated, tolerancePct, toleranceAmt);
+    // check whether the vendortax was exact
+    exactVBT = (vendorTax == totalTaxCalculated);
+
+    for (let idx = 0; idx < tlSize; idx++) {
+      let taxDet = {};
+      let tl = avalaraTaxLines[idx];
+      const taxRate = _.sumBy(tl.details, function (detail: Record<string, any>) { return detail.rate; });
+
+      if (taxRate > 0) {
+
+        if (exactVBT) {
+          //need not do the prorate calculation
+          // balance will be 0 here in this if block
+        } else {
+          prevRunningProrateVBTTotal = runningProrateVBTTotal;
+
+          prorateVBTNotRounded = _.round(((vendorTax * tl.taxCalculated) / totalTaxCalculated), 3);
+
+          prorateVBT = _.round(prorateVBTNotRounded, 2);
+
+          runningProrateVBTTotal = runningProrateVBTTotal + prorateVBT;
+
+          if (Math.sign(runningProrateVBTTotal - vendorTax) > 0) {
+            prorateVBT = prorateVBT - (runningProrateVBTTotal - vendorTax);
+          }
+          balance = tl.taxCalculated - prorateVBT;
+        }
+        if (Math.sign(balance) < 0) {
+
+          if (withinTolerance) {
+            if (tlSize == idx + 1) {
+              finalProrateAmount = vendorTax - prevRunningProrateVBTTotal;
+
+              overRides.set(tl.lineNumber, tl.taxCalculated); //set VBT -- correct one
+              taxDet['taxRate'] = taxRate * 100;
+              taxDet['taxAmt'] = finalProrateAmount;
+              taxDet['taxAmtTaxCurr'] = finalProrateAmount;
+              taxDet['unroundedTaxAmt'] = finalProrateAmount;
+              taxDet['taxDetails'] = tl.details;
+              taxDet['ReturnVbtLineOnly'] = true; // will return vbt lines only
+            } else {
+              overRides.set(tl.lineNumber, tl.taxCalculated); //set VBT -- correct one
+              taxDet['taxRate'] = taxRate * 100;
+              taxDet['taxAmt'] = prorateVBT;
+              taxDet['taxAmtTaxCurr'] = prorateVBT;
+              taxDet['unroundedTaxAmt'] = prorateVBT;
+              taxDet['taxDetails'] = tl.details;
+              taxDet['ReturnVbtLineOnly'] = true; // will return vbt lines only
+            }
+          } else {
+            if (correctVBTForOC) {
+              overRides.set(tl.lineNumber, tl.taxCalculated); //set VBT -- correct one
+              taxDet['taxRate'] = taxRate * 100;
+              taxDet['taxAmt'] = tl.taxCalculated;
+              taxDet['taxAmtTaxCurr'] = tl.taxCalculated;
+              taxDet['unroundedTaxAmt'] = tl.taxCalculated;
+              taxDet['taxDetails'] = tl.details;
+              taxDet['ReturnVbtLineOnly'] = true;
+            } else {
+              if (tlSize == idx + 1) {
+
+                finalProrateAmount = vendorTax - prevRunningProrateVBTTotal;
+
+                overRides.set(tl.lineNumber, tl.taxCalculated); //set VBT -- correct one
+                taxDet['taxRate'] = taxRate * 100;
+                taxDet['taxAmt'] = finalProrateAmount;
+                taxDet['taxAmtTaxCurr'] = finalProrateAmount;
+                taxDet['unroundedTaxAmt'] = finalProrateAmount;
+                taxDet['taxDetails'] = tl.details;
+                taxDet['ReturnVbtLineOnly'] = true; // will return vbt lines only
+              } else {
+                overRides.set(tl.lineNumber, tl.taxCalculated); //set VBT -- correct one
+                taxDet['taxRate'] = taxRate * 100;
+                taxDet['taxAmt'] = prorateVBT;
+                taxDet['taxAmtTaxCurr'] = prorateVBT;
+                taxDet['unroundedTaxAmt'] = prorateVBT;
+                taxDet['taxDetails'] = tl.details;
+                taxDet['ReturnVbtLineOnly'] = true; // will return vbt lines only
+              }
+            }
+          }
+          vbtTaxAmtDetails.set(tl.lineNumber, taxDet);
+        } else if (Math.sign(balance) > 0) {
+          proRateTaxDet['ReturnOnlyVbtLines'] = false;
+          if (withinTolerance) {
+
+            if (tlSize == idx + 1) {
+
+              finalProrateAmount = vendorTax - prevRunningProrateVBTTotal;
+
+              overRides.set(tl.lineNumber, tl.taxCalculated); //set VBT -- correct one
+              taxDet['taxRate'] = taxRate * 100;
+              taxDet['taxAmt'] = finalProrateAmount;
+              taxDet['taxAmtTaxCurr'] = finalProrateAmount;
+              taxDet['unroundedTaxAmt'] = finalProrateAmount;
+              taxDet['taxDetails'] = tl.details;
+              taxDet['ReturnVbtLineOnly'] = true; // will return vbt lines only
+            } else {
+              overRides.set(tl.lineNumber, tl.taxCalculated); //set VBT -- correct one
+              taxDet['taxRate'] = taxRate * 100;
+              taxDet['taxAmt'] = prorateVBT;
+              taxDet['taxAmtTaxCurr'] = prorateVBT;
+              taxDet['unroundedTaxAmt'] = prorateVBT;
+              taxDet['taxDetails'] = tl.details;
+              taxDet['ReturnVbtLineOnly'] = true; // will return vbt lines only
+            }
+
+          } else {
+            if (tlSize == idx + 1) {
+
+              finalProrateAmount = vendorTax - prevRunningProrateVBTTotal;
+
+              overRides.set(tl.lineNumber, tl.taxCalculated); //set VBT -- correct one
+              taxDet['taxRate'] = taxRate * 100;
+              taxDet['taxAmt'] = finalProrateAmount;
+              taxDet['taxAmtTaxCurr'] = finalProrateAmount;
+              taxDet['unroundedTaxAmt'] = finalProrateAmount;
+              taxDet['taxDetails'] = tl.details;
+              taxDet['ReturnVbtLineOnly'] = false; // will return vbt lines only
+            } else {
+              overRides.set(tl.lineNumber, tl.taxCalculated); //set VBT -- correct one
+              taxDet['taxRate'] = taxRate * 100;
+              taxDet['taxAmt'] = prorateVBT;
+              taxDet['taxAmtTaxCurr'] = prorateVBT;
+              taxDet['unroundedTaxAmt'] = prorateVBT;
+              taxDet['taxDetails'] = tl.details;
+              taxDet['ReturnVbtLineOnly'] = false; // will return vbt lines only
+            }
+          }
+          vbtTaxAmtDetails.set(tl.lineNumber, taxDet);
+        } else {
+          proRateTaxDet['ReturnOnlyVbtLines'] = true;
+
+          overRides.set(tl.lineNumber, tl.taxCalculated); // setting correct VBT
+          taxDet['taxRate'] = taxRate * 100;
+          taxDet['taxAmt'] = tl.taxCalculated;
+          taxDet['taxAmtTaxCurr'] = tl.taxCalculated;
+          taxDet['unroundedTaxAmt'] = tl.taxCalculated;
+          taxDet['taxDetails'] = tl.details;
+          taxDet['ReturnVbtLineOnly'] = true;
+
+          vbtTaxAmtDetails.set(tl.lineNumber, taxDet);
+        }
+      }
+    }
+
+    if (isIntlTransaction) {
+
+      let vbtTaxDetailsSize = vbtTaxAmtDetails.size;
+      for (let idx = 0; idx < vbtTaxDetailsSize; idx++) {
+        for (let vbtDetails of Array.from(vbtTaxAmtDetails.values())) {
+          vbtDetails['ReturnVbtLineOnly'] = true;
+        }
+      }
+    }
+    return proRateTaxDet;
   }
-
   isVBTDiffWithinTolerance(vendorBilledTax, calculatedTax, tolerancePct, toleranceAmt) {
+    let parResult = "ZERO";
+    let calculatedAmt = 0;
+    let calculatedPct = 0;
+
     if (vendorBilledTax == 0) {
+      parResult = "ZERO";
       return false;
     }
     if (toleranceAmt == 0 && tolerancePct == 0) {
       return false;
     }
-    if (vendorBilledTax == calculatedTax) {
-      return true;
-    }
-    let taxDiff = calculatedTax - vendorBilledTax;
-    let baseVal = calculatedTax == 0 ? 1 : calculatedTax;
-    let pctDiff = taxDiff / baseVal;
-    let within = true;
-    if (pctDiff > tolerancePct || taxDiff > toleranceAmt) {
-      within = false;
+    let localTaxDifference = _.round(Math.abs(calculatedTax - vendorBilledTax), 2);
+    let localActualTax = calculatedTax == 0 ? 1 : _.round(calculatedTax, 2);
+
+
+    if (Math.sign(vendorBilledTax - calculatedTax) == 1) {
+      calculatedPct = _.round(_.divide(localTaxDifference, localActualTax), 3) * 100;
+      if (tolerancePct != 0) {
+        if (calculatedPct != tolerancePct) {
+          parResult = "OVERCHARGE";
+        } else {
+          parResult = "CORRECT";
+        }
+      }
+      if ((tolerancePct == 0 || parResult == "OVERCHARGE") && (toleranceAmt != 0)) {
+        if (Math.sign(localTaxDifference - toleranceAmt) == 1) {
+          parResult = "OVERCHARGE";
+        } else {
+          parResult = "CORRECT";
+        }
+      }
+
     }
 
-    return within;
+    if (Math.sign(vendorBilledTax - calculatedTax) < 0) {
+      calculatedPct = _.round(_.divide(localTaxDifference, localActualTax), 3) * 100;
+      if (tolerancePct != 0) {
+        if (Math.sign(calculatedPct - tolerancePct) > 0) {
+          parResult = "UNDERCHARGE";
+        } else {
+          parResult = "CORRECT";
+        }
+      }
+      if ((tolerancePct == 0 || parResult == "UNDERCHARGE") && (toleranceAmt != 0)) {
+        if (Math.sign(localTaxDifference - toleranceAmt) > 0) {
+          parResult = "UNDERCHARGE";
+        } else {
+          parResult = "CORRECT";
+        }
+      }
+    }
+    if ((vendorBilledTax - calculatedTax) == 0) {
+      parResult = "CORRECT";
+    }
+    if (parResult == "CORRECT") {
+      return true;
+    }
   }
 };

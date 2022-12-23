@@ -81,36 +81,50 @@ export const proRateTaxes: SdkFlowFunctionEntry = {
   description: 'ProRateTaxCalculation',
   longDescription: 'Calculate ProRate taxes for AP module, return pro-rated tax for each line',
   inputSchema: {
-    type: 'object',
-    properties: {
-      apSelfAssesTaxFlag: {
-        title: 'Self Assess Tax Flag',
-        type: 'string',
+      type: 'object',
+      properties: {
+          apSelfAssesTaxFlag: {
+              title: 'Self Assess Tax Flag',
+              type: 'string',
+          },
+          vendorBilledTax: {
+              title: 'Self Assess Tax Flag',
+              type: 'number',
+          },
+          avalaraTransactionLines: {
+              title: 'Avalara Transaction Lines',
+              type: 'array',
+              items: {
+                  type: 'object'
+              }
+          },
+          apTolerances: {
+              title: 'Tolerance pct and amt',
+              type: 'object',
+          },
+          customerProfile: {
+              title: 'Customer Profile',
+              type: 'object',
+          },
+          isIntlTransaction: {
+              title: 'International Transaction',
+              type: 'boolean'
+          },
+
+          isUS2US: {
+              title: 'is US to US?',
+              type: 'boolean'
+          },
+
       },
-      vendorBilledTax: {
-        title: 'Self Assess Tax Flag',
-        type: 'number',
-      },
-      avalaraTransactionLines: {
-        title: 'Tolerance pct and amt',
-        type: 'array',
-        items: {
-          type: 'object',
-        },
-      },
-      apTolerances: {
-        title: 'Tolerance pct and amt',
-        type: 'number',
-      },
-    },
   },
   js: proRateTaxesJS,
   outputSchema: {
-    type: 'object',
-    items: ProRateTaxDetailModel,
+      type: 'object',
+      items: ProRateTaxDetailModel,
   },
 };
-
+   
 export const addProratedTaxesAsTaxOverrides: SdkFlowFunctionEntry = {
   description: 'Add Pro Rated Taxes on Avalara Document',
   longDescription: 'Add Pro Rated Taxes on Avalara Document',
