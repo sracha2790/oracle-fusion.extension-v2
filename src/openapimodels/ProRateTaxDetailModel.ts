@@ -35,10 +35,17 @@ export const ProRateTaxDetailModel: SdkOpenApiSchemaProperty = {
   description: 'TaxOverrideModel',
   type: 'object',
   properties: {
-    taxOverrideDetails: {
-      type: 'array',
-      description: 'Tax override details by line',
-      items: TaxOverrideDetailsModel,
+    ReturnOnlyVbtLines: {
+      type: 'boolean',
+      description: 'Return Only Vbt Lines',
+    },
+    overRides: {
+      type: 'object',
+      description: 'over Rides',
+    },
+    vbtTaxAmtDetails: {
+      type: 'object',
+      description: 'vbt Tax Amt Details',
     },
   },
 };

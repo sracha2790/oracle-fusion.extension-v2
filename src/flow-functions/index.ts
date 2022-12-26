@@ -121,6 +121,7 @@ export const proRateTaxes: SdkFlowFunctionEntry = {
   js: proRateTaxesJS,
   outputSchema: {
       type: 'object',
+      items: ProRateTaxDetailModel,
   },
 };
    
