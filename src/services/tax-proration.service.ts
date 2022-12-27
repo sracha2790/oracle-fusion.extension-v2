@@ -4,9 +4,8 @@ import { ConfigurationCodesService } from "./configuration.service";
 export class TaxProrationService {
   prorateTaxes(apSelfAssesTaxFlag: string, vendorBilledTax: number, avalaraTaxLines: Array<Record<string, any>>, tolerancePct, toleranceAmt, customerProfile: Record<string, any>, isIntlTransaction: boolean, isUS2US: boolean) {
     let proRateTaxDet = {};
-
-    let overRides = new Map();
-    let vbtTaxAmtDetails = new Map();
+    let overRides = {};
+    let vbtTaxAmtDetails = {};
 
     proRateTaxDet['ReturnOnlyVbtLines'] = false;
     proRateTaxDet['overRides'] = overRides;
@@ -24,7 +23,7 @@ export class TaxProrationService {
           let taxDet = {};
 
           // overRidesNoSelfAssess.set(aoTl.lineNumber, aoTl.taxCalculated);
-          overRides.set(aoTl.lineNumber, aoTl.taxCalculated);
+          overRides[aoTl.lineNumber]= aoTl.taxCalculated;
           // taxDet['lineNumber'] = aoTl.lineNumber;
           // taxDet['override'] = aoTl.taxCalculated;
           taxDet['taxRate'] = _.sumBy(aoTl.details, function (detail: Record<string, any>) { return detail.rate; }) * 100;
@@ -34,7 +33,7 @@ export class TaxProrationService {
           taxDet['taxDetails'] = aoTl.details;
           taxDet['ReturnVbtLineOnly'] = true; // will return vbt lines only
 
-          vbtTaxAmtDetails.set(aoTl.lineNumber, taxDet);
+          vbtTaxAmtDetails[aoTl.lineNumber]=taxDet;
         }
         return proRateTaxDet;
       }
@@ -122,7 +121,7 @@ export class TaxProrationService {
           if (withinTolerance) {
             if (lineWithTaxAmountRunning == linesWithTaxAmount) {
               finalProrateAmount = vendorTax - prevRunningProrateVBTTotal;
-              overRides.set(tl.lineNumber, tl.taxCalculated); //set VBT -- correct one
+              overRides[tl.lineNumber]= tl.taxCalculated; //set VBT -- correct one
               taxDet['taxRate'] = taxRate * 100;
               taxDet['taxAmt'] = finalProrateAmount;
               taxDet['taxAmtTaxCurr'] = finalProrateAmount;
@@ -130,7 +129,7 @@ export class TaxProrationService {
               taxDet['taxDetails'] = tl.details;
               taxDet['ReturnVbtLineOnly'] = true; // will return vbt lines only
             } else {
-              overRides.set(tl.lineNumber, tl.taxCalculated); //set VBT -- correct one
+              overRides[tl.lineNumber]= tl.taxCalculated; //set VBT -- correct one
               taxDet['taxRate'] = taxRate * 100;
               taxDet['taxAmt'] = prorateVBT;
               taxDet['taxAmtTaxCurr'] = prorateVBT;
@@ -140,7 +139,7 @@ export class TaxProrationService {
             }
           } else {
             if (correctVBTForOC) {
-              overRides.set(tl.lineNumber, tl.taxCalculated); //set VBT -- correct one
+              overRides[tl.lineNumber]=tl.taxCalculated; //set VBT -- correct one
               taxDet['taxRate'] = taxRate * 100;
               taxDet['taxAmt'] = tl.taxCalculated;
               taxDet['taxAmtTaxCurr'] = tl.taxCalculated;
@@ -152,7 +151,7 @@ export class TaxProrationService {
               if (lineWithTaxAmountRunning == linesWithTaxAmount) {
                 finalProrateAmount = vendorTax - prevRunningProrateVBTTotal;
 
-                overRides.set(tl.lineNumber, finalProrateAmount); //set VBT -- correct one
+                overRides[tl.lineNumber]=finalProrateAmount; //set VBT -- correct one
                 taxDet['taxRate'] = taxRate * 100;
                 taxDet['taxAmt'] = finalProrateAmount;
                 taxDet['taxAmtTaxCurr'] = finalProrateAmount;
@@ -160,7 +159,7 @@ export class TaxProrationService {
                 taxDet['taxDetails'] = tl.details;
                 taxDet['ReturnVbtLineOnly'] = true; // will return vbt lines only
               } else {
-                overRides.set(tl.lineNumber, prorateVBT); //set VBT -- correct one
+                overRides[tl.lineNumber]= prorateVBT; //set VBT -- correct one
                 taxDet['taxRate'] = taxRate * 100;
                 taxDet['taxAmt'] = prorateVBT;
                 taxDet['taxAmtTaxCurr'] = prorateVBT;
@@ -170,7 +169,7 @@ export class TaxProrationService {
               }
             }
           }
-          vbtTaxAmtDetails.set(tl.lineNumber, taxDet);
+          vbtTaxAmtDetails[tl.lineNumber]= taxDet;
         } else if (Math.sign(balance) > 0) {
           proRateTaxDet['ReturnOnlyVbtLines'] = false;
           if (withinTolerance) {
@@ -178,7 +177,7 @@ export class TaxProrationService {
             if (lineWithTaxAmountRunning == linesWithTaxAmount) {
               finalProrateAmount = vendorTax - prevRunningProrateVBTTotal;
 
-              overRides.set(tl.lineNumber, tl.taxCalculated); //set VBT -- correct one
+              overRides[tl.lineNumber]= tl.taxCalculated; //set VBT -- correct one
               taxDet['taxRate'] = taxRate * 100;
               taxDet['taxAmt'] = finalProrateAmount;
               taxDet['taxAmtTaxCurr'] = finalProrateAmount;
@@ -186,7 +185,7 @@ export class TaxProrationService {
               taxDet['taxDetails'] = tl.details;
               taxDet['ReturnVbtLineOnly'] = true; // will return vbt lines only
             } else {
-              overRides.set(tl.lineNumber, tl.taxCalculated); //set VBT -- correct one
+              overRides[tl.lineNumber]= tl.taxCalculated; //set VBT -- correct one
               taxDet['taxRate'] = taxRate * 100;
               taxDet['taxAmt'] = prorateVBT;
               taxDet['taxAmtTaxCurr'] = prorateVBT;
@@ -199,7 +198,7 @@ export class TaxProrationService {
             if (lineWithTaxAmountRunning == linesWithTaxAmount) {
               finalProrateAmount = vendorTax - prevRunningProrateVBTTotal;
 
-              overRides.set(tl.lineNumber, finalProrateAmount); //set VBT -- correct one
+              overRides[tl.lineNumber]= finalProrateAmount; //set VBT -- correct one
               taxDet['taxRate'] = taxRate * 100;
               taxDet['taxAmt'] = finalProrateAmount;
               taxDet['taxAmtTaxCurr'] = finalProrateAmount;
@@ -207,7 +206,7 @@ export class TaxProrationService {
               taxDet['taxDetails'] = tl.details;
               taxDet['ReturnVbtLineOnly'] = false; // will return vbt lines only
             } else {
-              overRides.set(tl.lineNumber, prorateVBT); //set VBT -- correct one
+              overRides[tl.lineNumber]= prorateVBT; //set VBT -- correct one
               taxDet['taxRate'] = taxRate * 100;
               taxDet['taxAmt'] = prorateVBT;
               taxDet['taxAmtTaxCurr'] = prorateVBT;
@@ -216,18 +215,18 @@ export class TaxProrationService {
               taxDet['ReturnVbtLineOnly'] = false; // will return vbt lines only
             }
           }
-          vbtTaxAmtDetails.set(tl.lineNumber, taxDet);
+          vbtTaxAmtDetails[tl.lineNumber]=taxDet;
         } else {
           proRateTaxDet['ReturnOnlyVbtLines'] = true;
 
-          overRides.set(tl.lineNumber, tl.taxCalculated); // setting correct VBT
+          overRides[tl.lineNumber]= tl.taxCalculated; // setting correct VBT
           taxDet['taxRate'] = taxRate * 100;
           taxDet['taxAmt'] = tl.taxCalculated;
           taxDet['taxAmtTaxCurr'] = tl.taxCalculated;
           taxDet['unroundedTaxAmt'] = tl.taxCalculated;
           taxDet['taxDetails'] = tl.details;
           taxDet['ReturnVbtLineOnly'] = true;
-          vbtTaxAmtDetails.set(tl.lineNumber, taxDet);
+          vbtTaxAmtDetails[tl.lineNumber]= taxDet;
         }
       } else {
 
@@ -236,9 +235,9 @@ export class TaxProrationService {
 
     if (isUS2US) {
       if (configurationCodesService.getCodeValue("AP_SELF_ASSESS_TAX") == 'Y' && configurationCodesService.getCodeValue("BLOCK_AP_SELF_ASSESS_RESP") == 'Y') {
-        let vbtTaxDetailsSize = vbtTaxAmtDetails.size;
+        let vbtTaxDetailsSize = Object.keys(vbtTaxAmtDetails).length;
         for (let idx = 0; idx < vbtTaxDetailsSize; idx++) {
-          for (let vbtDetails of Array.from(vbtTaxAmtDetails.values())) {
+          for (let vbtDetails of Object.values(vbtTaxAmtDetails)) {
             vbtDetails['ReturnVbtLineOnly'] = true;
           }
         }
