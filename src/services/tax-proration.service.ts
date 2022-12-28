@@ -444,7 +444,7 @@ export class TaxProrationService {
           parResult = 'CORRECT';
         }
       }
-      if ((tolerancePct == 0 || parResult == 'OVERCHARGE') && toleranceAmt != 0) {
+      if ((tolerancePct == 0 || parResult == 'OVERCHARGE') && (toleranceAmt != 0)) {
         if (Math.sign(localTaxDifference - toleranceAmt) == 1) {
           parResult = 'OVERCHARGE';
         } else {
@@ -461,7 +461,7 @@ export class TaxProrationService {
           parResult = 'CORRECT';
         }
       }
-      if ((tolerancePct == 0 || parResult == 'UNDERCHARGE') && toleranceAmt != 0) {
+      if ((tolerancePct == 0 || parResult == 'UNDERCHARGE') && (toleranceAmt != 0)) {
         if (Math.sign(localTaxDifference - toleranceAmt) > 0) {
           parResult = 'UNDERCHARGE';
         } else {
@@ -469,7 +469,7 @@ export class TaxProrationService {
         }
       }
     }
-    if (vendorBilledTax - calculatedTax == 0) {
+    if ((vendorBilledTax - calculatedTax) == 0) {
       parResult = 'CORRECT';
     }
     if (parResult == 'CORRECT') {
