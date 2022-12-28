@@ -17,7 +17,7 @@ export class TaxProrationService {
     proRateTaxDet['ReturnOnlyVbtLines'] = false;
     proRateTaxDet['overRides'] = overRides;
     proRateTaxDet['vbtTaxAmtDetails'] = vbtTaxAmtDetails;
-    console.log('intl:' + isIntlTransaction);
+    // console.log('intl:' + isIntlTransaction);
     if (isIntlTransaction) {
       return this.proRateTaxIntl(avalaraTaxLines, vendorBilledTax, tolerancePct, toleranceAmt, isIntlTransaction);
     }
@@ -62,7 +62,7 @@ export class TaxProrationService {
     let exactVBT = false;
     //boolean
     let withinTolerance = false;
-    let correctVBTForOC = configurationCodesService.getCodeValue('CORRECT_VBT_FOR_OC') == 'Y';
+    let correctVBTForOC = (configurationCodesService.getCodeValue('CORRECT_VBT_FOR_OC') == 'Y');
     let vendorTax = vendorBilledTax;
     // Can remove this and pass total taxable and totalTaxCalculated from doc level
     for (let idx = 0; idx < tlSize; idx++) {
@@ -87,7 +87,7 @@ export class TaxProrationService {
     }
     withinTolerance = this.isVBTDiffWithinTolerance(vendorTax, totalTaxCalculated, tolerancePct, toleranceAmt);
     // check whether the vendortax was exact
-    exactVBT = vendorTax == totalTaxCalculated;
+    exactVBT = (vendorTax == totalTaxCalculated);
     // super.getAvtxLog().addDebugMessage("D", this.className, "Total tax percent " + totalTaxPercent.toString());
     tlSize = avalaraTaxLines.length;
     let lineWithTaxAmountRunning = 0;
@@ -107,7 +107,7 @@ export class TaxProrationService {
         } else {
           prevRunningProrateVBTTotal = runningProrateVBTTotal;
           if (tl.tax == 0) {
-            prorateVBTNotRounded = _.round(vendorTax / tlSize, 3);
+            prorateVBTNotRounded = _.round((vendorTax / tlSize), 3);
           } else {
             prorateVBTNotRounded = _.round((vendorTax * tl.taxCalculated) / totalTaxCalculated, 3);
           }
@@ -285,7 +285,7 @@ export class TaxProrationService {
     }
     withinTolerance = this.isVBTDiffWithinTolerance(vendorTax, totalTaxCalculated, tolerancePct, toleranceAmt);
     // check whether the vendortax was exact
-    exactVBT = vendorTax == totalTaxCalculated;
+    exactVBT = (vendorTax == totalTaxCalculated);
     for (let idx = 0; idx < tlSize; idx++) {
       let taxDet = {};
       let tl = avalaraTaxLines[idx];
@@ -298,7 +298,7 @@ export class TaxProrationService {
           // balance will be 0 here in this if block
         } else {
           prevRunningProrateVBTTotal = runningProrateVBTTotal;
-          prorateVBTNotRounded = _.round((vendorTax * tl.taxCalculated) / totalTaxCalculated, 3);
+          prorateVBTNotRounded = _.round(((vendorTax * tl.taxCalculated) / totalTaxCalculated), 3);
           prorateVBT = _.round(prorateVBTNotRounded, 2);
           runningProrateVBTTotal = runningProrateVBTTotal + prorateVBT;
           if (Math.sign(runningProrateVBTTotal - vendorTax) > 0) {
