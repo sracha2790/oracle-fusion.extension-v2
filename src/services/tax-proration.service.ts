@@ -8,7 +8,7 @@ export class TaxProrationService {
     tolerancePct,
     toleranceAmt,
     customerProfile: Record<string, any>,
-    isIntlTransaction: boolean,
+    isInternational: boolean,
     isUS2US: boolean,
   ) {
     let proRateTaxDet = {};
@@ -17,9 +17,9 @@ export class TaxProrationService {
     proRateTaxDet['ReturnOnlyVbtLines'] = false;
     proRateTaxDet['overRides'] = overRides;
     proRateTaxDet['vbtTaxAmtDetails'] = vbtTaxAmtDetails;
-    // console.log('intl:' + isIntlTransaction);
-    if (isIntlTransaction) {
-      return this.proRateTaxIntl(avalaraTaxLines, vendorBilledTax, tolerancePct, toleranceAmt, isIntlTransaction);
+    // console.log('intl:' + isInternational);
+    if (isInternational) {
+      return this.proRateTaxIntl(avalaraTaxLines, vendorBilledTax, tolerancePct, toleranceAmt, isInternational);
     }
     if (isUS2US) {
       if (apSelfAssesTaxFlag != 'Y') {
@@ -251,7 +251,7 @@ export class TaxProrationService {
     return proRateTaxDet;
   }
 
-  proRateTaxIntl(avalaraTaxLines, vendorBilledTax, tolerancePct, toleranceAmt, isIntlTransaction) {
+  proRateTaxIntl(avalaraTaxLines, vendorBilledTax, tolerancePct, toleranceAmt, isInternational) {
     let proRateTaxDet = {};
     let overRides = {};
     let vbtTaxAmtDetails = {};
@@ -420,7 +420,7 @@ export class TaxProrationService {
         }
       }
     }
-    if (isIntlTransaction) {
+    if (isInternational) {
       let vbtTaxDetailsSize = Object.keys(vbtTaxAmtDetails).length;
       for (let idx = 0; idx < vbtTaxDetailsSize; idx++) {
         for (let vbtDetails of Object.values(vbtTaxAmtDetails)) {
