@@ -337,6 +337,7 @@ export class ResponseBuilderService {
     detailTaxLine['ns:EventClassCode'] = fusionTaxableLine['ns:EventClassCode'];
     detailTaxLine['ns:TrxId'] = fusionTaxableLine['ns:TrxId'];
     detailTaxLine['ns:TrxLineId'] = fusionTaxableLine['ns:TrxLineId'];
+    detailTaxLine['ns:LinesDetFactorId'] = fusionTaxableLine['ns:LinesDetFactorId'];
     return detailTaxLine;
   }
 
@@ -353,6 +354,7 @@ export class ResponseBuilderService {
 
       detailTaxLine['ns:TaxCurrencyCode'] = fusionTaxableLine['ns:TrxLineCurrencyCode'];
       detailTaxLine['ns:TrxLineId'] = fusionTaxableLine['ns:TrxLineId'];
+      detailTaxLine['ns:LinesDetFactorId'] = fusionTaxableLine['ns:LinesDetFactorId'];
       detailTaxLine['ns:TrxLineNumber'] = fusionTaxableLine['ns:TrxLineNumber'];
       detailTaxLine['ns:TrxLevelType'] = fusionTaxableLine['ns:TrxLevelType'];
       detailTaxLine['ns:InternalOrganizationId'] = this.fusionRequest.taxableHeader['ns:InternalOrganizationId'];
