@@ -14,8 +14,8 @@ export class ExtendedFunctionsService {
         glDate: Date,
     ) {
         for (const avalaraRequestLineItem of avalaraCreateTransactionModel.lines) {
-            const lineOverrideItem = taxOverrides[avalaraRequestLineItem.number];
-            if (!lineOverrideItem) {
+            const lineOverrideAmount = taxOverrides[avalaraRequestLineItem.number];
+            if (!lineOverrideAmount) {
                 avalaraRequestLineItem.taxOverride = null;
                 continue;
             }
@@ -23,13 +23,13 @@ export class ExtendedFunctionsService {
                 avalaraRequestLineItem.taxOverride = {
                     type: lineItemTaxOverrideTypeEnum.TaxAmount,
                     taxDate: avalaraCreateTransactionModel.date,
-                    taxAmount: lineOverrideItem,
+                    taxAmount: lineOverrideAmount,
                     reason: 'Tax Amount and Tax Date override'
                 }
             } else {
                 avalaraRequestLineItem.taxOverride = {
                     type: lineItemTaxOverrideTypeEnum.TaxAmount,
-                    taxAmount: lineOverrideItem,
+                    taxAmount: lineOverrideAmount,
                     reason: 'To get prorated vendor billed tax amounts for the lines'
                 }
             }

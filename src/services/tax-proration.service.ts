@@ -91,6 +91,7 @@ export class TaxProrationService {
     // super.getAvtxLog().addDebugMessage("D", this.className, "Total tax percent " + totalTaxPercent.toString());
     tlSize = avalaraTaxLines.length;
     let lineWithTaxAmountRunning = 0;
+
     for (let idx = 0; idx < tlSize; idx++) {
       let tl = avalaraTaxLines[idx];
       let taxDet = {};
@@ -98,6 +99,7 @@ export class TaxProrationService {
         return detail.rate;
       });
       if (tl.tax != 0) {
+        //lineswithNonZeroTaxCalculated in its own for loop
         lineWithTaxAmountRunning = lineWithTaxAmountRunning + 1;
       }
       if (taxRate > 0 || tl.tax == 0) {
@@ -105,21 +107,24 @@ export class TaxProrationService {
           //need not do the prorate calculation
           // balance will be 0 here in this if block
         } else {
-          prevRunningProrateVBTTotal = runningProrateVBTTotal;
+          prevRunningProrateVBTTotal = runningProrateVBTTotal; //0 //8.81 //20.01
           if (tl.tax == 0) {
-            prorateVBTNotRounded = _.round((vendorTax / tlSize), 3);
+            prorateVBTNotRounded = _.round((vendorTax / tlSize), 3); //6.667
           } else {
-            prorateVBTNotRounded = _.round((vendorTax * tl.taxCalculated) / totalTaxCalculated, 3);
+            prorateVBTNotRounded = _.round((vendorTax * tl.taxCalculated) / totalTaxCalculated, 3); //8.805 //11.195 
           }
-          prorateVBT = _.round(prorateVBTNotRounded, 2);
+          prorateVBT = _.round(prorateVBTNotRounded, 2); //8.81 //11.20 //6.67
           if (lineWithTaxAmountRunning == linesWithTaxAmount) {
-            prorateVBT = vendorTax - prevRunningProrateVBTTotal;
+            prorateVBT = vendorTax - prevRunningProrateVBTTotal; //-0.01 
           }
-          runningProrateVBTTotal = runningProrateVBTTotal + prorateVBT;
+          runningProrateVBTTotal = runningProrateVBTTotal + prorateVBT; //8.81 //20.01 //20.00
+          if (runningProrateVBTTotal > vendorTax) {
+            runningProrateVBTTotal = vendorTax;
+          } //anagha -debugging 
           if (Math.sign(runningProrateVBTTotal - vendorTax) == 1) {
             prorateVBT = prorateVBT - (runningProrateVBTTotal - vendorTax);
           }
-          balance = tl.taxCalculated - prorateVBT;
+          balance = tl.taxCalculated - prorateVBT; //-1.81 //-0.01 //0 - (-0.01) = +0.01
         }
         if (Math.sign(balance) < 0) {
           if (withinTolerance) {
@@ -176,10 +181,10 @@ export class TaxProrationService {
           proRateTaxDet['ReturnOnlyVbtLines'] = false;
           if (withinTolerance) {
             if (lineWithTaxAmountRunning == linesWithTaxAmount) {
-              finalProrateAmount = vendorTax - prevRunningProrateVBTTotal;
+              finalProrateAmount = vendorTax - prevRunningProrateVBTTotal; //20 - 20.01 = -0.01
               overRides[tl.lineNumber] = _.round(tl.taxCalculated, 2); //set VBT -- correct one
               taxDet['taxRate'] = _.round(taxRate * 100, 2);
-              taxDet['taxAmt'] = _.round(finalProrateAmount, 2);
+              taxDet['taxAmt'] = _.round(finalProrateAmount, 2); //-0.01
               taxDet['taxAmtTaxCurr'] = _.round(finalProrateAmount, 2);
               taxDet['unroundedTaxAmt'] = _.round(finalProrateAmount, 2);
               taxDet['taxDetails'] = tl.details;
@@ -227,7 +232,9 @@ export class TaxProrationService {
         }
       } else {
       }
-    }
+    } // for (let idx = 0; idx < tlSize; idx++)
+
+
     if (isUS2US) {
       if (
         configurationCodesService.getCodeValue('AP_SELF_ASSESS_TAX') == 'Y' &&
@@ -243,6 +250,7 @@ export class TaxProrationService {
     }
     return proRateTaxDet;
   }
+
   proRateTaxIntl(avalaraTaxLines, vendorBilledTax, tolerancePct, toleranceAmt, isIntlTransaction) {
     let proRateTaxDet = {};
     let overRides = {};
