@@ -1,6 +1,10 @@
-
 export enum lineItemTaxOverrideTypeEnum {
-  'None', 'TaxAmount', 'Exemption', 'TaxDate', 'AccruedTaxAmount', 'DeriveTaxable'
+  None = 'None',
+  TaxAmount = 'TaxAmount',
+  Exemption = 'Exemption',
+  TaxDate = 'TaxDate',
+  AccruedTaxAmount = 'AccruedTaxAmount',
+  DeriveTaxable = 'DeriveTaxable',
 }
 
 export class TaxOverride {
