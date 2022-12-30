@@ -187,6 +187,9 @@ export class ResponseBuilderService {
             vbtDetailTaxLine['ns:UnroundedTaxAmt'] = 0;
             vbtDetailTaxLine['ns:TaxAmtTaxCurr'] = 0;
             vbtDetailTaxLine['ns:TaxRate'] = 0;
+            if (line['ns:LinesDetFactorId']) {
+              vbtDetailTaxLine['ns:LinesDetFactorId'] = line['ns:LinesDetFactorId'];
+            }
             this.addToDetailTaxLinesCollection(detailTaxLines, vbtDetailTaxLine);
           });
       }
@@ -212,6 +215,9 @@ export class ResponseBuilderService {
               detailTaxLine['ns:UnroundedTaxAmt'] = vbtTaxAmtDetail['unroundedTaxAmt'];
               detailTaxLine['ns:TaxAmtTaxCurr'] = vbtTaxAmtDetail['taxAmtTaxCurr'];
               detailTaxLine['ns:TaxRate'] = vbtTaxAmtDetail['taxRate'];
+              if (matchingFusionTaxableLine['ns:LinesDetFactorId']) {
+                detailTaxLine['ns:LinesDetFactorId'] = matchingFusionTaxableLine['ns:LinesDetFactorId'];
+              }
             }
             for (const avalaraTransactionLineDetail of avalaraTransactionLine.details) {
               if (this.isIntl) {
