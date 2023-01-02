@@ -145,6 +145,7 @@ export class RequestService {
       taxableLine['ns:TaxDate'] = Helpers.convertYYYYMMDDToIsoDateString(taxableLine['ns:TaxDate']);
       taxableLine['ns:AdjustedDocDate'] = Helpers.convertYYYYMMDDToIsoDateString(taxableLine['ns:AdjustedDocDate']);
       taxableLine['ns:TrxLineGlDate'] = Helpers.convertYYYYMMDDToIsoDateString(taxableLine['ns:TrxLineGlDate']);
+      taxableLine['ns:TrxLineDate'] = Helpers.convertYYYYMMDDToIsoDateString(taxableLine['ns:TrxLineDate']); 
       this.extractAddresses(taxableLine);
     });
     fusionRequest.taxableHeader['ns:TrxDate'] = Helpers.convertYYYYMMDDToIsoDateString( fusionRequest.taxableHeader['ns:TrxDate']);
