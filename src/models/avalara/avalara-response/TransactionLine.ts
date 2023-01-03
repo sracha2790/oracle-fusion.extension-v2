@@ -2,12 +2,16 @@ import { sourcingEnum, TransactionLineDetail } from "./TransactionLineDetail";
 
 
 export enum methodEnum {
-  'Accrual',
-  'Cash'
+  Accrual = 'Accrual',
+  Cash = 'Cash',
 }
 
 export enum taxOverrideTypeEnum {
-  'None', 'TaxAmount', 'Exemption', 'TaxDate', 'AccruedTaxAmount'
+  None = 'None',
+  TaxAmount = 'TaxAmount',
+  Exemption = 'Exemption',
+  TaxDate = 'TaxDate',
+  AccruedTaxAmount = 'AccruedTaxAmount',
 }
 
 export class TransactionLine {

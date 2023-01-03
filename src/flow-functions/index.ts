@@ -106,7 +106,7 @@ export const proRateTaxes: SdkFlowFunctionEntry = {
               title: 'Customer Profile',
               type: 'object',
           },
-          isIntlTransaction: {
+          isInternational: {
               title: 'International Transaction',
               type: 'boolean'
           },

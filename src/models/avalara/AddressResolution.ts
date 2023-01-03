@@ -6,19 +6,20 @@ import { ValidatedAddressInfo } from "./ValidatedAddressInfo";
 
 
 export enum resolutionQualityEnum {
-  'NotCoded',
-  'External',
-  'CountryCentroid',
-  'RegionCentroid',
-  'PartialCentroid',
-  'PostalCentroidGood',
-  'PostalCentroidBetter',
-  'PostalCentroidBest',
-  'Intersection',
-  'Interpolated',
-  'Rooftop',
-  'Constant',
+  NotCoded = 'NotCoded',
+  External = 'External',
+  CountryCentroid = 'CountryCentroid',
+  RegionCentroid = 'RegionCentroid',
+  ParialCentroid = 'PartialCentroid',
+  PostalCentroidGood = 'PostalCentroidGood',
+  PostalCentroidBetter = 'PostalCentroidBetter',
+  PostalCentroidBest = 'PostalCentroidBest',
+  Intersection = 'Intersection',
+  Interpolated = 'Interpolated',
+  Rooftop = 'Rooftop',
+  Constant = 'Constant',
 }
+
 export class AddressResolution {
   address: AddressInfo; 
   validatedAddresses: ValidatedAddressInfo; 

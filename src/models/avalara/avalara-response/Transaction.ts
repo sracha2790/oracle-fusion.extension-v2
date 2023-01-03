@@ -10,7 +10,15 @@ import { TransactionTypeEnums } from "../TransactionTypes";
 import { taxOverrideTypeEnum, TransactionLine, TransactionLinesWithTransactionLineDetails } from "./TransactionLine";
 
 export enum statusEnum {
-  'Temporary', 'Saved', 'Posted', 'Committed', 'Cancelled', 'Adjusted', 'Queued', 'PendingApproval', 'Any'
+  Temporary = 'Temporary',
+  Saved = 'Saved',
+  Posted = 'Posted',
+  Committed = 'Committed',
+  Cancelled = 'Cancelled',
+  Adjusted = 'Adjusted',
+  Queued = 'Queued',
+  PendingApproval = 'PendingApproval',
+  Any = 'Any',
 }
 
 

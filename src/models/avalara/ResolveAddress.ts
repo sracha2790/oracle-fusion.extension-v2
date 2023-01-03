@@ -1,6 +1,6 @@
 export enum textCaseEnum {
-  'Upper', 
-  'Mixed'
+  Upper = 'Upper',
+  Mixed = 'Mixed',
 }
 
 export class ResolveAddress {

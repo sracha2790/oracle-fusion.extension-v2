@@ -6,14 +6,14 @@ import { TransactionTypeEnums } from "../TransactionTypes";
 import { LineItem } from "./LineItem";
 
 export enum serviceModeEnum {
-  'Automatic',
-  'Local',
-  'Remote'
+  Automatic = 'Automatic',
+  Local = 'Local',
+  Remote = 'Remote',
 }
 
 export enum debugLevelEnum {
-  'Normal', 
-  'Diagnostic'
+  Normal = 'Normal',
+  Diagnostic = 'Diagnostic',
 }
 
 export class CreateTransaction {

@@ -1,22 +1,26 @@
 
 
 export enum jurisTypeEnumSummary {
-  'Country', 'State', 'County', 'City', 'Special'
+  Country='Country',
+  State='State',
+  County='County',
+  City='City',
+  Special='Special',
 }
 
 export enum rateTypeEnumSummary{
-    'ReducedA',
-    'ReducedB',
-    'Food',
-    'General',
-    'IncreasedStandard',
-    'LinenRental',
-    'Medical',
-    'Parking',
-    'SuperReduced',
-    'ReducedR',
-    'Standard',
-    'Zero',
+  ReducedA='ReducedA',
+  ReducedB='ReducedB',
+  Food='Food',
+  General='General',
+  IncreasedStandard= 'IncreasedStandard',
+  LinenRental='LinenRental',
+  Medical='Medical',
+  Parking='Parking',
+  SuperReduced='SuperReduced',
+  ReducedR='ReducedR',
+  Standard='Standard',
+  Zero='Zero',
 }
 export class TransactionSummary {
   country: string;

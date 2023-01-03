@@ -1,37 +1,50 @@
-
 export enum jurisTypeEnum {
-  STA ='STA', 
-  CTY= 'CTY', 
-  CIT ='CIT',
-  STJ= 'STJ', 
-  CNT= 'CNT'
+  STA = 'STA',
+  CTY = 'CTY',
+  CIT = 'CIT',
+  STJ = 'STJ',
+  CNT = 'CNT',
 }
 
 export enum nonTaxableTypeEnum {
-  'RateRule', 'RateOverrideRule', 'BaseRule', 'ExemptEntityRule', 'ProductTaxabilityRule', 'NexusRule'
+  RateRule = 'RateRule',
+  RateOverrideRule = 'RateOverrideRule',
+  BaseRule = 'BaseRule',
+  ExemptEntityRule = 'ExemptEntityRule',
+  ProductTaxabilityRule = 'ProductTaxabilityRule',
+  NexusRule = 'NexusRule',
 }
 
 export enum sourcingEnum {
-  'Destination', 'Origin'
+  Destination = 'Destination',
+  Origin = 'Origin',
 }
 
 export enum taxTypeEnum {
-  'ConsumerUse', 'Excise', 'Fee', 'Input', 'Nonrecoverable', 'Output', 'Rental', 'Sales', 'Use'
+  ConsumerUse = 'ConsumerUse',
+  Excise = 'Excise',
+  Fee = 'Fee',
+  Input = 'Input',
+  Nonrecoverable = 'Nonrecoverable',
+  Output = 'Output',
+  Rental = 'Rental',
+  Sales = 'Sales',
+  Use = 'Use',
 }
 
 export enum rateTypeEnum {
-  'ReducedA',
-  'ReducedB',
-  'Food',
-  'General',
-  'IncreasedStandard',
-  'LinenRental',
-  'Medical',
-  'Parking',
-  'SuperReduced',
-  'ReducedR',
-  'Standard',
-  'Zero',
+  ReducedA = 'ReducedA',
+  ReducedB = 'ReducedB',
+  Food = 'Food',
+  General = 'General',
+  IncreasedStandard = 'IncreasedStandard',
+  LinenRental = 'LinenRental',
+  Medical = 'Medical',
+  Parking = 'Parking',
+  SuperReduced = 'SuperReduced',
+  ReducedR = 'ReducedR',
+  Standard = 'Standard',
+  Zero = 'Zero',
 }
 
 export class TransactionLineDetail {
