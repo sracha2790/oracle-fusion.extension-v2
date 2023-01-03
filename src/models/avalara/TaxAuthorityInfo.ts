@@ -1,16 +1,15 @@
 export enum jurisdictionTypeEnum {
-  'Country', 
-  'Composite', 
-  'State', 
-  'County', 
-  'City', 
-  'Special'
+  Country = 'Country',
+  Composite = 'Composite',
+  State = 'State',
+  County = 'County',
+  City = 'City',
+  Special = 'Special',
 }
 
-
 export class TaxAuthorityInfo {
-  avalaraId: string; 
-  jurisdictionName: string; 
-  jurisdictionType: jurisdictionTypeEnum; 
+  avalaraId: string;
+  jurisdictionName: string;
+  jurisdictionType: jurisdictionTypeEnum;
   signatureCode: string;
 }

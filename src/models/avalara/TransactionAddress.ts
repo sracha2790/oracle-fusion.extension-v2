@@ -1,7 +1,7 @@
 export enum boundaryLevelEnum {
-  'Address',
-  'Zip9',
-  'Zip5',
+  Address='Address',
+  Zip9='Zip9',
+  Zip5='Zip5',
 }
 
 export class TransactionAddress {

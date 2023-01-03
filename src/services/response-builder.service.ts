@@ -30,7 +30,7 @@ export class ResponseBuilderService {
     private isCA2CA: boolean,
     private isUS2CA: boolean,
     private isIndia: boolean,
-    private isIntl: boolean,
+    private isInternational: boolean,
   ) {
     this.jurisDataMapper = new JurisDataMapper(
       sdk,
@@ -116,7 +116,7 @@ export class ResponseBuilderService {
             avalaraTransactionLineDetail,
           );
         }
-        if (this.isIntl) {
+        if (this.isInternational) {
           await this.jurisDataMapper.addJurisDataForIntl(
             detailTaxLine,
             matchingFusionTaxableLine,
@@ -220,7 +220,7 @@ export class ResponseBuilderService {
               }
             }
             for (const avalaraTransactionLineDetail of avalaraTransactionLine.details) {
-              if (this.isIntl) {
+              if (this.isInternational) {
                 await this.jurisDataMapper.addJurisDataForIntl(
                   detailTaxLine,
                   matchingFusionTaxableLine,
@@ -276,7 +276,7 @@ export class ResponseBuilderService {
           );
         }
 
-        if (this.isIntl) {
+        if (this.isInternational) {
           if (isReverseCharge && this.fusionRequest.taxableHeader['ns:ApplicationShortname'] == 'AP' && avalaraTransactionLineDetail.taxType == taxTypeEnum.Input) {
             detailTaxLine['ns:TaxAmt'] = avalaraTransactionLineDetail.taxCalculated * -1;
             detailTaxLine['ns:UnroundedTaxAmt'] = avalaraTransactionLineDetail.taxCalculated * -1;
