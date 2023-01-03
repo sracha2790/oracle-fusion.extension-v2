@@ -138,9 +138,9 @@ export class RequestService {
     }
   
   public prepareBatchRequest(fusionRequest: {
-    taxableHeader: Record<string, any>;
-  }): Record<string, any> {
-    fusionRequest.taxableHeader.taxableLines.forEach((taxableLine: Record<string, any>) => {
+    taxableHeader: TaxableHeaderWithLines;
+  }) {
+    fusionRequest.taxableHeader.taxableLines.forEach((taxableLine: TaxableLinesWithDetailTaxLines) => {
       taxableLine['ns:TrxDate'] = Helpers.convertYYYYMMDDToIsoDateString(taxableLine['ns:TrxDate']);
       taxableLine['ns:TaxDate'] = Helpers.convertYYYYMMDDToIsoDateString(taxableLine['ns:TaxDate']);
       taxableLine['ns:AdjustedDocDate'] = Helpers.convertYYYYMMDDToIsoDateString(taxableLine['ns:AdjustedDocDate']);
@@ -148,7 +148,17 @@ export class RequestService {
       taxableLine['ns:TrxLineDate'] = Helpers.convertYYYYMMDDToIsoDateString(taxableLine['ns:TrxLineDate']); 
       this.extractAddresses(taxableLine);
     });
-    fusionRequest.taxableHeader['ns:TrxDate'] = Helpers.convertYYYYMMDDToIsoDateString( fusionRequest.taxableHeader['ns:TrxDate']);
+    for (const taxableLine of fusionRequest.taxableHeader.taxableLines) {
+      for (const detailTaxLines of taxableLine.detailTaxLines) {
+
+        detailTaxLines['ns:TrxDate'] = Helpers.convertYYYYMMDDToIsoDateString(detailTaxLines['ns:TrxDate']);
+        detailTaxLines['ns:TaxDate'] = Helpers.convertYYYYMMDDToIsoDateString(detailTaxLines['ns:TaxDate']);
+        detailTaxLines['ns:TaxCurrencyConversionDate'] = Helpers.convertYYYYMMDDToIsoDateString(detailTaxLines['ns:TaxCurrencyConversionDate']);
+        detailTaxLines['ns:TaxDetermineDate'] = Helpers.convertYYYYMMDDToIsoDateString(detailTaxLines['ns:TaxDetermineDate']);
+
+      }
+    }
+    fusionRequest.taxableHeader['ns:TrxDate'] = Helpers.convertYYYYMMDDToIsoDateString(fusionRequest.taxableHeader['ns:TrxDate']);
     return fusionRequest;
   }
   
