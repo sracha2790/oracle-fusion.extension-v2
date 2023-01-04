@@ -157,7 +157,7 @@ export class JurisDataMapper {
         detailTaxLine['ns:TaxRateCode'] = regimeCodeAndJurisdiction.taxRateCode;
         detailTaxLine['ns:TaxStatusCode'] = regimeCodeAndJurisdiction.taxStatusCode;
         detailTaxLine['ns:TaxJurisdictionCode'] = regimeCodeAndJurisdiction.taxJurisdictionCode;
-        if (_.toNumber(regimeCodeAndJurisdiction.providerRecRate > 0)) {
+        if (_.toNumber(regimeCodeAndJurisdiction.providerRecRate) > 0) {
           detailTaxLine['ns:ProviderRecRate'] = regimeCodeAndJurisdiction.providerRecRate;
           detailTaxLine['ns:ProviderRecRateCode'] = regimeCodeAndJurisdiction.providerRecRateCode;
         }
