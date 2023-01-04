@@ -72,6 +72,24 @@ export class ResponseBuilderService {
   async createO2CResponse() {
     const detailTaxLines: Array<DetailTaxLine> = [];
     let i = 1;
+
+    for (const avalaraTransactionLine of this.avalaraTransaction.lines) {
+      for (const avalaraTransactionLineDetail of avalaraTransactionLine.details) {
+  
+        if(this.isUS2CA && avalaraTransactionLineDetail.country !="CA"){
+          this.isUS2CA=false;
+          this.isUS2US=true;
+          break;
+        }
+        
+        if(this.isUS2US && (avalaraTransactionLineDetail.country !="US" && avalaraTransactionLineDetail.country !="CA" && avalaraTransactionLineDetail.country !="IN")){
+          this.isUS2US=false;
+          this.isInternational=true;
+          break;
+        }
+      }
+    }
+
     for (const avalaraTransactionLine of this.avalaraTransaction.lines) {
       if (Helpers.isCreditMemoAdditionalLine(avalaraTransactionLine)) {
         continue;
@@ -82,10 +100,6 @@ export class ResponseBuilderService {
       );
       for (const avalaraTransactionLineDetail of avalaraTransactionLine.details) {
 
-        if(this.isUS2CA && avalaraTransactionLineDetail.country !="CA"){
-          this.isUS2CA=false;
-          this.isUS2US=true;
-        }
         const detailTaxLine = this.buildFusionDetailTaxLine(
           matchingFusionTaxableLine,
           avalaraTransactionLine,
@@ -173,6 +187,23 @@ export class ResponseBuilderService {
     let VendorLineHandledFlag = false;
     let isReverseCharge = ((this.fusionRequest.taxableHeader['ns:ApplicationShortname'] == 'AP' && this.avalaraTransaction.type == TransactionTypeEnums.ReverseChargeInvoice) || (this.fusionRequest.taxableHeader['ns:ApplicationShortname'] == 'PO' && this.avalaraTransaction.type == TransactionTypeEnums.ReverseChargeOrder));
 
+  for (const avalaraTransactionLine of this.avalaraTransaction.lines) {
+    for (const avalaraTransactionLineDetail of avalaraTransactionLine.details) {
+
+      if(this.isUS2CA && avalaraTransactionLineDetail.country !="CA"){
+        this.isUS2CA=false;
+        this.isUS2US=true;
+        break;
+      }
+      
+      if(this.isUS2US && (avalaraTransactionLineDetail.country !="US" && avalaraTransactionLineDetail.country !="CA" && avalaraTransactionLineDetail.country !="IN")){
+        this.isUS2US=false;
+        this.isInternational=true;
+        break;
+      }
+    }
+  }
+
     if (
       this.isUS2US &&
       this.avalaraTransaction.totalTax == 0 &&
@@ -255,11 +286,6 @@ export class ResponseBuilderService {
 
       for (const avalaraTransactionLineDetail of avalaraTransactionLine.details) {
 
-        if(this.isUS2CA && avalaraTransactionLineDetail.country !="CA"){
-          this.isUS2CA=false;
-          this.isUS2US=true;
-        }
-        
         const detailTaxLine = this.buildFusionDetailTaxLine(
           matchingFusionTaxableLine,
           avalaraTransactionLine,
