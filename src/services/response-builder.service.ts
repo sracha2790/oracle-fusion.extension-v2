@@ -306,8 +306,8 @@ export class ResponseBuilderService {
                 detailTaxLine['ns:TaxRegimeCode'] = detailTaxLine['ns:TaxRegimeCode'].replace("INPUT", "OUTPUT");
                 detailTaxLine['ns:ProviderRecRate'] = 0;
                 detailTaxLine['ns:ProviderRecRateCode'] = '';
-                detailTaxLine['ns:SelfAssessedFlag'] = 'N';
               }
+              detailTaxLine['ns:SelfAssessedFlag'] = 'N';
             }
           }
           detailTaxLine['ns:Char1'] = avalaraTransactionLine.vatCode;
