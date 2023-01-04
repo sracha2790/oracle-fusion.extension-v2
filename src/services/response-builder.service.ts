@@ -245,6 +245,14 @@ export class ResponseBuilderService {
         );
         continue;
       }
+      if (!(isReverseCharge && (this.fusionRequest.taxableHeader['ns:ApplicationShortname'] == 'AP' || this.fusionRequest.taxableHeader['ns:ApplicationShortname'] == 'PO'))) {
+        this.addToDetailTaxLinesCollection(
+          detailTaxLines,
+          this.getNoCalculationDetailTaxLine(matchingFusionTaxableLine),
+        );
+        continue;
+      }
+
       for (const avalaraTransactionLineDetail of avalaraTransactionLine.details) {
 
         if(this.isUS2CA && avalaraTransactionLineDetail.country !="CA"){
