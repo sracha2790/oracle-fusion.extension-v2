@@ -61,12 +61,14 @@ export class AFCResponseBuilderService {
                     avalaraTransactionLine,
                     avalaraTransactionLineDetail,
                 );
-                await this.jurisDataMapper.addJurisDataforUS2USAFC(
-                    detailTaxLine,
-                    matchingFusionTaxableLine,
-                    avalaraTransactionLine,
-                    avalaraTransactionLineDetail,
-                );
+                if (avalaraTransactionLineDetail.tid != 0) {
+                    await this.jurisDataMapper.addJurisDataforUS2USAFC(
+                        detailTaxLine,
+                        matchingFusionTaxableLine,
+                        avalaraTransactionLine,
+                        avalaraTransactionLineDetail,
+                    );
+                }
                 this.addToAFCDetailTaxLinesCollection(detailTaxLines,detailTaxLine)
             }
         }
@@ -110,7 +112,12 @@ export class AFCResponseBuilderService {
         let detailTaxLine: DetailTaxLine = {}; 
         detailTaxLine['ns:ApplicationId'] = fusionTaxableLine['ns:ApplicationId']
         detailTaxLine['ns:EntityCode'] = fusionTaxableLine['ns:EntityCode'];
-        detailTaxLine['ns:ErrorMessageTypeFlag'] = 'S';
+        // detailTaxLine['ns:ErrorMessageTypeFlag'] = 'S';
+        if (avalaraTransactionLineDetail.tid == 0) {
+            detailTaxLine['ns:ErrorMessageTypeFlag'] = 'X';
+        } else {
+            detailTaxLine['ns:ErrorMessageTypeFlag'] = 'S'; 
+        }
         detailTaxLine['ns:EventClassCode'] = fusionTaxableLine['ns:EventClassCode'];
         detailTaxLine['ns:InternalOrganizationId'] = this.fusionRequest.taxableHeader['ns:InternalOrganizationId'];
         detailTaxLine['ns:LegalEntityId'] = this.fusionRequest.taxableHeader['ns:LegalEntityId'];
