@@ -111,7 +111,7 @@ export class JurisDataMapper {
       whereClause = {
         ATX_GEO_SOURCE: 'AVA',
         ATX_JURISDICTION_TYPE: 'COUNTRY',
-        ATX_REGION: avalaraTransactionLineDetail.region,
+        // ATX_REGION: avalaraTransactionLineDetail.region,
         ATX_COUNTRY: avalaraTransactionLineDetail.country,
       };
     }
@@ -177,7 +177,7 @@ export class JurisDataMapper {
 
     const query: AdhocQuery = {
       fieldSets: {
-        ATX_JURIS_DATA: 'nm2btNGY8GLZMG9JG2ktWx',
+        ATX_JURIS_DATA: '@NAME:ATX_JURIS_DATA',
       },
       joins: undefined,
       select: {
