@@ -101,7 +101,7 @@ export class RequestService {
           }
           if (
             mappings.taxableHeader['ns:EventClassCode'] == 'PO_PA' ||
-            mappings.taxableHeader['ns:EventClassCode'] == 'PO_CA' ||
+            mappings.taxableHeader['ns:EventClassCode'] == 'PO_CO' ||
             !line['ns:TrxLineNumber']
           ) {
             line['ns:TrxLineNumber'] = lineNumber;
