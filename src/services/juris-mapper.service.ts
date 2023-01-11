@@ -211,6 +211,11 @@ export class JurisDataMapper {
     let regimeConfigItem: Record<string, any>;
     let jurisData: Record<string, any>;
     if (country != 'US') {
+      if (application == "PO") {
+        application = "AP";
+      } else if (application == "OM") {
+        application = "AR";
+      }
       for (const jurisDataResultsItem of jurisDataResults) {
         regimeConfigItem = (this.customerProfile.ATX_COUNTRIES as Array<Record<string, any>>)
           ?.find(countryItem => countryItem.ATX_COUNTRY == country)
