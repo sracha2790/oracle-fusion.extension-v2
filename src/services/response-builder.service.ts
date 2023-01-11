@@ -269,12 +269,14 @@ export class ResponseBuilderService {
         continue; // was BREAK before ASK KRISHNA
       }
 
-      if (await this.returnNoTaxCalculationForAvaTaxLine(avalaraTransactionLine)) {
-        this.addToDetailTaxLinesCollection(
-          detailTaxLines,
-          this.getNoCalculationDetailTaxLine(matchingFusionTaxableLine),
-        );
-        continue;
+      if (!this.isInternational) {
+        if (await this.returnNoTaxCalculationForAvaTaxLine(avalaraTransactionLine)) {
+          this.addToDetailTaxLinesCollection(
+            detailTaxLines,
+            this.getNoCalculationDetailTaxLine(matchingFusionTaxableLine),
+          );
+          continue;
+        }
       }
 
       if (this.isInternational) {
