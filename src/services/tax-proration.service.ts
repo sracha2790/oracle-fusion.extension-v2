@@ -107,24 +107,24 @@ export class TaxProrationService {
           //need not do the prorate calculation
           // balance will be 0 here in this if block
         } else {
-          prevRunningProrateVBTTotal = runningProrateVBTTotal; //0 //8.81 //20.01
-          if (tl.tax == 0) {
-            prorateVBTNotRounded = _.round((vendorTax / tlSize), 3); //6.667
+          prevRunningProrateVBTTotal = runningProrateVBTTotal; 
+          if (totalTaxCalculated == 0) {
+            prorateVBTNotRounded = _.round((vendorTax / tlSize), 3); 
           } else {
-            prorateVBTNotRounded = _.round((vendorTax * tl.taxCalculated) / totalTaxCalculated, 3); //8.805 //11.195 
+            prorateVBTNotRounded = _.round((vendorTax * tl.taxCalculated) / totalTaxCalculated, 3); 
           }
-          prorateVBT = _.round(prorateVBTNotRounded, 2); //8.81 //11.20 //6.67
+          prorateVBT = _.round(prorateVBTNotRounded, 2); 
           if (lineWithTaxAmountRunning == linesWithTaxAmount) {
-            prorateVBT = vendorTax - prevRunningProrateVBTTotal; //-0.01 
+            prorateVBT = vendorTax - prevRunningProrateVBTTotal; 
           }
-          runningProrateVBTTotal = runningProrateVBTTotal + prorateVBT; //8.81 //20.01 //20.00
+          runningProrateVBTTotal = runningProrateVBTTotal + prorateVBT; 
           if (runningProrateVBTTotal > vendorTax) {
             runningProrateVBTTotal = vendorTax;
           } //anagha -debugging 
           if (Math.sign(runningProrateVBTTotal - vendorTax) == 1) {
             prorateVBT = prorateVBT - (runningProrateVBTTotal - vendorTax);
           }
-          balance = tl.taxCalculated - prorateVBT; //-1.81 //-0.01 //0 - (-0.01) = +0.01
+          balance = tl.taxCalculated - prorateVBT; 
         }
         if (Math.sign(balance) < 0) {
           if (withinTolerance) {
@@ -181,10 +181,10 @@ export class TaxProrationService {
           proRateTaxDet['ReturnOnlyVbtLines'] = false;
           if (withinTolerance) {
             if (lineWithTaxAmountRunning == linesWithTaxAmount) {
-              finalProrateAmount = vendorTax - prevRunningProrateVBTTotal; //20 - 20.01 = -0.01
+              finalProrateAmount = vendorTax - prevRunningProrateVBTTotal; 
               overRides[tl.lineNumber] = _.round(tl.taxCalculated, 2); //set VBT -- correct one
               taxDet['taxRate'] = _.round(taxRate * 100, 2);
-              taxDet['taxAmt'] = _.round(finalProrateAmount, 2); //-0.01
+              taxDet['taxAmt'] = _.round(finalProrateAmount, 2); 
               taxDet['taxAmtTaxCurr'] = _.round(finalProrateAmount, 2);
               taxDet['unroundedTaxAmt'] = _.round(finalProrateAmount, 2);
               taxDet['taxDetails'] = tl.details;
