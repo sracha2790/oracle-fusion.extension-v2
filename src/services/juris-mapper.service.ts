@@ -213,7 +213,7 @@ export class JurisDataMapper {
     if (country != 'US') {
       if (application == "PO") {
         application = "AP";
-      } else if (application == "OM") {
+      } else if (application == "ONT") {
         application = "AR";
       }
       for (const jurisDataResultsItem of jurisDataResults) {
