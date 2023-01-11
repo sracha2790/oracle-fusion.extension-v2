@@ -315,7 +315,7 @@ export class ResponseBuilderService {
         }
 
         if (this.isInternational) {
-          if (isReverseCharge && this.fusionRequest.taxableHeader['ns:ApplicationShortname'] == 'AP' && avalaraTransactionLineDetail.taxType == taxTypeEnum.Input) {
+          if (isReverseCharge && avalaraTransactionLineDetail.taxType == taxTypeEnum.Input) {
             detailTaxLine['ns:TaxAmt'] = avalaraTransactionLineDetail.taxCalculated * -1;
             detailTaxLine['ns:UnroundedTaxAmt'] = avalaraTransactionLineDetail.taxCalculated * -1;
             detailTaxLine['ns:TaxAmtTaxCurr'] = avalaraTransactionLineDetail.taxCalculated * -1;
@@ -329,7 +329,7 @@ export class ResponseBuilderService {
           );
 
           if (avalaraTransactionLineDetail.jurisType == jurisTypeEnum.CNT) {
-            if (isReverseCharge && this.fusionRequest.taxableHeader['ns:ApplicationShortname'] == 'AP') {
+            if (isReverseCharge) {
               if (avalaraTransactionLineDetail.taxType == taxTypeEnum.Output) {
                 detailTaxLine['ns:Tax'] = detailTaxLine['ns:Tax'].replace("INPUT", "OUTPUT");
                 detailTaxLine['ns:TaxRateCode'] = detailTaxLine['ns:TaxRateCode'].replace("INPUT", "OUTPUT");
