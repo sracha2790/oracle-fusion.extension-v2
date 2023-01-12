@@ -49,6 +49,9 @@ export const checkAndProcessVBTDetails: SdkFlowFunctionEntry = {
       currentLegalEntity: {
         type: 'object',
       },
+      isInternational: {
+        type: 'boolean',
+      },      
     },
   },
   js: checkAndProcessVBTDetailsJS,

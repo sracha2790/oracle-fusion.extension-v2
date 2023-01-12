@@ -168,6 +168,7 @@ export class RequestService {
     },
     configCodes: Array<configurationCodeRecord>,
     currentLegalEntity: Record<string, any>,
+    isInternational: boolean,
   ): {
     taxableHeader: TaxableHeaderWithLines;
     vendorTaxed: boolean;
@@ -175,7 +176,7 @@ export class RequestService {
     vendorTaxes: Record<string, number>;
   } {
     this.configurationCodesService.setConfigCodes(configCodes);
-    if (this.configurationCodesService.getCodeValue('AP_SELF_ASSESS_TAX') == 'Y') {
+    if (this.configurationCodesService.getCodeValue('AP_SELF_ASSESS_TAX') == 'Y' || isInternational) {
       if (
         fusionRequest.taxableHeader['ns:CtrlTotalHdrTxAmt'] &&
         fusionRequest.taxableHeader['ns:CtrlTotalHdrTxAmt'] > 0

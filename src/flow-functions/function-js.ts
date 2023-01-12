@@ -19,11 +19,11 @@ export const convertFusionRequestIntoHierarchyJS = (
 };
 
 export const checkAndProcessVBTDetailsJS = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
-  const { fusionRequest, configCodes, currentLegalEntity } = configuration;
+  const { fusionRequest, configCodes, currentLegalEntity,isInternational } = configuration;
   let mappedData;
 
   const requestService = new RequestService();
-  mappedData = requestService.checkAndProcessVBTDetails(fusionRequest, configCodes, currentLegalEntity);
+  mappedData = requestService.checkAndProcessVBTDetails(fusionRequest, configCodes, currentLegalEntity,isInternational);
 
   return Promise.resolve(mappedData);
 };
