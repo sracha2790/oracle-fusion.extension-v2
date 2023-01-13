@@ -198,7 +198,7 @@ export class RequestService {
     }
 
     const { vendorTaxed, totalVBT, vendorTaxes } = this.checkAndGetTotalVendorTax(
-      fusionRequest.taxableHeader.taxableLines,
+      fusionRequest.taxableHeader.taxableLines, isInternational
     );
 
     return {
@@ -211,6 +211,7 @@ export class RequestService {
 
   private checkAndGetTotalVendorTax(
     taxableLines: Array<TaxableLinesWithDetailTaxLines>,
+    isInternational: boolean,
   ): { vendorTaxed: boolean; totalVBT: number; vendorTaxes: Record<string, number> } {
     let totalVBT = 0;
     let vendorTaxed = false;
@@ -233,7 +234,7 @@ export class RequestService {
         vendorTaxes[taxableLine['ns:TrxLineId']] = lineAmount;
       }
     }
-    if (!vendorTaxed && this.configurationCodesService.getCodeValue('AP_SELF_ASSESS_TAX') != 'Y') {
+    if (!vendorTaxed && this.configurationCodesService.getCodeValue('AP_SELF_ASSESS_TAX') != 'Y' && !isInternational) {
       vendorTaxed = true;
     }
     return {
