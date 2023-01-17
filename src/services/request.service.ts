@@ -146,6 +146,7 @@ export class RequestService {
       taxableLine['ns:AdjustedDocDate'] = Helpers.convertYYYYMMDDToIsoDateString(taxableLine['ns:AdjustedDocDate']);
       taxableLine['ns:TrxLineGlDate'] = Helpers.convertYYYYMMDDToIsoDateString(taxableLine['ns:TrxLineGlDate']);
       taxableLine['ns:TrxLineDate'] = Helpers.convertYYYYMMDDToIsoDateString(taxableLine['ns:TrxLineDate']); 
+      this.convertToNumberTaxableLine(taxableLine);
       this.extractAddresses(taxableLine);
     });
     for (const taxableLine of fusionRequest.taxableHeader.taxableLines) {
@@ -155,7 +156,7 @@ export class RequestService {
         detailTaxLines['ns:TaxDate'] = Helpers.convertYYYYMMDDToIsoDateString(detailTaxLines['ns:TaxDate']);
         detailTaxLines['ns:TaxCurrencyConversionDate'] = Helpers.convertYYYYMMDDToIsoDateString(detailTaxLines['ns:TaxCurrencyConversionDate']);
         detailTaxLines['ns:TaxDetermineDate'] = Helpers.convertYYYYMMDDToIsoDateString(detailTaxLines['ns:TaxDetermineDate']);
-
+        this.convertToNumberDetTaxLine(detailTaxLines);
       }
     }
     fusionRequest.taxableHeader['ns:TrxDate'] = Helpers.convertYYYYMMDDToIsoDateString(fusionRequest.taxableHeader['ns:TrxDate']);
