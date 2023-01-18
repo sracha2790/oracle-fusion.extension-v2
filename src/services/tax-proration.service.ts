@@ -21,6 +21,11 @@ export class TaxProrationService {
     if (isInternational) {
       return this.proRateTaxIntl(avalaraTaxLines, vendorBilledTax, tolerancePct, toleranceAmt, isInternational);
     }
+    let taxAmount = 0;
+    for (const aoTl of avalaraTaxLines) {
+      taxAmount=aoTl.tax + taxAmount;
+    }
+
     if (isUS2US) {
       if (apSelfAssesTaxFlag != 'Y') {
         let overRidesNoSelfAssess = new Map();
@@ -74,7 +79,7 @@ export class TaxProrationService {
         });
       totalTaxCalculated = totalTaxCalculated + tl.taxCalculated;
       totalTaxable = totalTaxable + tl.taxableAmount;
-      if (tl.Tax != 0) {
+      if (tl.Tax != 0 || taxAmount == 0) {
         linesWithTaxAmount = linesWithTaxAmount + 1;
       }
       // avalaraTaxLines.push(tl);
@@ -98,7 +103,7 @@ export class TaxProrationService {
       const taxRate = _.sumBy(tl.details, function (detail: Record<string, any>) {
         return detail.rate;
       });
-      if (tl.tax != 0) {
+      if (tl.tax != 0 || taxAmount == 0) {
         //lineswithNonZeroTaxCalculated in its own for loop
         lineWithTaxAmountRunning = lineWithTaxAmountRunning + 1;
       }
