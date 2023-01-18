@@ -107,26 +107,35 @@ export class TaxProrationService {
         //lineswithNonZeroTaxCalculated in its own for loop
         lineWithTaxAmountRunning = lineWithTaxAmountRunning + 1;
       }
-      if (taxRate > 0 || tl.tax == 0) {
+      if (taxRate > 0 || taxAmount == 0) {
         if (exactVBT) {
           //need not do the prorate calculation
           // balance will be 0 here in this if block
         } else {
           prevRunningProrateVBTTotal = runningProrateVBTTotal; 
-          if (totalTaxCalculated == 0) {
-            prorateVBTNotRounded = _.round((vendorTax / tlSize), 3); 
-          } else {
+          // if (totalTaxCalculated == 0) {
+          //   prorateVBTNotRounded = _.round((vendorTax / tlSize), 3); 
+          // } else {
+          //   prorateVBTNotRounded = _.round((vendorTax * tl.taxCalculated) / totalTaxCalculated, 3); 
+          // }
+          if(taxAmount == 0){
+            prorateVBTNotRounded = _.round((vendorTax / tlSize), 3);
+            if(linesWithTaxAmount == 1){
+              prorateVBTNotRounded = vendorTax;
+            }
+          }else{
             prorateVBTNotRounded = _.round((vendorTax * tl.taxCalculated) / totalTaxCalculated, 3); 
           }
+
           prorateVBT = _.round(prorateVBTNotRounded, 2); 
           if (lineWithTaxAmountRunning == linesWithTaxAmount) {
             prorateVBT = vendorTax - prevRunningProrateVBTTotal; 
           }
           runningProrateVBTTotal = runningProrateVBTTotal + prorateVBT; 
+          // if (runningProrateVBTTotal > vendorTax) {
+          //   runningProrateVBTTotal = vendorTax;
+          // } //anagha -debugging 
           if (runningProrateVBTTotal > vendorTax) {
-            runningProrateVBTTotal = vendorTax;
-          } //anagha -debugging 
-          if (Math.sign(runningProrateVBTTotal - vendorTax) == 1) {
             prorateVBT = prorateVBT - (runningProrateVBTTotal - vendorTax);
           }
           balance = tl.taxCalculated - prorateVBT; 
