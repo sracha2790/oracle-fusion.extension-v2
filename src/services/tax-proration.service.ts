@@ -21,6 +21,11 @@ export class TaxProrationService {
     if (isInternational) {
       return this.proRateTaxIntl(avalaraTaxLines, vendorBilledTax, tolerancePct, toleranceAmt, isInternational);
     }
+    let taxAmount = 0;
+    for (const aoTl of avalaraTaxLines) {
+      taxAmount=aoTl.tax + taxAmount;
+    }
+
     if (isUS2US) {
       if (apSelfAssesTaxFlag != 'Y') {
         let overRidesNoSelfAssess = new Map();
@@ -74,7 +79,7 @@ export class TaxProrationService {
         });
       totalTaxCalculated = totalTaxCalculated + tl.taxCalculated;
       totalTaxable = totalTaxable + tl.taxableAmount;
-      if (tl.Tax != 0) {
+      if (tl.Tax != 0 || taxAmount == 0) {
         linesWithTaxAmount = linesWithTaxAmount + 1;
       }
       // avalaraTaxLines.push(tl);
@@ -98,30 +103,39 @@ export class TaxProrationService {
       const taxRate = _.sumBy(tl.details, function (detail: Record<string, any>) {
         return detail.rate;
       });
-      if (tl.tax != 0) {
+      if (tl.tax != 0 || taxAmount == 0) {
         //lineswithNonZeroTaxCalculated in its own for loop
         lineWithTaxAmountRunning = lineWithTaxAmountRunning + 1;
       }
-      if (taxRate > 0 || tl.tax == 0) {
+      if (taxRate > 0 || taxAmount == 0) {
         if (exactVBT) {
           //need not do the prorate calculation
           // balance will be 0 here in this if block
         } else {
           prevRunningProrateVBTTotal = runningProrateVBTTotal; 
-          if (totalTaxCalculated == 0) {
-            prorateVBTNotRounded = _.round((vendorTax / tlSize), 3); 
-          } else {
+          // if (totalTaxCalculated == 0) {
+          //   prorateVBTNotRounded = _.round((vendorTax / tlSize), 3); 
+          // } else {
+          //   prorateVBTNotRounded = _.round((vendorTax * tl.taxCalculated) / totalTaxCalculated, 3); 
+          // }
+          if(taxAmount == 0){
+            prorateVBTNotRounded = _.round((vendorTax / tlSize), 3);
+            if(linesWithTaxAmount == 1){
+              prorateVBTNotRounded = vendorTax;
+            }
+          }else{
             prorateVBTNotRounded = _.round((vendorTax * tl.taxCalculated) / totalTaxCalculated, 3); 
           }
+
           prorateVBT = _.round(prorateVBTNotRounded, 2); 
           if (lineWithTaxAmountRunning == linesWithTaxAmount) {
             prorateVBT = vendorTax - prevRunningProrateVBTTotal; 
           }
           runningProrateVBTTotal = runningProrateVBTTotal + prorateVBT; 
+          // if (runningProrateVBTTotal > vendorTax) {
+          //   runningProrateVBTTotal = vendorTax;
+          // } //anagha -debugging 
           if (runningProrateVBTTotal > vendorTax) {
-            runningProrateVBTTotal = vendorTax;
-          } //anagha -debugging 
-          if (Math.sign(runningProrateVBTTotal - vendorTax) == 1) {
             prorateVBT = prorateVBT - (runningProrateVBTTotal - vendorTax);
           }
           balance = tl.taxCalculated - prorateVBT; 

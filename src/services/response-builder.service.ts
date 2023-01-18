@@ -510,7 +510,7 @@ export class ResponseBuilderService {
 
     if (
       vbtTaxAmtDetail &&
-      _.toNumber(avalaraTransactionLineDetail.taxCalculated) > _.toNumber(avalaraTransactionLineDetail.tax)
+      _.toNumber(avalaraTransactionLine.taxCalculated) > _.toNumber(avalaraTransactionLine.tax)
     ) {
       detailTaxLine['ns:TaxAmt'] =
         _.toNumber(avalaraTransactionLineDetail.taxCalculated) - _.toNumber(avalaraTransactionLineDetail.tax);
