@@ -126,7 +126,7 @@ export class JurisDataMapper {
   ) {
     let whereClause: Record<string, any>;
     if (avalaraTransactionLineDetail.jurisType == jurisTypeEnum.CNT) {
-      const whereClause = {
+      whereClause = {
         ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
         ATX_JURISDICTION_TYPE: 'STATE',
         ATX_STATE: 'CANADA',
