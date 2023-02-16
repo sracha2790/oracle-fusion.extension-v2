@@ -305,7 +305,13 @@ export class ResponseBuilderService {
             avalaraTransactionLineDetail,
           );
         }
-        if (this.isCA2CA) {
+        const processUS2CATaxesSameAsCA2CA = await getConfigurationCodeValue.js({
+          calculableFramework: null,
+          calculableContext: null,
+          runningContext: null,
+          functionArguments: ['PROCESS_US_TO_CA_TAXES', this.customerProfile.ATX_CONFIG_CODES],
+        });
+        if (this.isCA2CA || (this.isUS2CA && processUS2CATaxesSameAsCA2CA == 'Y')) {
           await this.jurisDataMapper.addJurisDataForCA2CA(
             detailTaxLine,
             matchingFusionTaxableLine,
@@ -357,6 +363,24 @@ export class ResponseBuilderService {
               }
             }
           }
+        }
+        const customerImplementsCustomDutyTax = await getConfigurationCodeValue.js({
+          calculableFramework: null,
+          calculableContext: null,
+          runningContext: null,
+          functionArguments: ['CUSTOM_DUTY_TAX', this.customerProfile.ATX_CONFIG_CODES],
+        });
+
+        if (this.isUS2CA && processUS2CATaxesSameAsCA2CA != 'Y' && customerImplementsCustomDutyTax == 'Y') {
+          if (avalaraTransactionLineDetail.jurisType !== jurisTypeEnum.CNT) {
+            continue;
+          }
+          await this.jurisDataMapper.addJurisDataForUS2CA(
+            detailTaxLine,
+            matchingFusionTaxableLine,
+            avalaraTransactionLine,
+            avalaraTransactionLineDetail,
+          );
         }
         this.addToDetailTaxLinesCollection(detailTaxLines, detailTaxLine);
       }
