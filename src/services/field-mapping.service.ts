@@ -1,11 +1,12 @@
 import _ = require("lodash");
 import { TaxableHeaderWithLines } from "../../src/models/oracle/TaxableHeaders";
 import { TaxableLine, TaxableLinesWithDetailTaxLines } from "../../src/models/oracle/TaxableLines";
+import { ConfigurationCodesService } from '../services/configuration.service';
 
 export class FieldMappingService {
 
     public resolveFieldValueByFieldMapping = (
-        fieldName, application, fieldMapping, fusionRequestTaxableHeader: TaxableHeaderWithLines, fusionRequestTaxableLine: TaxableLinesWithDetailTaxLines, additionalData, defaultValue
+        fieldName, application, fieldMapping, fusionRequestTaxableHeader: TaxableHeaderWithLines, fusionRequestTaxableLine: TaxableLinesWithDetailTaxLines, additionalData, customerProfile,defaultValue
     ): any => {
         let additionalDataLine = (additionalData as Array<Record<string, any>>)?.find(item => {
             return (item.TRX_ID == fusionRequestTaxableLine['ns:TrxId'] && item.TRX_LINE_ID == fusionRequestTaxableLine['ns:TrxLineId']);
@@ -16,7 +17,7 @@ export class FieldMappingService {
         let returnValue = defaultValue;
         for (const fieldMappingItem of fieldMapping) {
             if (fieldMappingItem.ATX_APPLICATION == application && fieldMappingItem.ATX_FIELD == fieldName) {
-                const sortedByPriority = _.sortBy(fieldMappingItem.ATX_FIELD_MAPPING_PRIORITY, [function(o){return _.toNumber(o.ATX_PRIORITY);}]);
+                const sortedByPriority = _.sortBy(fieldMappingItem.ATX_FIELD_MAPPING_PRIORITY, [function (o) { return _.toNumber(o.ATX_PRIORITY); }]);
                 for (const fieldMappingPriorityItem of sortedByPriority) {
 
                     if (fieldMappingPriorityItem.ATX_FUSION_FIELD_TYPE == 'FFLD') {
@@ -28,6 +29,9 @@ export class FieldMappingService {
                         } else {
                             if (fusionRequestTaxableLine[fieldMappingPriorityItem.ATX_FUSION_PROP_COLUMN_NAME]) {
                                 returnValue = fusionRequestTaxableLine[fieldMappingPriorityItem.ATX_FUSION_PROP_COLUMN_NAME];
+                                if (fieldMappingPriorityItem.ATX_FUSION_PROP_COLUMN_NAME.toLowerCase().includes('accountstring')) {
+                                    returnValue = this.accountStringByPos(returnValue,customerProfile);
+                                }
                                 break;
                             }
                         }
@@ -45,7 +49,7 @@ export class FieldMappingService {
         return returnValue;
     };
 
-    public resolveUserDefinedFieldValues = (application, UDFMapping, fusionRequestTaxableHeader: TaxableHeaderWithLines, fusionRequestTaxableLine: TaxableLinesWithDetailTaxLines, additionalData) => {
+    public resolveUserDefinedFieldValues = (application, UDFMapping, fusionRequestTaxableHeader: TaxableHeaderWithLines, fusionRequestTaxableLine: TaxableLinesWithDetailTaxLines, additionalData,customerProfile) => {
         let additionalDataLine = (additionalData as Array<Record<string, any>>)?.find(item => {
             return (item.TRX_ID == fusionRequestTaxableLine['ns:TrxId'] && item.TRX_LINE_ID == fusionRequestTaxableLine['ns:TrxLineId']);
         });
@@ -66,6 +70,9 @@ export class FieldMappingService {
                     } else {
                         if (fusionRequestTaxableLine[UDFMappingItem.ATX_FUSION_PROP_COLUMN_NAME]) {
                             value = fusionRequestTaxableLine[UDFMappingItem.ATX_FUSION_PROP_COLUMN_NAME];
+                            if (UDFMappingItem.ATX_FUSION_PROP_COLUMN_NAME.toLowerCase().includes('accountstring')) {
+                                value = this.accountStringByPos(value,customerProfile);
+                            }
                         }
                     }
                 }
@@ -93,7 +100,7 @@ export class FieldMappingService {
         }
     };
 
-    public resolveAvalaraParametersMapping = (application, paramMapping, fusionRequestTaxableHeader: TaxableHeaderWithLines, fusionRequestTaxableLine: TaxableLinesWithDetailTaxLines, additionalData) => {
+    public resolveAvalaraParametersMapping = (application, paramMapping, fusionRequestTaxableHeader: TaxableHeaderWithLines, fusionRequestTaxableLine: TaxableLinesWithDetailTaxLines, additionalData,customerProfile) => {
         const returnValue = [];
         for (const paramMappingItem of paramMapping) {
             if (paramMappingItem.ATX_APPLICATION == application) {
@@ -108,7 +115,10 @@ export class FieldMappingService {
                     }
                     else {
                         if (fusionRequestTaxableLine[paramMappingItem.ATX_FUSION_PROP_COLUMN_NAME]) {
-                             value = fusionRequestTaxableLine[paramMappingItem.ATX_FUSION_PROP_COLUMN_NAME];
+                            value = fusionRequestTaxableLine[paramMappingItem.ATX_FUSION_PROP_COLUMN_NAME];
+                            if (paramMappingItem.ATX_FUSION_PROP_COLUMN_NAME.toLowerCase().includes('accountstring')) {
+                                value = this.accountStringByPos(value,customerProfile);
+                            }
                         }
                     }
                 }
@@ -127,6 +137,20 @@ export class FieldMappingService {
         } else {
             return undefined;
         }
+    };
+
+    public accountStringByPos = (
+        accountString: string,customerProfile
+    ): string => {
+        let returnValue = accountString;
+        let configurationCodesService = new ConfigurationCodesService(customerProfile.ATX_CONFIG_CODES);
+        if (configurationCodesService.getCodeValue('USE_GL_ACCOUNT_STRING') == 'Y') {
+            const accountStringDelim = configurationCodesService.getCodeValue('GL_ACCSTR_SEG_DELIM');
+            const accountStringPos = Number(configurationCodesService.getCodeValueNbr('GL_ACCSTR_ACC_POSN'));
+            const accountStringsplit = accountString.split(accountStringDelim);
+            returnValue = accountStringsplit[accountStringPos - 1];
+        }
+        return returnValue;
     };
 
 }
