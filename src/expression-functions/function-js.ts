@@ -8,6 +8,12 @@ export const getConfigurationCodeValueJS = async (context: SdkExpressionFunction
   return configurationCodesService.getCodeValue(codeName, defaultValue);
 };
 
+export const getConfigurationCodeValueNbrJS = async (context: SdkExpressionFunctionArgument): Promise<any> => {
+  const [codeName, configCodes, defaultValue] = context.functionArguments;
+  const configurationCodesService = new ConfigurationCodesService(configCodes);
+  return configurationCodesService.getCodeValueNbr(codeName, defaultValue);
+};
+
 export const resolveFieldValueByFieldMappingJS = async (context: SdkExpressionFunctionArgument): Promise<any> => {
   const [
     fieldName,
@@ -16,6 +22,7 @@ export const resolveFieldValueByFieldMappingJS = async (context: SdkExpressionFu
     fusionRequestTaxableHeader,
     fusionRequestTaxableLines,
     additionalData,
+    customerProfile,
     defaultValue,
   ] = context.functionArguments;
   const fieldMappingService = new FieldMappingService();
@@ -26,6 +33,7 @@ export const resolveFieldValueByFieldMappingJS = async (context: SdkExpressionFu
     fusionRequestTaxableHeader,
     fusionRequestTaxableLines,
     additionalData,
+    customerProfile,
     defaultValue,
   );
 };
@@ -37,6 +45,7 @@ export const resolveUserDefinedFieldValuesJS = async (context: SdkExpressionFunc
     fusionRequestTaxableHeader,
     fusionRequestTaxableLines,
     additionalData,
+    customerProfile,
   ] = context.functionArguments;
   const fieldMappingService = new FieldMappingService();
   return fieldMappingService.resolveUserDefinedFieldValues(
@@ -45,11 +54,12 @@ export const resolveUserDefinedFieldValuesJS = async (context: SdkExpressionFunc
     fusionRequestTaxableHeader,
     fusionRequestTaxableLines,
     additionalData,
+    customerProfile,
   );
 };
 
 export const resolveAvalaraParametersMappingJS = async (context: SdkExpressionFunctionArgument): Promise<any> => {
-  const [application, paramMapping, fusionRequestTaxableHeader, fusionRequestTaxableLines,additionalData] = context.functionArguments;
+  const [application, paramMapping, fusionRequestTaxableHeader, fusionRequestTaxableLines,additionalData, customerProfile] = context.functionArguments;
   const fieldMappingService = new FieldMappingService();
   return fieldMappingService.resolveAvalaraParametersMapping(
     application,
@@ -57,5 +67,6 @@ export const resolveAvalaraParametersMappingJS = async (context: SdkExpressionFu
     fusionRequestTaxableHeader,
     fusionRequestTaxableLines,
     additionalData,
+    customerProfile,
   );
 };

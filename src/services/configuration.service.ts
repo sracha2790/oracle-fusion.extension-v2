@@ -1,6 +1,7 @@
 export type configurationCodeRecord = {
     ATX_CONFIG_CODE: string,
     ATX_CONFIG_CODE_STRING_VALUE: string,
+    ATX_CONFIG_CODE_NUMBER_VALUE: string,
 }
 
 export class ConfigurationCodesService {
@@ -15,7 +16,16 @@ export class ConfigurationCodesService {
     public getCodeValue(codeName: string, defaultValue?: any): any {
         for (const configCode of this.configCodes) {
             if ((configCode.ATX_CONFIG_CODE as string).trim() == codeName && configCode.ATX_CONFIG_CODE_STRING_VALUE) {
-                return configCode.ATX_CONFIG_CODE_STRING_VALUE
+                return configCode.ATX_CONFIG_CODE_STRING_VALUE;
+            }
+        }
+        return defaultValue;
+    }
+
+    public getCodeValueNbr(codeName: string, defaultValue?: any): any {
+        for (const configCode of this.configCodes) {
+            if ((configCode.ATX_CONFIG_CODE as string).trim() == codeName && configCode.ATX_CONFIG_CODE_NUMBER_VALUE) {
+                return Number(configCode.ATX_CONFIG_CODE_NUMBER_VALUE);
             }
         }
         return defaultValue;

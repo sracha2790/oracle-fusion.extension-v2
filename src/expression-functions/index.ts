@@ -4,6 +4,7 @@ import {
   resolveAvalaraParametersMappingJS,
   resolveFieldValueByFieldMappingJS,
   resolveUserDefinedFieldValuesJS,
+  getConfigurationCodeValueNbrJS
 } from './function-js';
 
 export const getConfigurationCodeValue: SdkExpressionFunctionEntry = {
@@ -18,6 +19,24 @@ export const getConfigurationCodeValue: SdkExpressionFunctionEntry = {
     },
   },
   js: getConfigurationCodeValueJS,
+  outputSchema: {
+    title: 'Result',
+    type: 'object',
+  },
+};
+
+export const getConfigurationCodeValueNbr: SdkExpressionFunctionEntry = {
+  description: 'Appknit custom expression funtion to fetch config code values',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      functionArguments: {
+        description: 'Function Arguments',
+        type: 'array',
+      },
+    },
+  },
+  js: getConfigurationCodeValueNbrJS,
   outputSchema: {
     title: 'Result',
     type: 'object',
