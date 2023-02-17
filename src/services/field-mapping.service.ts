@@ -6,7 +6,7 @@ import { ConfigurationCodesService } from '../services/configuration.service';
 export class FieldMappingService {
 
     public resolveFieldValueByFieldMapping = (
-        fieldName, application, fieldMapping, fusionRequestTaxableHeader: TaxableHeaderWithLines, fusionRequestTaxableLine: TaxableLinesWithDetailTaxLines, additionalData, customerProfile,defaultValue
+        fieldName, application, fieldMapping, fusionRequestTaxableHeader: TaxableHeaderWithLines, fusionRequestTaxableLine: TaxableLinesWithDetailTaxLines, additionalData, configCodes,defaultValue
     ): any => {
         let additionalDataLine = (additionalData as Array<Record<string, any>>)?.find(item => {
             return (item.TRX_ID == fusionRequestTaxableLine['ns:TrxId'] && item.TRX_LINE_ID == fusionRequestTaxableLine['ns:TrxLineId']);
@@ -30,7 +30,7 @@ export class FieldMappingService {
                             if (fusionRequestTaxableLine[fieldMappingPriorityItem.ATX_FUSION_PROP_COLUMN_NAME]) {
                                 returnValue = fusionRequestTaxableLine[fieldMappingPriorityItem.ATX_FUSION_PROP_COLUMN_NAME];
                                 if (fieldMappingPriorityItem.ATX_FUSION_PROP_COLUMN_NAME.toLowerCase().includes('accountstring')) {
-                                    returnValue = this.accountStringByPos(returnValue,customerProfile);
+                                    returnValue = this.accountStringByPos(returnValue,configCodes);
                                 }
                                 break;
                             }
@@ -49,7 +49,7 @@ export class FieldMappingService {
         return returnValue;
     };
 
-    public resolveUserDefinedFieldValues = (application, UDFMapping, fusionRequestTaxableHeader: TaxableHeaderWithLines, fusionRequestTaxableLine: TaxableLinesWithDetailTaxLines, additionalData,customerProfile) => {
+    public resolveUserDefinedFieldValues = (application, UDFMapping, fusionRequestTaxableHeader: TaxableHeaderWithLines, fusionRequestTaxableLine: TaxableLinesWithDetailTaxLines, additionalData,configCodes) => {
         let additionalDataLine = (additionalData as Array<Record<string, any>>)?.find(item => {
             return (item.TRX_ID == fusionRequestTaxableLine['ns:TrxId'] && item.TRX_LINE_ID == fusionRequestTaxableLine['ns:TrxLineId']);
         });
@@ -71,7 +71,7 @@ export class FieldMappingService {
                         if (fusionRequestTaxableLine[UDFMappingItem.ATX_FUSION_PROP_COLUMN_NAME]) {
                             value = fusionRequestTaxableLine[UDFMappingItem.ATX_FUSION_PROP_COLUMN_NAME];
                             if (UDFMappingItem.ATX_FUSION_PROP_COLUMN_NAME.toLowerCase().includes('accountstring')) {
-                                value = this.accountStringByPos(value,customerProfile);
+                                value = this.accountStringByPos(value,configCodes);
                             }
                         }
                     }
@@ -100,7 +100,7 @@ export class FieldMappingService {
         }
     };
 
-    public resolveAvalaraParametersMapping = (application, paramMapping, fusionRequestTaxableHeader: TaxableHeaderWithLines, fusionRequestTaxableLine: TaxableLinesWithDetailTaxLines, additionalData,customerProfile) => {
+    public resolveAvalaraParametersMapping = (application, paramMapping, fusionRequestTaxableHeader: TaxableHeaderWithLines, fusionRequestTaxableLine: TaxableLinesWithDetailTaxLines, additionalData,configCodes) => {
         const returnValue = [];
         for (const paramMappingItem of paramMapping) {
             if (paramMappingItem.ATX_APPLICATION == application) {
@@ -117,7 +117,7 @@ export class FieldMappingService {
                         if (fusionRequestTaxableLine[paramMappingItem.ATX_FUSION_PROP_COLUMN_NAME]) {
                             value = fusionRequestTaxableLine[paramMappingItem.ATX_FUSION_PROP_COLUMN_NAME];
                             if (paramMappingItem.ATX_FUSION_PROP_COLUMN_NAME.toLowerCase().includes('accountstring')) {
-                                value = this.accountStringByPos(value,customerProfile);
+                                value = this.accountStringByPos(value,configCodes);
                             }
                         }
                     }
@@ -140,10 +140,10 @@ export class FieldMappingService {
     };
 
     public accountStringByPos = (
-        accountString: string,customerProfile
+        accountString: string,configCodes
     ): string => {
         let returnValue = accountString;
-        let configurationCodesService = new ConfigurationCodesService(customerProfile.ATX_CONFIG_CODES);
+        let configurationCodesService = new ConfigurationCodesService(configCodes);
         if (configurationCodesService.getCodeValue('USE_GL_ACCOUNT_STRING') == 'Y') {
             const accountStringDelim = configurationCodesService.getCodeValue('GL_ACCSTR_SEG_DELIM');
             const accountStringPos = Number(configurationCodesService.getCodeValueNbr('GL_ACCSTR_ACC_POSN'));

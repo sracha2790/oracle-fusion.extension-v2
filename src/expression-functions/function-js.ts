@@ -22,7 +22,7 @@ export const resolveFieldValueByFieldMappingJS = async (context: SdkExpressionFu
     fusionRequestTaxableHeader,
     fusionRequestTaxableLines,
     additionalData,
-    customerProfile,
+    configCodes,
     defaultValue,
   ] = context.functionArguments;
   const fieldMappingService = new FieldMappingService();
@@ -33,7 +33,7 @@ export const resolveFieldValueByFieldMappingJS = async (context: SdkExpressionFu
     fusionRequestTaxableHeader,
     fusionRequestTaxableLines,
     additionalData,
-    customerProfile,
+    configCodes,
     defaultValue,
   );
 };
@@ -45,7 +45,7 @@ export const resolveUserDefinedFieldValuesJS = async (context: SdkExpressionFunc
     fusionRequestTaxableHeader,
     fusionRequestTaxableLines,
     additionalData,
-    customerProfile,
+    configCodes,
   ] = context.functionArguments;
   const fieldMappingService = new FieldMappingService();
   return fieldMappingService.resolveUserDefinedFieldValues(
@@ -54,12 +54,12 @@ export const resolveUserDefinedFieldValuesJS = async (context: SdkExpressionFunc
     fusionRequestTaxableHeader,
     fusionRequestTaxableLines,
     additionalData,
-    customerProfile,
+    configCodes,
   );
 };
 
 export const resolveAvalaraParametersMappingJS = async (context: SdkExpressionFunctionArgument): Promise<any> => {
-  const [application, paramMapping, fusionRequestTaxableHeader, fusionRequestTaxableLines,additionalData, customerProfile] = context.functionArguments;
+  const [application, paramMapping, fusionRequestTaxableHeader, fusionRequestTaxableLines,additionalData, configCodes] = context.functionArguments;
   const fieldMappingService = new FieldMappingService();
   return fieldMappingService.resolveAvalaraParametersMapping(
     application,
@@ -67,6 +67,6 @@ export const resolveAvalaraParametersMappingJS = async (context: SdkExpressionFu
     fusionRequestTaxableHeader,
     fusionRequestTaxableLines,
     additionalData,
-    customerProfile,
+    configCodes,
   );
 };
