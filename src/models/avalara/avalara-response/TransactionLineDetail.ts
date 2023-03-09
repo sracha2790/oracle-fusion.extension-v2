@@ -4,6 +4,7 @@ export enum jurisTypeEnum {
   CIT = 'CIT',
   STJ = 'STJ',
   CNT = 'CNT',
+  IGST = 'IGST',
 }
 
 export enum nonTaxableTypeEnum {
