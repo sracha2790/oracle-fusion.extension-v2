@@ -192,7 +192,11 @@ export class RequestService {
       }
     } else {
       if (this.atLeastOneLineHasVBTDetail(fusionRequest.taxableHeader.taxableLines)) {
-        this.makeTaxZeroOnVBTDetails(fusionRequest.taxableHeader.taxableLines);
+        if(this.configurationCodesService.getCodeValue('AP_SELF_ASSESS_TAX') == 'N'){
+          this.addDetailTaxLinesWithAmount(fusionRequest, currentLegalEntity, 0);
+        }else{
+          this.makeTaxZeroOnVBTDetails(fusionRequest.taxableHeader.taxableLines);
+        }
       } else {
         this.addDetailTaxLinesWithAmount(fusionRequest, currentLegalEntity, 0);
       }
