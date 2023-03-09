@@ -118,6 +118,40 @@ export class JurisDataMapper {
     await this.findAndAddJurisDataOnDetailsTaxLine(whereClause, detailTaxLine);
   }
 
+  async addJurisDataForIndia(
+    detailTaxLine: DetailTaxLine,
+    matchingFusionTaxableLine: TaxableLinesWithDetailTaxLines,
+    avalaraTransactionLine: TransactionLinesWithTransactionLineDetails,
+    avalaraTransactionLineDetail: TransactionLineDetail,
+  ) {
+    let queryResults: Record<string, any>;
+    let whereClause: Record<string, any>;
+
+    if (avalaraTransactionLineDetail.jurisType == jurisTypeEnum.CNT && avalaraTransactionLineDetail.taxName == jurisTypeEnum.IGST) {
+      whereClause = {
+        ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
+        ATX_JURISDICTION_TYPE: 'COUNTRY',
+        ATX_COUNTRY: avalaraTransactionLineDetail.country,
+      };
+    }
+    if (avalaraTransactionLineDetail.jurisType == jurisTypeEnum.CNT) {
+      whereClause = {
+        ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
+        ATX_JURISDICTION_TYPE: 'COUNTRY',
+        ATX_COUNTRY: avalaraTransactionLineDetail.country,
+      };
+    }
+    if (avalaraTransactionLineDetail.jurisType == jurisTypeEnum.STA) {
+      whereClause = {
+        ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
+        ATX_JURISDICTION_TYPE: 'STATE',
+        ATX_REGION: avalaraTransactionLineDetail.region,
+        ATX_COUNTRY: avalaraTransactionLineDetail.country,
+      };
+    }
+    await this.findAndAddJurisDataOnDetailsTaxLine(whereClause, detailTaxLine);
+  }
+
   async addJurisDataForUS2CA(
     detailTaxLine: DetailTaxLine,
     matchingFusionTaxableLine: TaxableLinesWithDetailTaxLines,

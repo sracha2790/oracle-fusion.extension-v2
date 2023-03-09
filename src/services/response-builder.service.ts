@@ -130,6 +130,14 @@ export class ResponseBuilderService {
             avalaraTransactionLineDetail,
           );
         }
+        if (this.isIndia) {
+          await this.jurisDataMapper.addJurisDataForIndia(
+            detailTaxLine,
+            matchingFusionTaxableLine,
+            avalaraTransactionLine,
+            avalaraTransactionLineDetail,
+          );
+        }
         if (this.isInternational) {
           await this.jurisDataMapper.addJurisDataForIntl(
             detailTaxLine,
@@ -319,7 +327,14 @@ export class ResponseBuilderService {
             avalaraTransactionLineDetail,
           );
         }
-
+        if (this.isIndia) {
+          await this.jurisDataMapper.addJurisDataForIndia(
+            detailTaxLine,
+            matchingFusionTaxableLine,
+            avalaraTransactionLine,
+            avalaraTransactionLineDetail,
+          );
+        }
         if (this.isInternational) {
           if (isReverseCharge && avalaraTransactionLineDetail.taxType == taxTypeEnum.Input) {
             detailTaxLine['ns:TaxAmt'] = avalaraTransactionLineDetail.taxCalculated * -1;
