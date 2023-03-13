@@ -132,6 +132,7 @@ export class JurisDataMapper {
         ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
         ATX_JURISDICTION_TYPE: 'COUNTRY',
         ATX_COUNTRY: avalaraTransactionLineDetail.country,
+        ATX_TAX_CODE: ['contains', 'IGST'],
       };
     }
     if (avalaraTransactionLineDetail.jurisType == jurisTypeEnum.CNT) {
@@ -139,6 +140,7 @@ export class JurisDataMapper {
         ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
         ATX_JURISDICTION_TYPE: 'COUNTRY',
         ATX_COUNTRY: avalaraTransactionLineDetail.country,
+        ATX_TAX_CODE: ['contains', 'CGST'],
       };
     }
     if (avalaraTransactionLineDetail.jurisType == jurisTypeEnum.STA) {
@@ -203,9 +205,15 @@ export class JurisDataMapper {
     const queryFilters = [];
     for (const key in whereClause) {
       const newClause = {};
-      newClause[`@FIELD:ATX_JURIS_DATA.${key}`] = {
-        '@eq': `${whereClause[key]}`,
-      };
+      if (typeof whereClause[key] === 'string') {
+        newClause[`@FIELD:ATX_JURIS_DATA.${key}`] = {
+          '@eq': `${whereClause[key]}`,
+        };
+      } else {
+        newClause[`@FIELD:ATX_JURIS_DATA.${key}`] = {
+          [`@${whereClause[key][0]}`]: `${whereClause[key][1]}`,
+        };
+      }
       queryFilters.push(newClause);
     }
 
