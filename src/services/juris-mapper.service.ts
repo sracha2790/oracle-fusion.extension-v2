@@ -135,7 +135,7 @@ export class JurisDataMapper {
         ATX_TAX_CODE: ['contains', 'IGST'],
       };
     }
-    if (avalaraTransactionLineDetail.jurisType == jurisTypeEnum.CNT) {
+    if (avalaraTransactionLineDetail.jurisType == jurisTypeEnum.CNT && avalaraTransactionLineDetail.taxName == jurisTypeEnum.CGST) {
       whereClause = {
         ATX_GEO_SOURCE: this.customerProfile.ATX_GEO_SOURCE,
         ATX_JURISDICTION_TYPE: 'COUNTRY',
