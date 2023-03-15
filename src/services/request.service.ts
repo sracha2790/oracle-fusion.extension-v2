@@ -367,6 +367,7 @@ export class RequestService {
     currentLegalEntity: Record<string, any>,
     amountForFirstLine: number,
   ) {
+    var firstActiveLine=true;
     for (var i = 0; i < fusionRequest.taxableHeader.taxableLines.length; i++) {
       const taxableLine = fusionRequest.taxableHeader.taxableLines[i];
       if (taxableLine['ns:LineLevelAction'] == 'DISCARD') {
@@ -398,11 +399,11 @@ export class RequestService {
           'ns:RoundingRuleCode': 'NEAREST',
           'ns:SelfAssessedFlag': 'N',
           'ns:Tax': this.configurationCodesService.getCodeValue('VBT_CODE'),
-          'ns:TaxAmt': i === 0 ? amountForFirstLine : 0,
-          'ns:TaxAmtTaxCurr': i === 0 ? amountForFirstLine : 0,
-          'ns:UnroundedTaxAmt': i === 0 ? amountForFirstLine : 0,
+          'ns:TaxAmt': firstActiveLine? amountForFirstLine : 0,
+          'ns:TaxAmtTaxCurr': firstActiveLine? amountForFirstLine : 0,
+          'ns:UnroundedTaxAmt': firstActiveLine? amountForFirstLine : 0,
           'ns:UnroundedTaxableAmt': taxableLine['ns:LineAmt'],
-          'ns:TaxRate': i === 0 ? 0 : 0,
+          'ns:TaxRate': firstActiveLine? 0 : 0,
           'ns:TaxAmtIncludedFlag': 'N',
           'ns:TaxApportionmentLineNumber': this.TaxApportionmentCounter++,
           'ns:TaxCurrencyCode': fusionRequest.taxableHeader['ns:TaxCurrencyCode'],
@@ -429,6 +430,7 @@ export class RequestService {
           'ns:TrxLineNumber': taxableLine['ns:TrxLineNumber'],
         },
       ];
+      firstActiveLine=false;
     }
   }
 
