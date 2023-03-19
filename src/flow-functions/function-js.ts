@@ -19,11 +19,11 @@ export const convertFusionRequestIntoHierarchyJS = (
 };
 
 export const checkAndProcessVBTDetailsJS = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
-  const { fusionRequest, configCodes, currentLegalEntity,isInternational } = configuration;
+  const { fusionRequest, configCodes, currentLegalEntity, isInternational } = configuration;
   let mappedData;
 
   const requestService = new RequestService();
-  mappedData = requestService.checkAndProcessVBTDetails(fusionRequest, configCodes, currentLegalEntity,isInternational);
+  mappedData = requestService.checkAndProcessVBTDetails(fusionRequest, configCodes, currentLegalEntity, isInternational);
 
   return Promise.resolve(mappedData);
 };
@@ -36,19 +36,19 @@ export const addCreditMemoLinesJS = async (sdk: AppknitSDK | AppknitGraphSDK, co
 };
 
 export const proRateTaxesJS = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
-    const { apSelfAssesTaxFlag, vendorBilledTax, avalaraTransactionLines, apTolerances, customerProfile, isInternational, isUS2US } = configuration;
+  const { apSelfAssesTaxFlag, vendorBilledTax, avalaraTransactionLines, apTolerances, customerProfile, isInternational, isUS2US } = configuration;
 
-    const taxProrationService = new TaxProrationService();
-    let taxOverRideDtls = taxProrationService.prorateTaxes(
-        apSelfAssesTaxFlag,
-        vendorBilledTax,
-        avalaraTransactionLines,
-        apTolerances.tolerancePct,
-        apTolerances.toleranceAmt,
-        customerProfile,
-        isInternational,
-        isUS2US,
-    );
+  const taxProrationService = new TaxProrationService();
+  let taxOverRideDtls = taxProrationService.prorateTaxes(
+    apSelfAssesTaxFlag,
+    vendorBilledTax,
+    avalaraTransactionLines,
+    apTolerances.tolerancePct,
+    apTolerances.toleranceAmt,
+    customerProfile,
+    isInternational,
+    isUS2US,
+  );
 
   return Promise.resolve(taxOverRideDtls);
 };
@@ -139,35 +139,35 @@ export const mapToFusionResponseJS = async (sdk: AppknitSDK | AppknitGraphSDK, c
 
 
 export const mapToFusionAFCResponseJS = async (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
-    const {avalaraTransaction, fusionRequest, customerProfile, currentLegalEntity} = configuration;
-    const responseBuilder = new AFCResponseBuilderService(
-        sdk,
-        avalaraTransaction,
-        fusionRequest,
-        customerProfile,
-        currentLegalEntity,
-    );
-    const result = await responseBuilder.createAFCResponse()
+  const { avalaraTransaction, fusionRequest, customerProfile, currentLegalEntity } = configuration;
+  const responseBuilder = new AFCResponseBuilderService(
+    sdk,
+    avalaraTransaction,
+    fusionRequest,
+    customerProfile,
+    currentLegalEntity,
+  );
+  const result = await responseBuilder.createAFCResponse()
 
-    return result; 
+  return result;
 }
 
 export const mapToFusionAFCErrorResponseJS = async (
-    sdk: AppknitSDK | AppknitGraphSDK,
-    configuration: any,
-  ): Promise<any> => {
-    const { message, fusionRequest } = configuration;
-    const responseBuilder = new AFCResponseBuilderService(
-      sdk,
-      undefined,
-      fusionRequest,
-      undefined,
-      undefined,
-    );
-    const result = await responseBuilder.createAFCErrorResponse(message);
-  
-    return result;
-  };
+  sdk: AppknitSDK | AppknitGraphSDK,
+  configuration: any,
+): Promise<any> => {
+  const { message, fusionRequest } = configuration;
+  const responseBuilder = new AFCResponseBuilderService(
+    sdk,
+    undefined,
+    fusionRequest,
+    undefined,
+    undefined,
+  );
+  const result = await responseBuilder.createAFCErrorResponse(message);
+
+  return result;
+};
 
 export const prepareBatchRequestJS = async (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
   const { fusionRequest } = configuration;
@@ -176,4 +176,24 @@ export const prepareBatchRequestJS = async (sdk: AppknitSDK | AppknitGraphSDK, c
   const result = requestService.prepareBatchRequest(fusionRequest);
 
   return Promise.resolve(result);
+};
+
+export const getDTLDocsFromDBJS = async (sdk: AppknitSDK | AppknitGraphSDK,
+  configuration: { collectionName: string, lines?: string, query: Record<string, any>, skip?: number, limit?: number }): Promise<any> => {
+
+  let asdk: AppknitSDK = sdk as AppknitSDK;
+  let dtlCursor = await asdk.mongoProvider.selectFetch(configuration.collectionName, configuration.query, configuration.skip, configuration.limit);
+  let docs = [];
+  let dtLines = [];
+  let linesFld = configuration.lines ? configuration.lines : 'TaxLines';
+  while (dtlCursor.hasNext()) {
+    const doc = dtlCursor.next();
+    docs.push({ 'docId': doc['_id'], 'TrxId': doc['TrxId'] });
+    const lines = doc[linesFld];
+    dtLines.push(...lines);
+  }
+  if (!dtlCursor.isClosed()) {
+    dtlCursor.close();
+  }
+  return Promise.resolve({ docs, 'TaxLines': dtLines });
 };
