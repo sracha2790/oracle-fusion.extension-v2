@@ -186,8 +186,8 @@ export const getDTLDocsFromDBJS = async (sdk: AppknitSDK | AppknitGraphSDK,
   let docs = [];
   let dtLines = [];
   let linesFld = configuration.lines ? configuration.lines : 'TaxLines';
-  while (dtlCursor.hasNext()) {
-    const doc = dtlCursor.next();
+  while (await dtlCursor.hasNext()) {
+    const doc = await dtlCursor.next();
     docs.push({ 'docId': doc['_id'], 'TrxId': doc['TrxId'] });
     const lines = doc[linesFld];
     dtLines.push(...lines);
