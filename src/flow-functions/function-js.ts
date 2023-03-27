@@ -190,7 +190,9 @@ export const getDTLDocsFromDBJS = async (sdk: AppknitSDK | AppknitGraphSDK,
     const doc = await dtlCursor.next();
     docs.push({ 'docId': doc['_id'], 'TrxId': doc['TrxId'] });
     const lines = doc[linesFld];
-    dtLines.push(...lines);
+    if (lines && Array.isArray(lines)){
+      dtLines.push(...lines);
+    }
   }
   if (!dtlCursor.isClosed()) {
     dtlCursor.close();
