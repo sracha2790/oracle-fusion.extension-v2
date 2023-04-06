@@ -215,6 +215,9 @@ export const mapToFusionResponse: SdkFlowFunctionEntry = {
       vbtTaxAmtDetails: {
         type: 'object',
       },
+      isOverChargeScenario: {
+        type: 'boolean',
+      },      
       isUS2US: {
         type: 'boolean',
       },
