@@ -26,6 +26,7 @@ export class ResponseBuilderService {
     },
     private customerProfile: Record<string, any>,
     private currentLegalEntity: Record<string, any>,
+    private isOverChargeScenario: boolean,
     private isUS2US: boolean,
     private isCA2CA: boolean,
     private isUS2CA: boolean,
@@ -215,6 +216,7 @@ export class ResponseBuilderService {
     if (
       this.isUS2US &&
       this.avalaraTransaction.totalTax == 0 &&
+      this.isOverChargeScenario &&
       this.configurationCodesService.getCodeValue('CORRECT_VBT_FOR_OC') == 'Y'
     ) {
       VendorLineHandledFlag = true;

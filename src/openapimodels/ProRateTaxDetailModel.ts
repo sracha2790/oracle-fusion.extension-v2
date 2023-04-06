@@ -39,6 +39,10 @@ export const ProRateTaxDetailModel: SdkOpenApiSchemaProperty = {
       type: 'boolean',
       description: 'Return Only Vbt Lines',
     },
+    isOverChargeScenario: {
+      type: 'boolean',
+      description: 'Is Overcharge Scenario',
+    },
     overRides: {
       type: 'object',
       description: 'over Rides',
