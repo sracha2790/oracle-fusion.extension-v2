@@ -17,6 +17,7 @@ export class TaxProrationService {
     proRateTaxDet['ReturnOnlyVbtLines'] = false;
     proRateTaxDet['overRides'] = overRides;
     proRateTaxDet['vbtTaxAmtDetails'] = vbtTaxAmtDetails;
+    proRateTaxDet['isOverChargeScenario'] = false;
     // console.log('intl:' + isInternational);
     if (isInternational) {
       return this.proRateTaxIntl(avalaraTaxLines, vendorBilledTax, tolerancePct, toleranceAmt, isInternational);
@@ -57,6 +58,7 @@ export class TaxProrationService {
     let linesWithTaxAmount = 0;
     let totalTaxPercent = 0;
     let totalTaxCalculated = 0;
+    let totalTaxCalculatedActual =0;
     let runningProrateVBTTotal = 0;
     let prevRunningProrateVBTTotal = 0;
     let totalTaxable = 0;
@@ -78,6 +80,7 @@ export class TaxProrationService {
           return detail.rate;
         });
       totalTaxCalculated = totalTaxCalculated + tl.taxCalculated;
+      totalTaxCalculatedActual = totalTaxCalculatedActual + tl.taxCalculated;
       totalTaxable = totalTaxable + tl.taxableAmount;
       if (tl.Tax != 0 || taxAmount == 0) {
         linesWithTaxAmount = linesWithTaxAmount + 1;
@@ -90,9 +93,9 @@ export class TaxProrationService {
     if (totalTaxPercent == 0) {
       totalTaxPercent = 1;
     }
-    withinTolerance = this.isVBTDiffWithinTolerance(vendorTax, totalTaxCalculated, tolerancePct, toleranceAmt);
+    withinTolerance = this.isVBTDiffWithinTolerance(vendorTax, totalTaxCalculatedActual, tolerancePct, toleranceAmt);
     // check whether the vendortax was exact
-    exactVBT = (vendorTax == totalTaxCalculated);
+    exactVBT = (vendorTax == totalTaxCalculatedActual);
     // super.getAvtxLog().addDebugMessage("D", this.className, "Total tax percent " + totalTaxPercent.toString());
     tlSize = avalaraTaxLines.length;
     let lineWithTaxAmountRunning = 0;
@@ -141,7 +144,9 @@ export class TaxProrationService {
           balance = tl.taxCalculated - prorateVBT; 
         }
         if (Math.sign(balance) < 0) {
+          proRateTaxDet['isOverChargeScenario'] = true;
           if (withinTolerance) {
+            proRateTaxDet['isOverChargeScenario'] = false;
             if (lineWithTaxAmountRunning == linesWithTaxAmount) {
               finalProrateAmount = vendorTax - prevRunningProrateVBTTotal;
               overRides[tl.lineNumber] = _.round(tl.taxCalculated, 2); //set VBT -- correct one
