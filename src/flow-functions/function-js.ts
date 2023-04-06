@@ -79,6 +79,7 @@ export const mapToFusionForNoCalculationResponseJS = async (
     undefined,
     undefined,
     undefined,
+    undefined,
   );
   const result = await responseBuilder.createNoCalculationResponse();
 
@@ -101,6 +102,7 @@ export const mapToFusionForErrorResponseJS = async (
     undefined,
     undefined,
     undefined,
+    undefined,
   );
   const result = await responseBuilder.createErrorResponse(message);
 
@@ -114,6 +116,7 @@ export const mapToFusionResponseJS = async (sdk: AppknitSDK | AppknitGraphSDK, c
     customerProfile,
     currentLegalEntity,
     vbtTaxAmtDetails,
+    isOverChargeScenario,
     isUS2US,
     isCA2CA,
     isUS2CA,
@@ -126,6 +129,7 @@ export const mapToFusionResponseJS = async (sdk: AppknitSDK | AppknitGraphSDK, c
     fusionRequest,
     customerProfile,
     currentLegalEntity,
+    isOverChargeScenario,
     isUS2US,
     isCA2CA,
     isUS2CA,
