@@ -81,6 +81,7 @@ export const mapToFusionForNoCalculationResponseJS = async (
     undefined,
     undefined,
     undefined,
+    undefined,
   );
   const result = await responseBuilder.createNoCalculationResponse();
 
@@ -96,6 +97,7 @@ export const mapToFusionForErrorResponseJS = async (
     sdk,
     undefined,
     fusionRequest,
+    undefined,
     undefined,
     undefined,
     undefined,
@@ -123,6 +125,7 @@ export const mapToFusionResponseJS = async (sdk: AppknitSDK | AppknitGraphSDK, c
     isUS2CA,
     isIndia,
     isInternational,
+    isCreditMemoTransaction,
   } = configuration;
   const responseBuilder = new ResponseBuilderService(
     sdk,
@@ -136,6 +139,7 @@ export const mapToFusionResponseJS = async (sdk: AppknitSDK | AppknitGraphSDK, c
     isUS2CA,
     isIndia,
     isInternational,
+    isCreditMemoTransaction,
   );
   const result = await responseBuilder.createResponse(vbtTaxAmtDetails);
 

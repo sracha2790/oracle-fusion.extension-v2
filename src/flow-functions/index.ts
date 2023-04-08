@@ -219,7 +219,7 @@ export const mapToFusionResponse: SdkFlowFunctionEntry = {
       },
       isOverChargeScenario: {
         type: 'boolean',
-      },      
+      },        
       isUS2US: {
         type: 'boolean',
       },
@@ -235,6 +235,9 @@ export const mapToFusionResponse: SdkFlowFunctionEntry = {
       isInternational: {
         type: 'boolean',
       },
+      isCreditMemoTransaction: {
+        type: 'boolean',
+      },       
     },
   },
   js: mapToFusionResponseJS,
