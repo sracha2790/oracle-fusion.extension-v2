@@ -553,7 +553,6 @@ export class ResponseBuilderService {
     if (
       vbtTaxAmtDetail &&
       Math.abs(_.toNumber(avalaraTransactionLine.taxCalculated)) > Math.abs(_.toNumber(avalaraTransactionLine.tax))
-      //absolute 
     ) {
       if (this.isCreditMemoTransaction) {
         detailTaxLine['ns:TaxAmt'] =
