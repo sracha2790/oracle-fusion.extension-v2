@@ -179,8 +179,8 @@ export class RequestService {
     this.configurationCodesService.setConfigCodes(configCodes);
     if (this.configurationCodesService.getCodeValue('AP_SELF_ASSESS_TAX') == 'Y' || isInternational) {
       if (
-        fusionRequest.taxableHeader['ns:CtrlTotalHdrTxAmt'] &&
-        fusionRequest.taxableHeader['ns:CtrlTotalHdrTxAmt'] > 0
+        fusionRequest.taxableHeader['ns:CtrlTotalHdrTxAmt']
+        //  && fusionRequest.taxableHeader['ns:CtrlTotalHdrTxAmt'] > 0
       ) {
         this.addDetailTaxLinesWithAmount(
           fusionRequest,

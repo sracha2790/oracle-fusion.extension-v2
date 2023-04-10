@@ -36,7 +36,7 @@ export const addCreditMemoLinesJS = async (sdk: AppknitSDK | AppknitGraphSDK, co
 };
 
 export const proRateTaxesJS = (sdk: AppknitSDK | AppknitGraphSDK, configuration: any): Promise<any> => {
-  const { apSelfAssesTaxFlag, vendorBilledTax, avalaraTransactionLines, apTolerances, customerProfile, isInternational, isUS2US } = configuration;
+  const { apSelfAssesTaxFlag, vendorBilledTax, avalaraTransactionLines, apTolerances, customerProfile, isCreditMemoTransaction,isUS2US, isInternational } = configuration;
 
   const taxProrationService = new TaxProrationService();
   let taxOverRideDtls = taxProrationService.prorateTaxes(
@@ -46,8 +46,9 @@ export const proRateTaxesJS = (sdk: AppknitSDK | AppknitGraphSDK, configuration:
     apTolerances.tolerancePct,
     apTolerances.toleranceAmt,
     customerProfile,
-    isInternational,
+    isCreditMemoTransaction,
     isUS2US,
+    isInternational,
   );
 
   return Promise.resolve(taxOverRideDtls);
@@ -79,6 +80,8 @@ export const mapToFusionForNoCalculationResponseJS = async (
     undefined,
     undefined,
     undefined,
+    undefined,
+    undefined,
   );
   const result = await responseBuilder.createNoCalculationResponse();
 
@@ -101,6 +104,8 @@ export const mapToFusionForErrorResponseJS = async (
     undefined,
     undefined,
     undefined,
+    undefined,
+    undefined,
   );
   const result = await responseBuilder.createErrorResponse(message);
 
@@ -114,11 +119,13 @@ export const mapToFusionResponseJS = async (sdk: AppknitSDK | AppknitGraphSDK, c
     customerProfile,
     currentLegalEntity,
     vbtTaxAmtDetails,
+    isOverChargeScenario,
     isUS2US,
     isCA2CA,
     isUS2CA,
     isIndia,
     isInternational,
+    isCreditMemoTransaction,
   } = configuration;
   const responseBuilder = new ResponseBuilderService(
     sdk,
@@ -126,11 +133,13 @@ export const mapToFusionResponseJS = async (sdk: AppknitSDK | AppknitGraphSDK, c
     fusionRequest,
     customerProfile,
     currentLegalEntity,
+    isOverChargeScenario,
     isUS2US,
     isCA2CA,
     isUS2CA,
     isIndia,
     isInternational,
+    isCreditMemoTransaction,
   );
   const result = await responseBuilder.createResponse(vbtTaxAmtDetails);
 

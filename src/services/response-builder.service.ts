@@ -27,11 +27,13 @@ export class ResponseBuilderService {
     private customerProfile: Record<string, any>,
     private currentBusinessUnit: Record<string, any>,
     private currentLegalEntity: Record<string, any>,
+    private isOverChargeScenario: boolean,
     private isUS2US: boolean,
     private isCA2CA: boolean,
     private isUS2CA: boolean,
     private isIndia: boolean,
     private isInternational: boolean,
+    private isCreditMemoTransaction: boolean,    
   ) {
     this.jurisDataMapper = new JurisDataMapper(
       sdk,
@@ -225,6 +227,7 @@ export class ResponseBuilderService {
     if (
       this.isUS2US &&
       this.avalaraTransaction.totalTax == 0 &&
+      this.isOverChargeScenario &&
       this.configurationCodesService.getCodeValue('CORRECT_VBT_FOR_OC') == 'Y'
     ) {
       VendorLineHandledFlag = true;
@@ -569,14 +572,24 @@ export class ResponseBuilderService {
 
     if (
       vbtTaxAmtDetail &&
-      _.toNumber(avalaraTransactionLine.taxCalculated) > _.toNumber(avalaraTransactionLine.tax)
+      Math.abs(_.toNumber(avalaraTransactionLine.taxCalculated)) > Math.abs(_.toNumber(avalaraTransactionLine.tax))
     ) {
-      detailTaxLine['ns:TaxAmt'] =
-        _.toNumber(avalaraTransactionLineDetail.taxCalculated) - _.toNumber(avalaraTransactionLineDetail.tax);
-      detailTaxLine['ns:TaxAmtTaxCurr'] =
-        _.toNumber(avalaraTransactionLineDetail.taxCalculated) - _.toNumber(avalaraTransactionLineDetail.tax);
-      detailTaxLine['ns:UnroundedTaxAmt'] =
-        _.toNumber(avalaraTransactionLineDetail.taxCalculated) - _.toNumber(avalaraTransactionLineDetail.tax);
+      if (this.isCreditMemoTransaction) {
+        detailTaxLine['ns:TaxAmt'] =
+          Math.abs(_.toNumber(avalaraTransactionLineDetail.taxCalculated)) - Math.abs(_.toNumber(avalaraTransactionLineDetail.tax)) * -1;
+        detailTaxLine['ns:TaxAmtTaxCurr'] =
+          Math.abs(_.toNumber(avalaraTransactionLineDetail.taxCalculated)) - Math.abs(_.toNumber(avalaraTransactionLineDetail.tax)) * -1;
+        detailTaxLine['ns:UnroundedTaxAmt'] =
+          Math.abs(_.toNumber(avalaraTransactionLineDetail.taxCalculated)) - Math.abs(_.toNumber(avalaraTransactionLineDetail.tax)) * -1;
+      }
+      else {
+        detailTaxLine['ns:TaxAmt'] =
+          _.toNumber(avalaraTransactionLineDetail.taxCalculated) - _.toNumber(avalaraTransactionLineDetail.tax);
+        detailTaxLine['ns:TaxAmtTaxCurr'] =
+          _.toNumber(avalaraTransactionLineDetail.taxCalculated) - _.toNumber(avalaraTransactionLineDetail.tax);
+        detailTaxLine['ns:UnroundedTaxAmt'] =
+          _.toNumber(avalaraTransactionLineDetail.taxCalculated) - _.toNumber(avalaraTransactionLineDetail.tax);
+      }
     }
     return detailTaxLine;
   }

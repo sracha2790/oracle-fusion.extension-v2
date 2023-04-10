@@ -110,16 +110,18 @@ export const proRateTaxes: SdkFlowFunctionEntry = {
         title: 'Customer Profile',
         type: 'object',
       },
-      isInternational: {
-        title: 'International Transaction',
+      isCreditMemoTransaction: {
+        title: 'is Creditmemo Transaction?',
         type: 'boolean'
       },
-
       isUS2US: {
         title: 'is US to US?',
         type: 'boolean'
       },
-
+      isInternational: {
+        title: 'International Transaction',
+        type: 'boolean'
+      },
     },
   },
   js: proRateTaxesJS,
@@ -215,6 +217,9 @@ export const mapToFusionResponse: SdkFlowFunctionEntry = {
       vbtTaxAmtDetails: {
         type: 'object',
       },
+      isOverChargeScenario: {
+        type: 'boolean',
+      },        
       isUS2US: {
         type: 'boolean',
       },
@@ -230,6 +235,9 @@ export const mapToFusionResponse: SdkFlowFunctionEntry = {
       isInternational: {
         type: 'boolean',
       },
+      isCreditMemoTransaction: {
+        type: 'boolean',
+      },       
     },
   },
   js: mapToFusionResponseJS,
