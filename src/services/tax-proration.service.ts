@@ -632,8 +632,9 @@ export class TaxProrationService {
           }else{
             if (isCreditMemoTransaction){
               prorateVBTNotRounded = _.round((vendorTax * (tl.taxCalculated * -1))/ totalTaxCalculated, 3);
+            } else {
+              prorateVBTNotRounded = _.round((vendorTax * tl.taxCalculated) / totalTaxCalculated, 3);
             }
-            prorateVBTNotRounded = _.round((vendorTax * tl.taxCalculated) / totalTaxCalculated, 3); 
           }
 
           prorateVBT = _.round(prorateVBTNotRounded, 2); 
