@@ -218,16 +218,16 @@ export class RequestService {
     taxableLines: Array<TaxableLinesWithDetailTaxLines>,
     isInternational: boolean,
   ): { vendorTaxed: boolean; totalVBT: number; vendorTaxes: Record<string, number> } {
-    let totalVBT = 0;
+    let totalVBT:number = 0;
     let vendorTaxed = false;
     let vendorTaxes = {};
     for (var i = 0; i < taxableLines.length; i++) {
       const taxableLine = taxableLines[i];
-      let lineAmount = 0;
+      let lineAmount:number = 0;
       for (var j = 0; j < taxableLine.detailTaxLines?.length; j++) {
         const detailTaxLine = taxableLine.detailTaxLines[j];
         if (this.isVBTDetail(detailTaxLine)) {
-          const vbtTaxAmt = detailTaxLine['ns:TaxAmt'];
+          const vbtTaxAmt : number = _.toNumber(detailTaxLine['ns:TaxAmt']);
           if (vbtTaxAmt) {
             vendorTaxed = true;
             lineAmount = lineAmount + vbtTaxAmt;
