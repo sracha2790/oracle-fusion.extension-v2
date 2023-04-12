@@ -102,7 +102,7 @@ export class ResponseBuilderService {
         this.fusionRequest.taxableHeader.taxableLines,
       );
       if (!this.isUS2US) {
-        if (await this.returnNoTaxCalculationForAvaTaxLine(avalaraTransactionLine)) {
+        if (await this.returnNoTaxCalculationForRegimeSubscription(avalaraTransactionLine)) {
           this.addToDetailTaxLinesCollection(
             detailTaxLines,
             this.getNoCalculationDetailTaxLine(matchingFusionTaxableLine),
@@ -301,7 +301,7 @@ export class ResponseBuilderService {
       }
 
       if (!this.isUS2US) {
-        if (await this.returnNoTaxCalculationForAvaTaxLine(avalaraTransactionLine)) {
+        if (await this.returnNoTaxCalculationForRegimeSubscription(avalaraTransactionLine)) {
           this.addToDetailTaxLinesCollection(
             detailTaxLines,
             this.getNoCalculationDetailTaxLine(matchingFusionTaxableLine),
@@ -603,6 +603,12 @@ export class ResponseBuilderService {
     ) {
       return true;
     }
+    return false;
+  }
+
+  private async returnNoTaxCalculationForRegimeSubscription(
+    avalaraTransactionLine: TransactionLinesWithTransactionLineDetails,
+  ): Promise<boolean> {
     if (
       this.configurationCodesService.getCodeValue('CHECK_FOR_REGIME_SUBSCRIPTION') == 'Y' &&
       !(await this.hasRegimeSubscription(avalaraTransactionLine))
