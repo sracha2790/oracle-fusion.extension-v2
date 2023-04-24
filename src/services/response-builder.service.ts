@@ -25,6 +25,7 @@ export class ResponseBuilderService {
       taxableHeader: TaxableHeaderWithLines;
     },
     private customerProfile: Record<string, any>,
+    private currentBusinessUnit: Record<string, any>,
     private currentLegalEntity: Record<string, any>,
     private isOverChargeScenario: boolean,
     private isUS2US: boolean,
@@ -100,6 +101,15 @@ export class ResponseBuilderService {
         avalaraTransactionLine,
         this.fusionRequest.taxableHeader.taxableLines,
       );
+      if (!this.isUS2US) {
+        if (await this.returnNoTaxCalculationForRegimeSubscription(avalaraTransactionLine)) {
+          this.addToDetailTaxLinesCollection(
+            detailTaxLines,
+            this.getNoCalculationDetailTaxLine(matchingFusionTaxableLine),
+          );
+          continue;
+        }
+      }
       for (const avalaraTransactionLineDetail of avalaraTransactionLine.details) {
 
         const detailTaxLine = this.buildFusionDetailTaxLine(
@@ -282,6 +292,16 @@ export class ResponseBuilderService {
 
       if (!this.isInternational) {
         if (await this.returnNoTaxCalculationForAvaTaxLine(avalaraTransactionLine)) {
+          this.addToDetailTaxLinesCollection(
+            detailTaxLines,
+            this.getNoCalculationDetailTaxLine(matchingFusionTaxableLine),
+          );
+          continue;
+        }
+      }
+
+      if (!this.isUS2US) {
+        if (await this.returnNoTaxCalculationForRegimeSubscription(avalaraTransactionLine)) {
           this.addToDetailTaxLinesCollection(
             detailTaxLines,
             this.getNoCalculationDetailTaxLine(matchingFusionTaxableLine),
@@ -583,16 +603,43 @@ export class ResponseBuilderService {
     ) {
       return true;
     }
+    return false;
+  }
+
+  private async returnNoTaxCalculationForRegimeSubscription(
+    avalaraTransactionLine: TransactionLinesWithTransactionLineDetails,
+  ): Promise<boolean> {
     if (
       this.configurationCodesService.getCodeValue('CHECK_FOR_REGIME_SUBSCRIPTION') == 'Y' &&
-      !(await this.hasRegimeSubscription())
+      !(await this.hasRegimeSubscription(avalaraTransactionLine))
     ) {
       return true;
     }
     return false;
   }
 
-  private async hasRegimeSubscription(): Promise<boolean> {
-    return true;
+  private async hasRegimeSubscription(avalaraTransactionLine): Promise<boolean> {
+    let applicationName, isRegimeSubscribedTo, isCountriesSubscribedTo, hasRegimeSubscription = false; 
+    if(this.fusionRequest.taxableHeader['ns:ApplicationShortname'] == 'AP' || this.fusionRequest.taxableHeader['ns:ApplicationShortname'] == 'PO' || this.fusionRequest.taxableHeader['ns:ApplicationShortname'] == 'PR'){
+      applicationName = 'P2P';
+    }else{
+      applicationName = 'O2C';
+    }
+    for (const avalaraTransactionLineDetail of avalaraTransactionLine.details) {
+      isRegimeSubscribedTo = (this.currentBusinessUnit.ATX_BUSINESS_UNIT_REGIME_SUBSCRIPTION as Array<Record<string,any>>)?.find(businessUnitRegime => 
+        businessUnitRegime.ATX_COUNTRY == avalaraTransactionLineDetail.country && 
+        businessUnitRegime.ATX_APPLICATION_TYPE.includes(applicationName),
+        );
+      isCountriesSubscribedTo = (this.customerProfile.ATX_COUNTRIES as Array<Record<string,any>>)?.find(countries => 
+        countries.ATX_COUNTRY == avalaraTransactionLineDetail.country,
+      );
+      if(isRegimeSubscribedTo && isCountriesSubscribedTo){
+        hasRegimeSubscription = true;
+      }else{
+        hasRegimeSubscription = false;
+        break;
+      }
+    }
+    return hasRegimeSubscription;
   }
 }
