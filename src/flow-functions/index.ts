@@ -47,6 +47,9 @@ export const checkAndProcessVBTDetails: SdkFlowFunctionEntry = {
           type: 'object',
         },
       },
+      currentBusinessUnit: {
+        type: 'object',
+      },
       currentLegalEntity: {
         type: 'object',
       },
