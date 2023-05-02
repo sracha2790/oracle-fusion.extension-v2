@@ -619,19 +619,23 @@ export class ResponseBuilderService {
   }
 
   private async hasRegimeSubscription(avalaraTransactionLine): Promise<boolean> {
-    let applicationName, isRegimeSubscribedTo, isCountriesSubscribedTo, hasRegimeSubscription = false; 
+    let applicationName, isRegimeSubscribedTo, isCountriesSubscribedTo, hasRegimeSubscription = false, applicationNameForCountries; 
     if(this.fusionRequest.taxableHeader['ns:ApplicationShortname'] == 'AP' || this.fusionRequest.taxableHeader['ns:ApplicationShortname'] == 'PO' || this.fusionRequest.taxableHeader['ns:ApplicationShortname'] == 'PR'){
       applicationName = 'P2P';
+      applicationNameForCountries = 'AP';
     }else{
       applicationName = 'O2C';
+      applicationNameForCountries = 'AR';
     }
+
     for (const avalaraTransactionLineDetail of avalaraTransactionLine.details) {
       isRegimeSubscribedTo = (this.currentBusinessUnit.ATX_BUSINESS_UNIT_REGIME_SUBSCRIPTION as Array<Record<string,any>>)?.find(businessUnitRegime => 
         businessUnitRegime.ATX_COUNTRY == avalaraTransactionLineDetail.country && 
         businessUnitRegime.ATX_APPLICATION_TYPE.includes(applicationName),
         );
       isCountriesSubscribedTo = (this.customerProfile.ATX_COUNTRIES as Array<Record<string,any>>)?.find(countries => 
-        countries.ATX_COUNTRY == avalaraTransactionLineDetail.country,
+        countries.ATX_COUNTRY == avalaraTransactionLineDetail.country &&
+        countries.ATX_COUNTRIES_REGIME_DETAILS.ATX_APPLICATION == applicationNameForCountries,
       );
       if(isRegimeSubscribedTo && isCountriesSubscribedTo){
         hasRegimeSubscription = true;
