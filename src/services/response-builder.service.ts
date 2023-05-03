@@ -107,7 +107,7 @@ export class ResponseBuilderService {
             detailTaxLines,
             this.getNoCalculationDetailTaxLine(matchingFusionTaxableLine),
           );
-          continue;
+          break;
         }
       }
       for (const avalaraTransactionLineDetail of avalaraTransactionLine.details) {
@@ -268,17 +268,17 @@ export class ResponseBuilderService {
               detailTaxLine['ns:TaxAmtTaxCurr'] = vbtTaxAmtDetail['taxAmtTaxCurr'];
               detailTaxLine['ns:TaxRate'] = vbtTaxAmtDetail['taxRate'];
             }
-            for (const avalaraTransactionLineDetail of avalaraTransactionLine.details) {
-              // Verify for regime subscription for vbt
-              if (!this.isUS2US) {
-                if (await this.returnNoTaxCalculationForRegimeSubscription(avalaraTransactionLine)) {
-                  this.addToDetailTaxLinesCollection(
-                    detailTaxLines,
-                    this.getNoCalculationDetailTaxLine(matchingFusionTaxableLine),
-                  );
-                  continue;
-                }
+             // Verify for regime subscription for vbt
+             if (!this.isUS2US) {
+              if (await this.returnNoTaxCalculationForRegimeSubscription(avalaraTransactionLine)) {
+                this.addToDetailTaxLinesCollection(
+                  detailTaxLines,
+                  this.getNoCalculationDetailTaxLine(matchingFusionTaxableLine),
+                );
+                break;
               }
+            }
+            for (const avalaraTransactionLineDetail of avalaraTransactionLine.details) {
               if (this.isInternational) {
                 await this.jurisDataMapper.addJurisDataForIntl(
                   detailTaxLine,
@@ -316,7 +316,7 @@ export class ResponseBuilderService {
             detailTaxLines,
             this.getNoCalculationDetailTaxLine(matchingFusionTaxableLine),
           );
-          continue;
+          break;
         }
       }
 
