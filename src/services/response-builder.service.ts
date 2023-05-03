@@ -269,6 +269,16 @@ export class ResponseBuilderService {
               detailTaxLine['ns:TaxRate'] = vbtTaxAmtDetail['taxRate'];
             }
             for (const avalaraTransactionLineDetail of avalaraTransactionLine.details) {
+              // Verify for regime subscription for vbt
+              if (!this.isUS2US) {
+                if (await this.returnNoTaxCalculationForRegimeSubscription(avalaraTransactionLine)) {
+                  this.addToDetailTaxLinesCollection(
+                    detailTaxLines,
+                    this.getNoCalculationDetailTaxLine(matchingFusionTaxableLine),
+                  );
+                  continue;
+                }
+              }
               if (this.isInternational) {
                 await this.jurisDataMapper.addJurisDataForIntl(
                   detailTaxLine,
