@@ -645,7 +645,7 @@ export class ResponseBuilderService {
         );
       isCountriesSubscribedTo = (this.customerProfile.ATX_COUNTRIES as Array<Record<string,any>>)?.find(countries => 
         countries.ATX_COUNTRY == avalaraTransactionLineDetail.country &&
-        countries.ATX_COUNTRIES_REGIME_DETAILS.ATX_APPLICATION == applicationNameForCountries,
+        countries.ATX_COUNTRIES_REGIME_DETAILS?.find(countriesRegimeDetails => countriesRegimeDetails.ATX_APPLICATION == applicationNameForCountries),
       );
       if(isRegimeSubscribedTo && isCountriesSubscribedTo){
         hasRegimeSubscription = true;
